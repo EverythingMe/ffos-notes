@@ -6,15 +6,6 @@
     "name": "DoAT",
     "url": "http://everything.me/"
   },
-  "permissions": {
-    "device-storage": {
-        "description": "Required to add images from the Gallery app into notes",
-        "access": "readonly"
-    },
-    "geolocation": {
-        "description": "For future Evernote sync, geolocation info on every note is required."
-    }
-  },
   "appcache_path": "/notes.appcache",
   "fullscreen": "true",
   "orientation": "portrait",
