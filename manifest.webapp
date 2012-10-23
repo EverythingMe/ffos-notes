@@ -1,15 +1,15 @@
 {
-    name: "Notes",
-    description: "Notes app",
-    launch_path: "/index.html",
-    developer: {
-        name: "DoAT",
-        url: "http://everything.me/"
+    "name": "Notes",
+    "description": "Notes app",
+    "launch_path": "/index.html",
+    "developer": {
+        "name": "DoAT",
+        "url": "http://everything.me/"
     },
-    appcache_path: "/notes.appcache",
-    fullscreen: "true",
-    orientation: "portrait",
-    icons: {
-        128: "/images/icon.png"
+    "appcache_path": "/notes.appcache",
+    "fullscreen": "true",
+    "orientation": "portrait",
+    "icons": {
+        "128": "/images/icon.png"
     }
 }
