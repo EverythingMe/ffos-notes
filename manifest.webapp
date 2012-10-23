@@ -7,13 +7,18 @@
     "url": "http://everything.me/"
   },
   "permissions": [
-    "device-storage:pictures",
-    "location"
+    "device-storage" : {
+        "description": "Required to add images from the Gallery app into notes",
+        "access": "readonly"
+    },
+    "geolocation": {
+        "description": "For future Evernote sync, geolocation info on every note is required."
+    }
   ],
-  "orientation": "portrait-primary",
-  "locales": {},
-  "default_locale": "en-US",
+  "appcache_path": "/notes.appcache",
+  "fullscreen": "true",
+  "orientation": "portrait",
   "icons": {
-    "64": "/images/icon.png"
+    "128": "/images/icon.png"
   }
 }
