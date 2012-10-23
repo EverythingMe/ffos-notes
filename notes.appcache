@@ -1,0 +1,20 @@
+CACHE MANIFEST
+# ver 1
+
+index.html
+images/icon.png
+images/sprite.png
+js/Cards.js
+js/common.js
+js/Console.js
+js/db.js
+js/dialog.js
+js/models.js
+js/Searcher.js
+style/images/ui/gradient.png
+style/images/ui/pattern.png
+style/common.css
+style/dialog.css
+
+NETWORK:
+*
