@@ -81,7 +81,7 @@ section[role="dialog"] menu.actions > ul > li {
   overflow: hidden;
   border: none;
   height: auto;
-  line-height: auto;
+  line-height: normal;
 }
 
 section[role="dialog"] menu.actions > ul > li:last-child {
