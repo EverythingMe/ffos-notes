@@ -31,8 +31,6 @@ body {
     background: #c4582b;
     background: -moz-linear-gradient(50% 0, #cd6723, #bb482d);
     border-bottom: 1px solid #9a3124;
-    -moz-box-shadow: 0 1px 4px 0 rgba(0, 0, 0, .4);
-    -webkit-box-shadow: 0 1px 4px 0 rgba(0, 0, 0, .4);
     box-shadow: 0 1px 4px 0 rgba(0, 0, 0, .4);
 }
     .card .header h1 {
@@ -53,7 +51,6 @@ body {
         color: #fff;
         padding: 0 56px 0 40px;
         -moz-box-sizing: border-box;
-        -webkit-box-sizing: border-box;
         box-sizing: border-box;
         display: none;
     }
@@ -78,13 +75,10 @@ body {
         left: 0;
         width: 30px;
         border-right: 1px solid rgba(255, 255, 255, .3);
-        -moz-box-shadow: -1px 0 0 0 rgba(0, 0, 0, .3) inset;
-        -webkit-box-shadow: -1px 0 0 0 rgba(0, 0, 0, .3) inset;
         box-shadow: -1px 0 0 0 rgba(0, 0, 0, .3) inset;
     }
     #button-notebook-menu:before {
         -moz-transform: scale(.7, 1);
-        -webkit-transform: scale(.7, 1);
         transform: scale(.7, 1);
     }
     .card .header b.topright {
@@ -93,8 +87,6 @@ body {
         right: 0;
         width: 50px;
         border-left: 1px solid rgba(0, 0, 0, .3);
-        -moz-box-shadow: 1px 0 0 0 rgba(255, 255, 255, .3) inset;
-        -webkit-box-shadow: 1px 0 0 0 rgba(255, 255, 255, .3) inset;
         box-shadow: 1px 0 0 0 rgba(255, 255, 255, .3) inset;
     }
     .card .header b.topleft:active {
@@ -203,7 +195,6 @@ body {
         padding: 20px;
         line-height: 130%;
         -moz-box-sizing: border-box;
-        -webkit-box-sizing: border-box;
         box-sizing: border-box;
     }
     #note .demo-content {
@@ -260,7 +251,6 @@ body {
         opacity: 0;
         pointer-events: none;
         -moz-transition: opacity 150ms linear;
-        -webkit-transition: opacity 150ms linear;
         transition: opacity 150ms linear;
     }
     #note #button-note-save.visible {
@@ -312,7 +302,6 @@ body {
         border-right: 1px solid #a6a5a5;
         border-left: 1px solid #d9d8d8;
         -moz-box-sizing: border-box;
-        -webkit-box-sizing: border-box;
         box-sizing: border-box;
     }
     #note-edit-actions li:first-child {
@@ -391,8 +380,6 @@ body {
 #notebooks {
     background: #3b3b3b;
     color: #fff;
-    -moz-box-shadow: -5px 0 5px 0 rgba(0, 0, 0, .3) inset;
-    -webkit-box-shadow: -5px 0 5px 0 rgba(0, 0, 0, .3) inset;
     box-shadow: -5px 0 5px 0 rgba(0, 0, 0, .3) inset;
 }
     #notebooks h2 {
@@ -402,8 +389,6 @@ body {
         font-size: 22px;
         padding: 0 20px;
         border-bottom: 1px solid rgba(255, 255, 255, .1);
-        -moz-box-shadow: 0 1px 2px 0 rgba(0, 0, 0, .3);
-        -webkit-box-shadow: 0 1px 2px 0 rgba(0, 0, 0, .3);
         box-shadow: 0 1px 2px 0 rgba(0, 0, 0, .3);
     }
         #notebooks h2 #button-new-notebook {
@@ -447,7 +432,6 @@ body {
         border: 1px solid #b0b0b0;
         border-radius: 3px;
         -moz-box-sizing: border-box;
-        -webkit-box-sizing: border-box;
         box-sizing: border-box;
     }
 
@@ -536,13 +520,11 @@ body {
     pointer-events: none;
     opacity: 0;
     -moz-transition: all 300ms ease;
-    -webkit-transition: all 300ms ease;
     transition: all 300ms ease;
 }
 .notifier.visible {
     opacity: 1;
     -moz-transform: translate3d(0, -40px, 0);
-    -webkit-transform: translate3d(0, -40px, 0);
     transform: translate3d(0, -40px, 0);
 }
 
