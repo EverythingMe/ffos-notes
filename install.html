@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html>
+  <head><title>Install</title></head>
+  <body>
+    <button id="install">Install me</button>
+    <script>
+var i = document.getElementById("install");
+i.onclick = function() {
+  navigator.mozApps.install("http://everythingme.github.com/ffos-notes/manifest.webapp");
+  return false;
+}
+    </script>
+  </body>
+</html>
