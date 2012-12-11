@@ -34,7 +34,8 @@ var App = new function() {
             "NOTE_CANCEL_CHANGES": "You have made changes to the note, do you wish to save it?",
             "CONFIRM_TRASH_NOTE": "Tap OK to move this note to the Trash",
             "CONFIRM_DELETE_NOTE": "Are you sure you want to permanently delete this note?",
-            "ADD_IMAGE_TITLE": "Attach a photo to your note:"
+            "ADD_IMAGE_TITLE": "Attach a photo to your note:",
+            "IMAGE_NOT_SUPPORTED": "This feature is not supported on your device"
         },
         ORDERS = [
             {
@@ -1187,12 +1188,7 @@ var App = new function() {
                     reader.readAsDataURL(act.result.blob);
                 };
             } else {
-                onAfterAction && onAfterAction("photo", {
-                    "name": "DCIM/img_asckjbasckbkasjcnascaschkbascasc.jpg",
-                    "src": "http://www.cbc.ca/sevenwonders/images/pic_wonder_prairie_sky_lg.jpg",
-                    "size": 82364,
-                    "type": "image/jpeg"
-                });
+                alert(TEXTS.IMAGE_NOT_SUPPORTED);
             }
         }
         
