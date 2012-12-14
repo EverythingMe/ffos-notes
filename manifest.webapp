@@ -1,12 +1,12 @@
 {
     "name": "Notes",
     "description": "Notes app",
-    "launch_path": "/ffos-notes/",
+    "launch_path": "/ffos-notes/index.html",
     "developer": {
         "name": "DoAT",
         "url": "http://everything.me/"
     },
-    "appcache_path": "/notes.appcache",
+    "appcache_path": "/ffos-notes/notes.appcache",
     "fullscreen": "true",
     "orientation": "portrait",
     "icons": {
