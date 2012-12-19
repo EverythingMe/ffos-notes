@@ -10,6 +10,6 @@
     "fullscreen": "true",
     "orientation": "portrait",
     "icons": {
-        "128": "/images/icon.png"
+        "128": "/ffos-notes/images/icon.png"
     }
 }
