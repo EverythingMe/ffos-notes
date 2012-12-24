@@ -6,42 +6,31 @@
         
         <title>Notes</title>
         
-        
         <link href="style/dialog.css" rel="Stylesheet" type="text/css" />
         <script src="js/dialog.js" type="text/javascript"></script>
-        
         
         <script src="js/db.js" type="text/javascript"></script>
         <script src="js/models.js" type="text/javascript"></script>
         <script src="js/Console.js" type="text/javascript"></script>
         <script src="js/Searcher.js" type="text/javascript"></script>
         <script src="js/Cards.js" type="text/javascript"></script>
-        
         <script src="js/common.js" type="text/javascript"></script>
-        <script type="text/javascript">
-            // appcache updateready
-            window.applicationCache.addEventListener('updateready', function() {
-                alert('i have changed');
-                window.applicationCache.swapCache();
-                window.location.reload();
-            }, false);
-        </script>
         
         <link href="style/common.css" rel="Stylesheet" type="text/css" />
     </head>
     <body onload="App.init();">
         <div id="container" class="cards">
             <div class="card drawer" id="notebooks" data-gutter="50">
-                <h2>Notebooks <b id="button-new-notebook" class="sprited"></b></h2>
+                <h2>Notebooks <b id="button-new-notebook"></b></h2>
                 <b class="card-next"></b>
                 <ul id="notebooks-list"></ul>
             </div>
             <div class="card active" id="main">
                 <div class="header">
-                    <b class="topleft sprited card-prev" id="button-notebook-menu">Notebooks</b>
+                    <b class="topleft card-prev" id="button-notebook-menu"><span></span></b>
                     <h1></h1>
                     <input type="text" value="" id="edit-notebook-name" name="edit-notebook-name" />
-                    <b class="topright sprited" id="button-notebook-add">Add</b>
+                    <b class="topright" id="button-notebook-add"><span></span></b>
                 </div>
                 <div class="content">
                     <form method="get" action="" id="search" class="sprited" onsubmit="return false;">
@@ -59,10 +48,10 @@
             </div>
             <div class="card" id="note">
                 <div class="header">
-                    <b class="topleft sprited" id="button-note-cancel">Cancel</b>
+                    <b class="topleft" id="button-note-cancel"><span></span></b>
                     <h1></h1>
                     <input type="text" value="" id="edit-note-name" name="edit-note-name" />
-                    <b class="topright sprited" id="button-note-save">Save</b>
+                    <b class="topright" id="button-note-save"><span></span></b>
                 </div>
                 <ul id="note-edit-actions">
                     <li class="sprited type">Type</li>
@@ -93,7 +82,7 @@
             </div>
             <div class="card" id="note-info">
                 <div class="header">
-                    <b class="topleft sprited card-prev">Back to Note</b>
+                    <b class="topleft card-prev"><span></span></b>
                     <h1>Note Info</h1>
                 </div>
                 <div class="content">

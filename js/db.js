@@ -1,11 +1,12 @@
 var DB = new function() {
-    var _this = this,
+    var self = this,
         
         indexedDB = window.indexedDB || window.mozIndexedDB || window.webkitIndexedDB || window.msIndexedDB,
+        IDBTransaction = window.IDBTransaction || window.webkitIDBTransaction || window.mozIDBTransaction,
         
         db = null,
         DB_NAME = "EVME_Notes",
-        DB_VERSION = 2,
+        DB_VERSION = 3,
         
         schema = {
             "notes": {
@@ -26,17 +27,17 @@ var DB = new function() {
         };
         
     this.init = function(onSuccess) {
-        _this.open(onSuccess);
+        self.open(onSuccess);
         
         // automaticaly create helper methods (like getNotes, or removeNotebook)
         for (var table in schema) {
             var obj = schema[table].objectName;
             
             (function(tableName, objName) {
-                _this['get' + objName + "s"] = function(filters, c, e) { _this.get(tableName, filters, c, e); };
-                _this['add' + objName] = function(obj, c, e) { _this.add(tableName, obj, c, e); };
-                _this['update' + objName] = function(obj, c, e) { _this.update(tableName, obj, c, e); };
-                _this['remove' + objName] = function(obj, c, e) { _this.remove(tableName, obj.getId(), c, e); };
+                self['get' + objName + "s"] = function(filters, c, e) { self.get(tableName, filters, c, e); };
+                self['add' + objName] = function(obj, c, e) { self.add(tableName, obj, c, e); };
+                self['update' + objName] = function(obj, c, e) { self.update(tableName, obj, c, e); };
+                self['remove' + objName] = function(obj, c, e) { self.remove(tableName, obj.getId(), c, e); };
             })(table, obj);
         }
     };
@@ -46,7 +47,7 @@ var DB = new function() {
     
     // update multiple objects (update @table set data=@data where filters=@filters)
     this.updateMultiple = function(table, filters, data, c, e) {
-        _this.get(table, filters, function(items) {
+        self.get(table, filters, function(items) {
             for (var i=0; i<items.length; i++) {
                 var item = items[i];
                 item.set(data);
@@ -65,7 +66,7 @@ var DB = new function() {
         req.onsuccess = function(e) {
             c && c();
         };
-        req.onfailure = onerror;
+        req.onfailure = self.onerror;
         
         Console.log("DB remove from -" + table + "-: ", key);
     };
@@ -76,7 +77,7 @@ var DB = new function() {
         transaction.oncomplete = function(e) {
             c && c(obj);
         };
-        transaction.onfailure = onerror;
+        transaction.onfailure = self.onerror;
         
         var request = transaction.objectStore(table).put(serialize(obj));
         request.onsuccess = function(e) {};
@@ -110,8 +111,8 @@ var DB = new function() {
                 c && c(ret);
             }
         };
-        req.onfailure = onerror;
-    }
+        req.onfailure = self.onerror;
+    };
     
     this.add = function(table, obj, c, e) {
         var transaction = db.transaction(table, IDBTransaction.READ_WRITE);
@@ -119,11 +120,14 @@ var DB = new function() {
         transaction.oncomplete = function(e) {
             c && c(obj);
         };
-        transaction.onfailure = onerror;
+        transaction.onerror = self.onerror;
         
-        var request = transaction.objectStore(table).add(serialize(obj));
-        request.onsuccess = function(e) {};
-        request.onfailure = function(e) {};
+        var store = transaction.objectStore(table),
+            request = store.add(serialize(obj));
+        request.onsuccess = function(e) {
+        };
+        request.onerror = function(e) {
+        };
         
         Console.log("DB: add to -" + table + "-: ", obj);
     };
@@ -172,7 +176,7 @@ var DB = new function() {
                 var store = null,
                     indexes = schema[table].indexes || [];
                     
-                if (transaction.objectStoreNames.contains(table)) {
+                if (transaction.objectStoreNames && transaction.objectStoreNames.contains(table)) {
                     store = transaction.objectStore(table);
                 } else {
                     store = transaction.db.createObjectStore(table, {keyPath: "id"})
@@ -189,7 +193,7 @@ var DB = new function() {
             transaction.oncomplete = function() {
                 Console.log("DB: Upgrade success!");
             };
-            transaction.onfailure = _this.onerror;
+            transaction.onfailure = self.onerror;
         };
     
         request.onsuccess = function(e) {
@@ -200,7 +204,13 @@ var DB = new function() {
             cbSuccess && cbSuccess(db);
         };
         
-        request.onfailure = _this.onerror;
+        request.onerror = function(e) {
+            self.onerror(e);
+        };
+        
+        request.onblocked = function(e) {
+            self.onerror(e);
+        };
     };
     
     this.onerror = function(e) {

@@ -1,5 +1,5 @@
-var User = function(_options) {
-    var _this = this;
+var User = function(initOptions) {
+    var self = this;
     
     this.data_id = "";
     this.data_username = "";
@@ -8,21 +8,21 @@ var User = function(_options) {
     this.data_metadata = {};
     
     function init(options) {
-        updateObject(_this, options);
+        updateObject(self, options);
         validate();
-    };
+    }
     
     this.set = function(options, cbSuccess, cbError) {
-        updateObject(_this, options);
+        updateObject(self, options);
         validate();
         
-        DB.updateUser(_this, cbSuccess, cbError);
+        DB.updateUser(self, cbSuccess, cbError);
         
-        return _this;
+        return self;
     };
     
     this.newNotebook = function(options, cbSuccess, cbError) {
-        options.user_id = _this.getId();
+        options.user_id = self.getId();
         
         var notebook = new Notebook(options);
         DB.addNotebook(notebook, function(){
@@ -31,7 +31,7 @@ var User = function(_options) {
     };
     
     this.getNotebooks = function(cbSuccess, cbError) {
-        DB.getNotebooks({"user_id": _this.data_id, "trashed": false}, cbSuccess, cbError);
+        DB.getNotebooks({"user_id": self.data_id, "trashed": false}, cbSuccess, cbError);
     };
     
     this.getTrashedNotes = function(cbSuccess, cbError) {
@@ -42,24 +42,24 @@ var User = function(_options) {
         DB.getNotes(filters, cbSuccess, cbError);
     };
     
-    this.getId = function() { return _this.data_id; };
-    this.getDateCreated = function() { return _this.data_date_created; };
+    this.getId = function() { return self.data_id; };
+    this.getDateCreated = function() { return self.data_date_created; };
     
     function validate() {
-        if (!_this.data_id) {
-            _this.data_id = "user_" + Math.round(Math.random()*100000);
+        if (!self.data_id) {
+            self.data_id = "user_" + Math.round(Math.random()*100000);
         }
         
-        if (!_this.data_date_created) {
-            _this.data_date_created = new Date().getTime();
+        if (!self.data_date_created) {
+            self.data_date_created = new Date().getTime();
         }
     }
     
-    init(_options);
+    init(initOptions);
 };
 
-var Notebook = function(_options) {
-    var _this = this;
+var Notebook = function(initOptions) {
+    var self = this;
     
     this.data_id = "";
     this.data_name = "";
@@ -73,28 +73,29 @@ var Notebook = function(_options) {
     this.data_numberOfTrashedNotes = 0;
     
     function init(options) {
-        updateObject(_this, options);
+        updateObject(self, options);
         validate();
     }
     
     this.set = function(options, cbSuccess, cbError) {
-        updateObject(_this, options);
+        updateObject(self, options);
         validate();
         
-        DB.updateNotebook(_this, cbSuccess, cbError);
+        DB.updateNotebook(self, cbSuccess, cbError);
         
-        return _this;
+        return self;
     };
     
     this.newNote = function(options, cbSuccess, cbError) {
-        !options && (options = {});
+        if (!options) {
+            options = {};
+        }
         
-        options.notebook_id = _this.getId();
+        options.notebook_id = self.getId();
         
         var note = new Note(options);
-        
         DB.addNote(note, function onSuccess(){
-            _this.updateNotesCount(function onSuccess() {
+            self.updateNotesCount(function onSuccess() {
                 cbSuccess && cbSuccess(note);
             }, cbError);
         }, cbError);
@@ -102,7 +103,7 @@ var Notebook = function(_options) {
     
     this.getNotes = function(bIncludeTrashed, cbSuccess, cbError) {
         var filters = {
-            "notebook_id": _this.getId()
+            "notebook_id": self.getId()
         };
         if (!bIncludeTrashed) {
             filters.trashed = false;
@@ -110,39 +111,45 @@ var Notebook = function(_options) {
         
         DB.getNotes(filters, cbSuccess, cbError);
         
-        return _this;
+        return self;
     };
     this.getTrashedNotes = function(cbSuccess, cbError) {
         var filters = {
-            "notebook_id": _this.getId(),
+            "notebook_id": self.getId(),
             "trashed": true
         };
         
         DB.getNotes(filters, cbSuccess, cbError);
         
-        return _this;
+        return self;
     };
     
     this.trash = function(cbSuccess, cbError) {
-        if (_this.data_trashed) return;
+        if (self.data_trashed) {
+            return;
+        }
         
-        DB.updateMultiple("notes", {"notebook_id": _this.getId()}, {"trashed": true}, function(){
-            _this.updateNotesCount(cbSuccess, cbError, {"trashed": true});
+        DB.updateMultiple("notes", {"notebook_id": self.getId()}, {"trashed": true}, function(){
+            self.updateNotesCount(cbSuccess, cbError, {"trashed": true});
         }, cbError);
     };
     
     this.restore = function(cbSuccess, cbError) {
-        if (!_this.data_trashed) return;
+        if (!self.data_trashed) {
+            return;
+        }
         
-        _this.set({
+        self.set({
             "trashed": false
         }, cbSuccess, cbError);
     };
     
     this.updateNotesCount = function(cbSuccess, cbError, options) {
-        !options && (options = {});
+        if (!options) {
+            options = {};
+        }
         
-        _this.getNotes(true, function(notes) {
+        self.getNotes(true, function(notes) {
             options.numberOfNotes = 0;
             options.numberOfTrashedNotes = 0;
             
@@ -154,37 +161,37 @@ var Notebook = function(_options) {
                 }
             }
             
-            _this.set(options, cbSuccess, cbError);
+            self.set(options, cbSuccess, cbError);
         }, cbError);
     };
     
-    this.getId = function() { return _this.data_id; };
-    this.getName = function() { return _this.data_name; };
-    this.getUserId = function() { return _this.data_user_id; };
-    this.getTrashed = function() { return _this.data_trashed; };
-    this.getNumberOfNotes = function() { return _this.data_numberOfNotes; };
-    this.getNumberOfTrashedNotes = function() { return _this.data_numberOfTrashedNotes; };
+    this.getId = function() { return self.data_id; };
+    this.getName = function() { return self.data_name; };
+    this.getUserId = function() { return self.data_user_id; };
+    this.getTrashed = function() { return self.data_trashed; };
+    this.getNumberOfNotes = function() { return self.data_numberOfNotes; };
+    this.getNumberOfTrashedNotes = function() { return self.data_numberOfTrashedNotes; };
 
-    init(_options);
+    init(initOptions);
     
     function validate() {
-        if (!_this.data_id){
-            _this.data_id = "nb_" + new Date().getTime() + "_" + Math.round(Math.random()*100000);
+        if (!self.data_id){
+            self.data_id = "nb_" + new Date().getTime() + "_" + Math.round(Math.random()*100000);
         }
-        if (!_this.data_date_created) {
-            _this.data_date_created = new Date().getTime();
+        if (!self.data_date_created) {
+            self.data_date_created = new Date().getTime();
         }
-        if (!_this.data_date_modified) {
-            _this.data_date_updated = new Date().getTime();
+        if (!self.data_date_modified) {
+            self.data_date_updated = new Date().getTime();
         }
         
-        (_this.data_numberOfNotes < 0) && (_this.data_numberOfNotes = 0);
-        (_this.data_numberOfTrashedNotes < 0) && (_this.data_numberOfTrashedNotes = 0);
+        (self.data_numberOfNotes < 0) && (self.data_numberOfNotes = 0);
+        (self.data_numberOfTrashedNotes < 0) && (self.data_numberOfTrashedNotes = 0);
     }
 };
 
-var Note = function(_options) {
-    var _this = this;
+var Note = function(initOptions) {
+    var self = this;
     
     this.data_id = "";
     this.data_title = "";
@@ -198,62 +205,62 @@ var Note = function(_options) {
     this.data_metadata = {};
     
     function init(options) {
-        updateObject(_this, options);
+        updateObject(self, options);
         validate();
     }
     
     this.set = function(options, cbSuccess, cbError) {
-        updateObject(_this, options);
+        updateObject(self, options);
         validate();
         
-        _this.data_date_updated = new Date().getTime();
+        self.data_date_updated = new Date().getTime();
         
-        DB.updateNote(_this, cbSuccess, cbError);
+        DB.updateNote(self, cbSuccess, cbError);
         
-        return _this;
+        return self;
     };
     
     this.trash = function(cbSuccess, cbError) {
-        if (_this.data_trashed) return;
+        if (self.data_trashed) return;
         
-        _this.set({"trashed": true}, function onSuccess() {
-            _this.updateNotebookNotesCount(cbSuccess, cbError);
+        self.set({"trashed": true}, function onSuccess() {
+            self.updateNotebookNotesCount(cbSuccess, cbError);
         }, cbError);
     };
     
     this.restore = function(cbSuccess, cbError) {
-        if (!_this.data_trashed) return;
+        if (!self.data_trashed) return;
         
-        _this.set({"trashed": false}, function onSuccess() {
-            _this.updateNotebookNotesCount(cbSuccess, cbError, {"trashed": false});
+        self.set({"trashed": false}, function onSuccess() {
+            self.updateNotebookNotesCount(cbSuccess, cbError, {"trashed": false});
         }, cbError);
     };
     
     this.remove = function(cbSuccess, cbError) {
-        DB.removeNote(_this, function() {
-            _this.updateNotebookNotesCount(cbSuccess, cbError);
+        DB.removeNote(self, function() {
+            self.updateNotebookNotesCount(cbSuccess, cbError);
         }, cbError);
     };
     
     this.getNotebook = function(cbSuccess, cbError) {
-        DB.getNotebooks({"id": _this.getNotebookId()}, function(notebooks){
+        DB.getNotebooks({"id": self.getNotebookId()}, function(notebooks){
             cbSuccess && cbSuccess(notebooks[0]);
         }, cbError);
     };
     
     this.updateNotebookNotesCount = function(cbSuccess, cbError, additionalOptions) {
-        _this.getNotebook(function(notebook){
+        self.getNotebook(function(notebook){
             notebook.updateNotesCount(cbSuccess, cbError, additionalOptions);
         }, cbError);
     };
     
     
     this.getResources = function(cbSuccess, cbError) {
-        DB.getNoteResources({"noteId": _this.getId()}, cbSuccess, cbError);
+        DB.getNoteResources({"noteId": self.getId()}, cbSuccess, cbError);
     };
     
     this.newResource = function(options, cbSuccess, cbError) {
-        options.noteId = _this.getId();
+        options.noteId = self.getId();
         
         var noteResource = new NoteResource(options);
         DB.addNoteResource(noteResource, function() {
@@ -261,33 +268,33 @@ var Note = function(_options) {
         });
     };
     
-    this.getId = function() { return _this.data_id; };
-    this.getName = function() { return _this.data_title; };
-    this.getContent = function() { return _this.data_text; };
-    this.getDateCreated = function() { return _this.data_date_created; };
-    this.getDateUpdated = function() { return _this.data_date_updated; };
-    this.getNotebookId = function() { return _this.data_notebook_id; };
-    this.isTrashed = function() { return _this.data_trashed; };
+    this.getId = function() { return self.data_id; };
+    this.getName = function() { return self.data_title; };
+    this.getContent = function() { return self.data_text; };
+    this.getDateCreated = function() { return self.data_date_created; };
+    this.getDateUpdated = function() { return self.data_date_updated; };
+    this.getNotebookId = function() { return self.data_notebook_id; };
+    this.isTrashed = function() { return self.data_trashed; };
     
-    init(_options);
+    init(initOptions);
     
     function validate() {
-        if (!_this.data_id) {
-            _this.data_id = "note_" + new Date().getTime() + "_" + Math.round(Math.random()*100000);
+        if (!self.data_id) {
+            self.data_id = "note_" + new Date().getTime() + "_" + Math.round(Math.random()*100000);
         }
         
-        if (!_this.data_date_created) {
-            _this.data_date_created = new Date().getTime();
+        if (!self.data_date_created) {
+            self.data_date_created = new Date().getTime();
         }
         
-        if (!_this.data_date_updated) {
-            _this.data_date_updated = new Date().getTime();
+        if (!self.data_date_updated) {
+            self.data_date_updated = new Date().getTime();
         }
     }
 };
 
-function NoteResource(_options) {
-    var _this = this;
+function NoteResource(initOptions) {
+    var self = this;
     
     this.data_id = '';
     this.data_name = '';
@@ -298,37 +305,37 @@ function NoteResource(_options) {
     this.data_metadata = {};
         
     function init(options) {
-        updateObject(_this, options);
+        updateObject(self, options);
         validate();
     }
     
     function validate() {
-        if (!_this.data_id) {
-            _this.data_id = "nr_" + new Date().getTime() + "_" + Math.round(Math.random()*100000);
+        if (!self.data_id) {
+            self.data_id = "nr_" + new Date().getTime() + "_" + Math.round(Math.random()*100000);
         }
     }
     
     this.set = function(options, cbSuccess, cbError) {
-        updateObject(_this, options);
+        updateObject(self, options);
         validate();
         
-        DB.updateNoteResource(_this, cbSuccess, cbError);
+        DB.updateNoteResource(self, cbSuccess, cbError);
         
-        return _this;        
+        return self;        
     };
     
     this.remove = function(cbSuccess, cbError) {
-        DB.removeNoteResource(_this, cbSuccess, cbError);
+        DB.removeNoteResource(self, cbSuccess, cbError);
     };
     
-    this.getId = function() { return _this.data_id; };
-    this.getName = function() { return _this.data_name; };
-    this.getSrc = function() { return _this.data_src; };
-    this.getSize = function() { return _this.data_size; };
-    this.getType = function() { return _this.data_type; };
-    this.getNoteId = function() { return _this.data_noteId; };
+    this.getId = function() { return self.data_id; };
+    this.getName = function() { return self.data_name; };
+    this.getSrc = function() { return self.data_src; };
+    this.getSize = function() { return self.data_size; };
+    this.getType = function() { return self.data_type; };
+    this.getNoteId = function() { return self.data_noteId; };
     
-    init(_options);
+    init(initOptions);
 }
 
 var ResourceTypes = {

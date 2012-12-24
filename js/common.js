@@ -1,10 +1,10 @@
 var App = new function() {
-    var _this = this,
+    var self = this,
         cards = null, user = null,
         $notebooksList = null, elButtonNewNote = null,
-        createNoteOnTap = false;
-
-    var DEBUG = false,
+        createNoteOnTap = false,
+        
+        DEBUG = false,
         LOGGER_NAMESPACE = "DOAT-NOTES",
         TIME_FOR_NEW_NOTE_DOUBLECLICK = 200,
         NUMBER_OF_SCROLL_RETRIES = 10,
@@ -80,6 +80,8 @@ var App = new function() {
     this.init = function() {
         DEBUG && Console.init(LOGGER_NAMESPACE);
         
+        setupCache();
+        
         cards = new Cards({
             "onMove": onCardMove
         });
@@ -87,7 +89,7 @@ var App = new function() {
         // handler of the notebook card (list of notes)
         NotebookView.init({
             "container": $("main"),
-            "onClickNote": _this.showNote,
+            "onClickNote": self.showNote,
             "onChange": NotebooksList.refresh
         });
         // handler of the note card (view and edit actual note)
@@ -146,28 +148,34 @@ var App = new function() {
         
         elButtonNewNote = $("button-notebook-add");
         
-        $("button-new-notebook").addEventListener("click", _this.promptNewNotebook);
+        $("button-new-notebook").addEventListener("click", self.promptNewNotebook);
         
         $("button-notebook-search").addEventListener("click", SearchHandler.open);
         
         elButtonNewNote.addEventListener("click", function() {
-            _this.newNote();
+            self.newNote();
         });
-        
         
         DB.init(initUser);
     };
     
+    function setupCache() {
+        window.applicationCache.addEventListener('updateready', function onCacheUpdated() {
+            window.applicationCache.swapCache();
+            window.location.reload();
+        }, false);
+    }
+    
     function initUser(){
         DB.getUsers({"id": DEFAULT_USER.id}, function onSuccess(users) {
-            if (users.length == 0) {
+            if (users.length === 0) {
                 user = new User(DEFAULT_USER);
                 DB.addUser(user, function onSuccess() {
-                    _this.getUserNotes();
+                    self.getUserNotes();
                 });
             } else {
                 user = users[0];
-                _this.getUserNotes();
+                self.getUserNotes();
             }
         });
     }
@@ -175,11 +183,11 @@ var App = new function() {
     this.getUserNotes = function() {
         user.getNotebooks(function(notebooks) {
             if (notebooks.length == 0) {
-                _this.newNotebook(TEXTS.FIRST_NOTEBOOK_NAME, function(notebook, note){
+                self.newNotebook(TEXTS.FIRST_NOTEBOOK_NAME, function(notebook, note){
                     NotebooksList.refresh(notebooks);
                 });
             } else {
-                _this.showNotes(notebooks[0]);
+                self.showNotes(notebooks[0]);
                 NotebooksList.refresh(notebooks);
             }
         });
@@ -191,41 +199,47 @@ var App = new function() {
         }, function(notebook) {
             NotebookView.show(notebook);
             
-            _this.newNote(notebook, function(note){
+            self.newNote(notebook, function(note){
                 cb && cb(notebook, note);
             });
         });
     };
 
-    this.newNote = function(notebook, cb) {
-        !notebook & (notebook = NotebookView.getCurrent());
+    this.newNote = function newNote(notebook, cb) {
+        if (!notebook) {
+            notebook = NotebookView.getCurrent();
+        }
         
-        if (!notebook) return;
+        if (!notebook) {
+            return false;
+        }
         
         notebook.newNote({
             "notebookId": notebook.getId()
-        }, function(note){
-            _this.showNote(note, notebook);
+        }, function onSuccess(note){
+            self.showNote(note, notebook);
             
             NoteView.focus();
             
             cb && cb(note);
         });
+        
+        return true;
     };
 
     this.getNotes = function() {
         return notes;
     };
     
-    this.showNote = function(note, notebook) {
-        if (typeof note == "string") {
+    this.showNote = function showNote(note, notebook) {
+        if (typeof note === "string") {
             DB.getNotes({"id": note}, function(notes) {
-                _this.showNote(notes[0], notebook);
+                self.showNote(notes[0], notebook);
             });
-            return;
+        } else {
+            NoteView.show(note, notebook);
+            cards.goTo(cards.CARDS.NOTE);
         }
-        NoteView.show(note, notebook);
-        cards.goTo(cards.CARDS.NOTE);
     };
     
     this.showNotes = function(notebook) {
@@ -240,7 +254,7 @@ var App = new function() {
     this.promptNewNotebook = function() {
         var notebookName = prompt(TEXTS.NEW_NOTEBOOK, "");
         if (notebookName) {
-            _this.newNotebook(notebookName);
+            self.newNotebook(notebookName);
         }
     };
     
@@ -273,13 +287,13 @@ var App = new function() {
     function onNotebookClick(type, notebook) {
         switch(type) {
             case "notebook":
-                _this.showNotes(notebook);
+                self.showNotes(notebook);
                 break;
             case "all":
-                _this.showAllNotes();
+                self.showAllNotes();
                 break;
             case "trash":
-                _this.showTrashedNotes();
+                self.showTrashedNotes();
                 break;
         }
     }
@@ -305,7 +319,7 @@ var App = new function() {
     }
     
     function onNoteSave(noteAffected) {
-        _this.showNotes();
+        self.showNotes();
         NotebooksList.refresh();
     }
     
@@ -317,7 +331,7 @@ var App = new function() {
         
         if (noteAffected.getName() == "" && noteAffected.getContent() == "") {
             noteAffected.remove(function onSuccess(){
-                _this.showNotes();
+                self.showNotes();
                 NotebooksList.refresh(); 
             }, function onError() {
                 
@@ -328,7 +342,7 @@ var App = new function() {
     }
     
     function onNoteRestore(noteAffected) {
-        _this.showTrashedNotes();
+        self.showTrashedNotes();
         NotebooksList.refresh();
         
         noteAffected.getNotebook(function onSuccess(notebook){
@@ -340,7 +354,7 @@ var App = new function() {
     }
     
     function onNoteDelete(noteAffected) {
-        _this.showTrashedNotes();
+        self.showTrashedNotes();
         NotebooksList.refresh();
     }
     
@@ -386,7 +400,7 @@ var App = new function() {
     }
     
     var NotebooksList = new function() {
-        var _this = this,
+        var self = this,
             el = null, elList = null,
             onClick = null, onRefresh = null, onRename = null, onDelete = null;
             
@@ -406,7 +420,7 @@ var App = new function() {
         
         this.refresh = function(notebooks) {
             if (!notebooks) {
-                user.getNotebooks(_this.refresh);
+                user.getNotebooks(self.refresh);
                 return;
             }
             
@@ -490,14 +504,14 @@ var App = new function() {
     };
     
     var NoteView = new function() {
-        var _this = this,
+        var self = this,
             currentNote = null, currentNotebook = null,
             noteContentBeforeEdit = "", noteNameBeforeEdit = "",
             el = null, elContent = null, elResources = null, elTitle = null, elEditTitle = null, elActions = null,
             elRestore = null, elDelete = null,
-            onSave = null, onCancel = null, onRestore = null, onDelete = null, onTitleChange = null;
+            onSave = null, onCancel = null, onRestore = null, onDelete = null, onTitleChange = null,
             
-        var CLASS_EDIT_TITLE = "edit-title",
+            CLASS_EDIT_TITLE = "edit-title",
             CLASS_WHEN_VISIBLE = "visible",
             CLASS_WHEN_TRASHED = "readonly",
             CLASS_WHEN_HAS_IMAGES = "has-images";
@@ -522,21 +536,21 @@ var App = new function() {
             elRestore = el.querySelector("#button-note-restore");
             elDelete = el.querySelector("#button-note-delete");
             
-            elTitle.addEventListener("click", _this.editTitle);
-            elEditTitle.addEventListener("blur", _this.saveEditTitle);
+            elTitle.addEventListener("click", self.editTitle);
+            elEditTitle.addEventListener("blur", self.saveEditTitle);
             elEditTitle.addEventListener("keyup", function(e){
-                (e.keyCode == 13) && _this.saveEditTitle();
+                (e.keyCode == 13) && self.saveEditTitle();
             });
             
             elContent.addEventListener("focus", onContentFocus);
             elContent.addEventListener("blur", onContentBlur);
             elContent.addEventListener("keyup", onContentKeyUp);
             
-            elSave.addEventListener("click", _this.save);
-            elCancel.addEventListener("click", _this.cancel);
+            elSave.addEventListener("click", self.save);
+            elCancel.addEventListener("click", self.cancel);
             
-            elRestore.addEventListener("click", _this.restore);
-            elDelete.addEventListener("click", _this.del);
+            elRestore.addEventListener("click", self.restore);
+            elDelete.addEventListener("click", self.del);
             
             NoteActions.init({
                 "el": elActions,
@@ -553,8 +567,8 @@ var App = new function() {
             noteNameBeforeEdit = noteName;
             
             elContent.value = noteContent;
-            _this.setTitle(noteName);
-            _this.loadResources(note);
+            self.setTitle(noteName);
+            self.loadResources(note);
             
             if (note.isTrashed()) {
                 el.classList.add(CLASS_WHEN_TRASHED);
@@ -576,7 +590,7 @@ var App = new function() {
             
             note.getResources(function onSuccess(resources) {
                 for (var i=0; i<resources.length; i++) {
-                    _this.addResource(resources[i]);
+                    self.addResource(resources[i]);
                 }
             }, function onError() {
                 
@@ -606,7 +620,7 @@ var App = new function() {
             el.classList.remove(CLASS_EDIT_TITLE);
             elEditTitle.blur();
             
-            _this.setTitle(elEditTitle.value);
+            self.setTitle(elEditTitle.value);
             
             onTitleChange && onTitleChange();
         };
@@ -626,7 +640,7 @@ var App = new function() {
         };
         
         this.cancel = function() {
-            onCancel && onCancel(currentNote, _this.changed());
+            onCancel && onCancel(currentNote, self.changed());
         };
         
         this.restore = function() {
@@ -649,7 +663,7 @@ var App = new function() {
         
         this.focus = function() {
             elContent.focus();
-            _this.scrollToElement(NUMBER_OF_SCROLL_RETRIES);
+            self.scrollToElement(NUMBER_OF_SCROLL_RETRIES);
         };
         
         this.scrollToElement = function(numberOfTries) {
@@ -658,7 +672,7 @@ var App = new function() {
             window.scrollTo(0, top);
             if (numberOfTries > 0 && document.body.scrollTop < top) {
                 window.setTimeout(function(){
-                    _this.scrollToElement(numberOfTries-1);
+                    self.scrollToElement(numberOfTries-1);
                 }, 80);
             }
         };
@@ -673,7 +687,7 @@ var App = new function() {
                 !elEditTitle.value && (html(elTitle, getNoteNameFromContent(elContent.value)));
             } else {
                 elSave.classList.remove(CLASS_WHEN_VISIBLE);
-                _this.setTitle();
+                self.setTitle();
             }
         }
 
@@ -757,7 +771,7 @@ var App = new function() {
                 case "photo":
                     output.type = ResourceTypes.IMAGE;
                     currentNote.newResource(output, function onSuccess(resource) {
-                        _this.addResource(resource);
+                        self.addResource(resource);
                         el.classList.add(CLASS_WHEN_HAS_IMAGES);
                     }, function onError() {
                         
@@ -778,7 +792,7 @@ var App = new function() {
     };
     
     var NoteInfoView = new function() {
-        var _this = this,
+        var self = this,
             el = null, fields = [], currentNote = null,
             onNotebookChange = null;
             
@@ -863,7 +877,7 @@ var App = new function() {
                 var f = fields[i];
                 
                 if (f.type == "options") {
-                    elFields.querySelector("select." + f.key).addEventListener("change", _this["onChange_" + f.key]);
+                    elFields.querySelector("select." + f.key).addEventListener("change", self["onChange_" + f.key]);
                 }
             }
         }
@@ -886,7 +900,7 @@ var App = new function() {
     };
     
     var NotebookView = new function() {
-        var _this = this,
+        var self = this,
             el = null, elTitle = null, elEditTitle = null, elEmptyNotes = null, $notesList = null,
             currentNotebook = null, currentFilters = null, currentSort = "", currentIsDesc = false,
             onClickNote = null, notebookScrollOffset = 0,
@@ -901,10 +915,10 @@ var App = new function() {
             elEditTitle = el.querySelector("input");
             elEmptyNotes = el.querySelector(".empty p");
             
-            elTitle.addEventListener("click", _this.editTitle);
-            elEditTitle.addEventListener("blur", _this.saveEditTitle);
+            elTitle.addEventListener("click", self.editTitle);
+            elEditTitle.addEventListener("blur", self.saveEditTitle);
             elEditTitle.addEventListener("keyup", function(e){
-                (e.keyCode == 13) && _this.saveEditTitle();
+                (e.keyCode == 13) && self.saveEditTitle();
             });
             
             $notesList = el.getElementsByClassName("notebook-notes")[0];
@@ -932,7 +946,7 @@ var App = new function() {
             el.classList.remove("notebook-fake");
             el.classList.add(notebook? "notebook-real": "notebook-fake");
             
-            notebook && _this.setTitle(notebook.getName());
+            notebook && self.setTitle(notebook.getName());
             
             if (!currentNotebook || currentNotebook.getId() != notebook.getId()) {
                 currentSort = "";
@@ -942,10 +956,10 @@ var App = new function() {
             currentNotebook = notebook;
             currentFilters = filters;
             
-            _this.showNotes(currentSort, currentIsDesc, filters);
+            self.showNotes(currentSort, currentIsDesc, filters);
             
             if (!bDontScroll) {
-                _this.scrollTop();
+                self.scrollTop();
             }
         };
         
@@ -955,17 +969,17 @@ var App = new function() {
             
             if (currentNotebook) {
                 if (currentNotebook.getNumberOfNotes() == 0) {
-                    _this.printNotes([]);
+                    self.printNotes([]);
                 } else {
                     currentNotebook.getNotes(false, function(notes){
-                        _this.printNotes(notes);
+                        self.printNotes(notes);
                     }, function onError() {
                         
                     });
                 }
             } else {
                 user.getNotes(filters, function onSuccess(notes){
-                    _this.printNotes(notes);
+                    self.printNotes(notes);
                 }, function onError() {
                     
                 });
@@ -1013,7 +1027,7 @@ var App = new function() {
                 currentNotebook.set({
                     "name": newName
                 }, function cbSuccess() {
-                    _this.setTitle(newName);
+                    self.setTitle(newName);
                     onChange && onChange();
                 }, function cbError() {
                     
@@ -1081,7 +1095,7 @@ var App = new function() {
     };
     
     var ResourceView = new function() {
-        var _this = this,
+        var self = this,
             el = null, elImage = null, elName = null,
             currentResource = null, onDelete = null;
             
@@ -1094,8 +1108,8 @@ var App = new function() {
             elImage = el.querySelector(".image");
             elName = el.querySelector(".name");
             
-            el.querySelector("#button-resource-close").addEventListener("click", _this.hide);
-            el.querySelector("#button-resource-delete").addEventListener("click", _this.del);
+            el.querySelector("#button-resource-close").addEventListener("click", self.hide);
+            el.querySelector("#button-resource-delete").addEventListener("click", self.del);
         };
         
         this.show = function(resource) {
@@ -1117,7 +1131,7 @@ var App = new function() {
     };
     
     var NoteActions = new function() {
-        var _this = this,
+        var self = this,
             el = null,
             onBeforeAction = null, onAfterAction = null;
             
@@ -1158,22 +1172,19 @@ var App = new function() {
                     }
                 });
                 
-                function reopenApp() {
-                    navigator.mozApps.getSelf().onsuccess = function getSelfCB(evt) {
-                        var app = evt.target.result;
-                        app.launch();
-                    };
-                };
                 act.onsuccess = function() {
-                    if (!act.result.url) return;
-                        
-                    reopenApp();
+                    if (!act.result.blob) return;
                     
-                    onAfterAction && onAfterAction("photo", {
-                        "name": "Photo",
-                        "src": act.result.url,
-                        "size": 0
-                    });
+                    // convert the blob to an image (base64)
+                    var reader = new FileReader();
+                    reader.onload = function onBlobRead(e) {
+                        onAfterAction && onAfterAction("photo", {
+                            "name": "Photo",
+                            "src": e.target.results,
+                            "size": 0
+                        });
+                    };
+                    reader.readAsDataURL(act.result.blob);
                 };
             } else {
                 onAfterAction && onAfterAction("photo", {
@@ -1225,7 +1236,7 @@ var App = new function() {
     };
     
     var Notification = new function() {
-        var _this = this,
+        var self = this,
             el = null, timeoutHide = null;
             
         var CLASS_WHEN_VISIBLE = "visible",
@@ -1246,7 +1257,7 @@ var App = new function() {
             el.innerHTML = message;
             el.classList.add(CLASS_WHEN_VISIBLE);
             
-            timeoutHide = window.setTimeout(_this.hide, TIME_TO_SHOW);
+            timeoutHide = window.setTimeout(self.hide, TIME_TO_SHOW);
         };
         
         this.hide = function() {
@@ -1324,7 +1335,7 @@ var App = new function() {
     }
 
     var Sorter = new function() {
-        var _this = this,
+        var self = this,
             el = null, elOptionNotebook = null,
             currentOrder = "", currentDesc = false, onChange = null;
             
@@ -1359,8 +1370,8 @@ var App = new function() {
             el.addEventListener("blur", select);
             
             var html = '';
-            for (var i=0; i<_this.ORDER.length; i++) {
-                var order = _this.ORDER[i],
+            for (var i=0; i<self.ORDER.length; i++) {
+                var order = self.ORDER[i],
                     option = document.createElement("option");
                     
                 option.value = order.property;
@@ -1374,7 +1385,7 @@ var App = new function() {
                 el.appendChild(option);
             }
             
-            _this.hideSortByNotebook();
+            self.hideSortByNotebook();
             
             parent.appendChild(el);
         }
@@ -1414,36 +1425,12 @@ function readableFilesize(size) {
 
 /* taken from the email app */
 function prettyDate(time) {
-  switch (time.constructor) {
-    case String:
-      time = parseInt(time);
-      break;
-    case Date:
-      time = time.getTime();
-      break;
-  }
-  
-  var f = navigator.mozL10n? new navigator.mozL10n.DateTimeFormat() : null;
-  var diff = (Date.now() - time) / 1000;
-  var day_diff = Math.floor(diff / 86400);
-  
-  if (isNaN(day_diff))
-    return '(incorrect date)';
-
-  if (day_diff < 0 || diff < 0) {
-    // future time
-    return f.localeFormat(new Date(time), _('shortDateTimeFormat'));
-  }
-  
-  return day_diff == 0 && (
-    diff < 60 && 'Just Now' ||
-    diff < 120 && '1 Minute Ago' ||
-    diff < 3600 && Math.floor(diff / 60) + ' Minutes Ago' ||
-    diff < 7200 && '1 Hour Ago' ||
-    diff < 86400 && Math.floor(diff / 3600) + ' Hours Ago') ||
-    day_diff == 1 && 'Yesterday' ||
-    day_diff < 7 && f.localeFormat(new Date(time), '%A') ||
-    f.localeFormat(new Date(time), '%x');
+    if (!("mozL10n" in window)) {
+        return time;
+    } else {
+        var f = new mozL10n.DateTimeFormat();
+        return f.fromNow(time);
+    }
 }
 
 function $(s) { return document.getElementById(s); }
