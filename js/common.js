@@ -1419,17 +1419,37 @@ function readableFilesize(size) {
     }
 }
 
-/* taken from the email app */
 function prettyDate(time) {
-    try {
-        var d = new Date(time),
-            f = new navigator.mozL10n.DateTimeFormat();
-            
-        return f.fromNow(d);
-    } catch(ex) {
-        alert(ex.message);
-        return time;
-    }
+  switch (time.constructor) {
+    case String:
+      time = parseInt(time);
+      break;
+    case Date:
+      time = time.getTime();
+      break;
+  }
+  
+  var diff = (Date.now() - time) / 1000;
+  var day_diff = Math.floor(diff / 86400);
+  
+  if (isNaN(day_diff)) {
+    return '(incorrect date)';
+  }
+  
+  return day_diff == 0 && (
+    diff < 60 && 'Just now' ||
+    diff < 120 && '1 minute ago' ||
+    diff < 3600 && Math.floor(diff / 60) + ' minutes ago' ||
+    diff < 7200 && '1 hour ago' ||
+    diff < 86400 && Math.floor(diff / 3600) + ' hours ago') ||
+    day_diff == 1 && 'Yesterday' ||
+    day_diff < 7 && day_diff + ' days ago' ||
+    day_diff < 9 && 'A week ago' ||
+    formatDate(new Date(time));
+}
+
+function formatDate(date) {
+    return date.getDate() + "/" + date.getMonth() + "/" + date.getFullYear();
 }
 
 function $(s) { return document.getElementById(s); }
