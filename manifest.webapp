@@ -11,5 +11,12 @@
     "orientation": "portrait",
     "icons": {
         "128": "/ffos-notes/images/icon.png"
-    }
+    },
+    "locales": {
+      "en-US": {
+        "name": "Notes",
+        "description": "Notes"
+      }
+    },
+    "default_locale": "en-US"
 }
