@@ -1,14 +1,28 @@
 <!DOCTYPE html>
 <html>
-  <head><title>Install</title></head>
+  <head>
+      <title>Install</title>
+      <meta name="viewport" content="initial-scale=1, maximum-scale=1" />
+      <style>
+          body {
+              text-align: center;
+              padding-top: 50px;
+          }
+          button {
+              padding: 20px 0;
+              width: 100%;
+              font-size: 17pt;
+          }
+      </style>
+  </head>
   <body>
     <button id="install">Install me</button>
     <script>
-var i = document.getElementById("install");
-i.onclick = function() {
-  navigator.mozApps.install("http://everythingme.github.com/ffos-notes/manifest.webapp");
-  return false;
-}
+        var i = document.getElementById("install");
+        i.onclick = function() {
+          navigator.mozApps.install("http://everythingme.github.com/ffos-notes/manifest.webapp");
+          return false;
+        };
     </script>
   </body>
 </html>
