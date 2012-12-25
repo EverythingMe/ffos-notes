@@ -1421,11 +1421,14 @@ function readableFilesize(size) {
 
 /* taken from the email app */
 function prettyDate(time) {
-    if (!("mozL10n" in window)) {
+    try {
+        var d = new Date(time),
+            f = new navigator.mozL10n.DateTimeFormat();
+            
+        return f.fromNow(d);
+    } catch(ex) {
+        alert(ex.message);
         return time;
-    } else {
-        var f = new mozL10n.DateTimeFormat();
-        return f.fromNow(time);
     }
 }
 
