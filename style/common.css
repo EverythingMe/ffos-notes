@@ -23,7 +23,7 @@ body {
     line-height: 49px;
     color: #fff;
     padding: 0 60px 4px 30px;
-    background: transparent url(/images/header_bg_orange.png) 0 0 repeat-x;
+    background: transparent url(../images/header_bg_orange.png) 0 0 repeat-x;
 }
     .card .header h1 {
         font-size: 11pt;
@@ -72,11 +72,11 @@ body {
     .card .header b.topleft {
         left: 0;
         width: 20px;
-        background: transparent url(/images/bg_overlay_orange.png) 0 0 no-repeat;
+        background: transparent url(../images/bg_overlay_orange.png) 0 0 no-repeat;
     }
         .card .header b.topleft span {
             left: 2px;
-            background: transparent url(/images/back.png) 50% 50% no-repeat;
+            background: transparent url(../images/back.png) 50% 50% no-repeat;
         }
         .card .header b.topleft:before {
             content: '';
@@ -85,7 +85,7 @@ body {
             bottom: 0;
             right: -1px;
             width: 2px;
-            background: transparent url(/images/div_line_sm_orange.png) 0 0 no-repeat;
+            background: transparent url(../images/div_line_sm_orange.png) 0 0 no-repeat;
         }
     .card .header b.topright {
         right: 0;
@@ -106,16 +106,16 @@ body {
             bottom: 0;
             left: -1px;
             width: 2px;
-            background: transparent url(/images/div_line_lg_orange.png) 0 0 no-repeat;
+            background: transparent url(../images/div_line_lg_orange.png) 0 0 no-repeat;
         }
         
         
 .card .header b#button-notebook-menu span {
     left: -1px;
-    background: transparent url(/images/iconaction_menu_30x30.png) 50% 50% no-repeat;
+    background: transparent url(../images/iconaction_menu_30x30.png) 50% 50% no-repeat;
 }
 .card .header b#button-notebook-add span {
-    background: transparent url(/images/iconaction_new_30x30.png) 50% 50% no-repeat;
+    background: transparent url(../images/iconaction_new_30x30.png) 50% 50% no-repeat;
 }
 #button-note-save span {
     background: transparent url('../images/sprite.png') -40px 0 no-repeat;
@@ -128,10 +128,10 @@ body {
     margin: -11px 0 0 -13px;
 }
 #button-note-cancel span {
-    background: transparent url(/images/iconaction_cancel_30x30.png) 50% 50% no-repeat;
+    background: transparent url(../images/iconaction_cancel_30x30.png) 50% 50% no-repeat;
 }
 .readonly #button-note-cancel span {
-    background: transparent url(/images/back.png) 50% 50% no-repeat;
+    background: transparent url(../images/back.png) 50% 50% no-repeat;
 }
     
 .card .footer {
@@ -439,7 +439,7 @@ body {
             bottom: 0;
             width: 50px;
             cursor: pointer;
-            background: transparent url(/images/iconaction_new_30x30.png) 50% 50% no-repeat;
+            background: transparent url(../images/iconaction_new_30x30.png) 50% 50% no-repeat;
         }
     #notebooks .card-next {
         position: absolute;
