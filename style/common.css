@@ -35,7 +35,7 @@ body {
         position: absolute;
         top: 0;
         left: 0;
-        font-size: 22px;
+        font-size: 11pt;
         width: 100%;
         height: 46px;
         background: transparent;
@@ -188,7 +188,7 @@ body {
 }
     .notebook-notes li {
         position: relative;
-        font-size: 13px;
+        font-size: 10pt;
         min-height: 21px;
         overflow: hidden;
         padding: 12px 40px 12px 20px;
@@ -196,13 +196,13 @@ body {
         cursor: pointer;
     }
         .notebook-notes li .title {
-            font-size: 18px;
+            font-size: 14pt;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
         }
         .notebook-notes li .time {
-            font-size: 13px;
+            font-size: 10pt;
             color: #666;
         }
         .notebook-notes li .image {
@@ -253,7 +253,7 @@ body {
     #note #note-resources {
         list-style-type: none;
         color: #2c2c2c;
-        font-size: 13px;
+        font-size: 10pt;
         margin: 0 15px 15px 15px;
     }
         #note #note-resources li {
@@ -408,7 +408,7 @@ body {
         left: 24px;
         right: 24px;
         color: #606060;
-        font-size: 21px;
+        font-size: 16pt;
         line-height: 130%;
         padding-top: 5px;
         margin-top: -25px;
@@ -427,7 +427,7 @@ body {
         position: relative;
         height: 47px;
         line-height: 47px;
-        font-size: 22px;
+        font-size: 11pt;
         padding: 0 20px;
         border-bottom: 1px solid rgba(255, 255, 255, .1);
         box-shadow: 0 1px 2px 0 rgba(0, 0, 0, .3);
@@ -455,7 +455,7 @@ body {
         #notebooks-list li {
             border-bottom: 1px solid #616666;
             padding: 13px 20px;
-            font-size: 15px;
+            font-size: 11pt;
             cursor: pointer;
         }
 
@@ -486,7 +486,7 @@ body {
     }
     #note-info .fields {
         list-style-type: none;
-        font-size: 15px;
+        font-size: 11pt;
     }
         #note-info .fields li {
             position: relative;
@@ -553,7 +553,7 @@ body {
     right: 0;
     height: 36px;
     line-height: 36px;
-    font-size: 14px;
+    font-size: 10pt;
     padding: 0 20px;
     color: #fff;
     font-weight: 400;
