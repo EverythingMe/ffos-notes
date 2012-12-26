@@ -4,7 +4,7 @@ var App = new function() {
         $notebooksList = null, elButtonNewNote = null,
         createNoteOnTap = false,
         
-        DEBUG = false,
+        DEBUG = window.location.href.indexOf('DEBUG=1') !== false,
         LOGGER_NAMESPACE = "DOAT-NOTES",
         TIME_FOR_NEW_NOTE_DOUBLECLICK = 200,
         NUMBER_OF_SCROLL_RETRIES = 10,
@@ -403,9 +403,9 @@ var App = new function() {
     var NotebooksList = new function() {
         var self = this,
             el = null, elList = null,
-            onClick = null, onRefresh = null, onRename = null, onDelete = null;
+            onClick = null, onRefresh = null, onRename = null, onDelete = null,
             
-        var TIMEOUT_BEFORE_EDITING_NOTEBOOK = 400;
+            TIMEOUT_BEFORE_EDITING_NOTEBOOK = 400;
             
         this.init = function(options) {
             !options && (options = {});
@@ -482,7 +482,7 @@ var App = new function() {
             
             elList.appendChild(el);
         }
-    
+        
         function onEditNotebook(notebook) {
             dialog(TEXTS.NOTEBOOK_ACTION_TITLE, [TEXTS.NOTEBOOK_ACTION_RENAME, TEXTS.NOTEBOOK_ACTION_DELETE], function(optionClicked) {
                 if (optionClicked == 0) {
@@ -492,7 +492,7 @@ var App = new function() {
                 }
             });
         }
-    
+        
         function clickNotebook(notebook) {
             onClick && onClick("notebook", notebook);
         }
@@ -808,13 +808,12 @@ var App = new function() {
         };
         
         this.load = function(note) {
-            if (currentNote && note.getId() == currentNote.getId()) {
+            if (currentNote && note.getId() === currentNote.getId()) {
                 return;
             }
             
-            for (var i=0; i<fields.length; i++) {
-                var f = fields[i],
-                    value = note['data_' + f.key],
+            for (var i=0,f; f=fields[i++];) {
+                var value = note['data_' + f.key],
                     elValue = elFields.querySelector("." + f.key);
                     
                 switch(f.type) {
@@ -836,11 +835,16 @@ var App = new function() {
         };
         
         this.refreshNotebooks = function(notebooks) {
-            var html = '';
-            for (var i=0; i<notebooks.length; i++) {
-                html += '<option value="' + notebooks[i].getId() + '">' + notebooks[i].getName() + '</option>';
+            var html = '',
+                elSelect = elFields.querySelector(".notebook_id"),
+                currentValue = elSelect.value;
+                
+            for (var i=0,notebook; notebook=notebooks[i++];) {
+                html += '<option value="' + notebook.getId() + '">' + notebook.getName() + '</option>';
             }
-            elFields.querySelector(".notebook_id").innerHTML = html;
+            elSelect.innerHTML = html;
+            
+            elSelect.value = currentValue;
         };
         
         this.selectNotebook = function(notebookId) {
@@ -854,30 +858,22 @@ var App = new function() {
         function initView() {
             var html = '';
             
-            for (var i=0; i<fields.length; i++) {
-                var f = fields[i],
-                    type = f.type;
-                
-                if (type == "options") {
-                    html += '<li>' +
-                                '<label>' + f.label + '</label>' +
-                                '<select class="' + f.key + '"></select>' +
-                            '</li>';
-                } else {
-                    html += '<li>' +
-                                '<label>' + f.label + '</label>' +
-                                '<b class="value ' + f.key + '"></b>' +
-                            '</li>';
-                }
+            for (var i=0,f; f=fields[i++];) {
+                var type = f.type;
+            
+                html += '<li>' +
+                            '<label>' + f.label + '</label>' +
+                            ((type === "options")?
+                            '<select class="' + f.key + '"></select>' :
+                            '<b class="value ' + f.key + '"></b>') +
+                        '</li>';
             }
             
             elFields.innerHTML += html;
             
             // automatically bind onChange events to all fields of type "option"
-            for (var i=0; i<fields.length; i++) {
-                var f = fields[i];
-                
-                if (f.type == "options") {
+            for (var i=0,f; f=fields[i++];) {
+                if (f.type === "options") {
                     elFields.querySelector("select." + f.key).addEventListener("change", self["onChange_" + f.key]);
                 }
             }
@@ -888,15 +884,15 @@ var App = new function() {
                 date = new Date(date);
             }
             
-            var s = "",
+            var formatted = "",
                 h = date.getHours(),
                 m = date.getMinutes();
                 
-            s += (h<10? '0' : '') + h + ":" + (m<10? '0' : '') + m;
-            s += " ";
-            s += date.getDate() + "/" + (date.getMonth()+1) + "/" + date.getFullYear();
+            formatted += (h<10? '0' : '') + h + ":" + (m<10? '0' : '') + m;
+            formatted += " ";
+            formatted += date.getDate() + "/" + (date.getMonth()+1) + "/" + date.getFullYear();
             
-            return s;
+            return formatted;
         }
     };
     
@@ -967,6 +963,9 @@ var App = new function() {
         this.showNotes = function(sortby, isDesc, filters) {
             currentSort = sortby;
             currentIsDesc = isDesc;
+            if (filters === undefined) {
+                filters = currentFilters;
+            }
             
             if (currentNotebook) {
                 if (currentNotebook.getNumberOfNotes() == 0) {
@@ -1366,9 +1365,8 @@ var App = new function() {
             el.addEventListener("blur", select);
             
             var html = '';
-            for (var i=0; i<self.ORDER.length; i++) {
-                var order = self.ORDER[i],
-                    option = document.createElement("option");
+            for (var i=0,order; order=self.ORDER[i++];) {
+                var option = document.createElement("option");
                     
                 option.value = order.property;
                 option.innerHTML = order.label;
@@ -1391,10 +1389,10 @@ var App = new function() {
                 sortby = "",
                 isDescending = false;
                 
-            for (var i=0,l=options.length; i<l; i++) {
-                if (options[i].selected) {
-                    sortby = options[i].value;
-                    isDescending = options[i].getAttribute("data-descending") == "true";
+            for (var i=0,option; option=options[i++];) {
+                if (option.selected) {
+                    sortby = option.value;
+                    isDescending = option.getAttribute("data-descending") === "true";
                     break;
                 }
             }
