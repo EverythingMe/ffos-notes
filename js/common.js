@@ -1175,11 +1175,14 @@ var App = new function() {
                 
                 act.onsuccess = function() {
                     if (!act.result.blob) return;
-                    
+                    alert('init reader');
                     // convert the blob to an image (base64)
                     var reader = new FileReader();
                     reader.readAsDataURL(act.result.blob);
                     reader.onload = function onBlobRead(e) {
+                        alert('loaded');
+                        alert(reader.result);
+                        
                         onAfterAction && onAfterAction("photo", {
                             "name": "Photo",
                             "src": reader.result,
