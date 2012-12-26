@@ -11,7 +11,7 @@ var Console = new function() {
     function c(method, args) {
         if (!DEBUG) return;
         Array.prototype.splice.call(args, 0, 0, namespace + ": ");
-        console[method].apply(this, args);
+        console[method].apply(console, args);
     }
     
     for (var i=0; i<methods.length; i++) {
