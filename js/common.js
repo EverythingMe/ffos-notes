@@ -1178,14 +1178,14 @@ var App = new function() {
                     
                     // convert the blob to an image (base64)
                     var reader = new FileReader();
+                    reader.readAsDataURL(act.result.blob);
                     reader.onload = function onBlobRead(e) {
                         onAfterAction && onAfterAction("photo", {
                             "name": "Photo",
-                            "src": e.target.results,
+                            "src": reader.result,
                             "size": 0
                         });
                     };
-                    reader.readAsDataURL(act.result.blob);
                 };
             } else {
                 alert(TEXTS.IMAGE_NOT_SUPPORTED);
