@@ -4,7 +4,7 @@ var App = new function() {
         $notebooksList = null, elButtonNewNote = null,
         createNoteOnTap = false,
         
-        DEBUG = window.location.href.indexOf('DEBUG=1') !== false,
+        DEBUG = window.location.href.indexOf('DEBUG=1') !== -1,
         LOGGER_NAMESPACE = "DOAT-NOTES",
         TIME_FOR_NEW_NOTE_DOUBLECLICK = 200,
         NUMBER_OF_SCROLL_RETRIES = 10,
