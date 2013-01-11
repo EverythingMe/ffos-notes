@@ -1,0 +1,104 @@
+<script src="TBinaryProtocol.js"></script>
+<script src="THTTPClient.js"></script>
+
+<script src="evernote/Errors_types.js"></script>
+<script src="evernote/Limits_types.js"></script>
+<script src="evernote/Types_types.js"></script>
+<script src="evernote/NoteStore_types.js"></script>
+<script src="evernote/UserStore_types.js"></script>
+<script src="evernote/NoteStore.js"></script>
+<script src="evernote/UserStore.js"></script>
+
+<script>
+// Fill in your username, password and API key below...
+
+var evernoteHost = "https://sandbox.evernote.com";
+
+var userStoreTransport = new Thrift.THTTPClient(evernoteHost + "/edam/user", "JavaScript Test", 0);
+var userStoreProtocol = new Thrift.TBinaryProtocol(userStoreTransport, false, false);
+var userStore = new UserStoreClient(userStoreProtocol, userStoreProtocol);
+
+var noteStore;
+var authToken;
+
+function fetchNotebooks() {
+	noteStore.listNotebooks(authToken, {
+		onSuccess: function(notebooks) {
+      for (var i = 0; i < notebooks.length; i++) {
+        $("listNotebooks").innerHTML += notebooks[i].name+"\n";
+      }      
+			fetchTags();
+		},
+		onFailure: function(error) {
+			alert("listNotebooks received error: "+error);
+		}
+	});
+}
+
+function fetchTags() {
+	noteStore.listTags(authToken, {
+		onSuccess: function(tags) {
+      for (var i = 0; i < tags.length; i++) {
+        $("listTags").innerHTML += tags[i].name+"\n";
+      }
+			findNotes();
+		},
+		onFailure: function(error) {
+			alert("listTags received error: "+error);
+		}
+	});
+}
+
+var results;
+function findNotes() {
+	var noteFilter = new NoteFilter();
+	noteFilter.words = "dylan";
+
+	noteStore.findNotes(authToken, noteFilter, 0, 20, {
+		onSuccess: function(noteList) {
+		  var notes = noteList.notes;
+      for (var i = 0; i < notes.length; i++) {
+        $("findNotes").innerHTML += notes[i].title+"\n";
+      }
+		},
+		onFailure: function(error) {
+			alert(error);
+		}
+	});
+}
+
+var genericCallback = {
+	onSuccess: function(success) {
+		alert("success: "+success);
+	},
+	onFailure: function(error) {
+		alert("error: "+error);
+	}
+};
+
+function onAuthSuccess(authResult) {
+	var noteStoreTransport = new Thrift.THTTPClient(authResult.noteStoreUrl, "JavaScript Test", 0);
+    var noteStoreProtocol = new Thrift.TBinaryProtocol(noteStoreTransport, false, false);
+    	noteStore = new NoteStoreClient(noteStoreProtocol, noteStoreProtocol);
+
+	authToken = authResult.authenticationToken;
+	$("authResult").innerHTML = authToken.toString();
+	fetchNotebooks();
+}
+
+function onAuthFailure(error) {
+	alert("userStore.authenticate returned error: " + error);
+}
+
+function $(i){return document.getElementById(i)}
+</script>
+
+<h3>Authentication token:</h3>
+<pre id="authResult"> </pre>
+<h3>Notebooks:</h3>
+<pre id="listNotebooks"> </pre>
+<h3>Tags:</h3>
+<pre id="listTags"> </pre>
+<h3>Search results:</h3>
+<pre id="findNotes"> </pre>
+<h3>All done!</h3>
