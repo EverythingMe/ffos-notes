@@ -1207,9 +1207,6 @@ var App = new function() {
                             '?subject=' + encodeURIComponent(TEXTS.SHARE_EMAIL_SUBJECT) +
                             '&body=' + encodeURIComponent(noteContent);
             
-            alert(elContent);
-            alert(mailURL);
-            
             Console.info('Mail URL: ' + mailURL);
             
             try {
