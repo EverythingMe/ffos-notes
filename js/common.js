@@ -1206,7 +1206,7 @@ var App = new function() {
                 mailURL = 'mailto:' +
                             '?subject=' + encodeURIComponent(TEXTS.SHARE_EMAIL_SUBJECT) +
                             '&body=' + encodeURIComponent(noteContent),
-                act = new MozActivity({
+                act = ('MozActivity' in window) && new MozActivity({
                     'name': 'new',
                     'data': {
                         'type': 'mail',
@@ -1214,8 +1214,10 @@ var App = new function() {
                     }
                 });
             
-            act.onsuccess = function(e){ };
-            act.onerror = function(e){ };
+            if (act) {
+                act.onsuccess = function(e){ };
+                act.onerror = function(e){ };
+            }
             
             Console.info('mail URL: ' + mailURL);
             
