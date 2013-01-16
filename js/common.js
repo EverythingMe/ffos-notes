@@ -1205,8 +1205,12 @@ var App = new function() {
                 noteContent = elContent.value || elContent.textContent || elContent.innerText || elContent.innerHTML,
                 mailURL = 'mailto:' +
                             '?subject=' + encodeURIComponent(TEXTS.SHARE_EMAIL_SUBJECT) +
-                            '&body=' + encodeURIComponent(noteContent),
-                act = ('MozActivity' in window) && new MozActivity({
+                            '&body=' + encodeURIComponent(noteContent);
+            
+            Console.info('Mail URL: ' + mailURL);
+            
+            try {
+                var act = MozActivity({
                     'name': 'new',
                     'data': {
                         'type': 'mail',
@@ -1214,12 +1218,11 @@ var App = new function() {
                     }
                 });
             
-            if (act) {
                 act.onsuccess = function(e){ };
                 act.onerror = function(e){ };
+            } catch(ex) {
+                Console.info('Mail exception: ' + ex.message);
             }
-            
-            Console.info('mail URL: ' + mailURL);
             
             onAfterAction && onAfterAction("share");
         }
