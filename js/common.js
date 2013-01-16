@@ -1221,7 +1221,7 @@ var App = new function() {
                 act.onsuccess = function(e){ };
                 act.onerror = function(e){ };
             } catch(ex) {
-                Console.info('Mail exception: ' + ex.message);
+                Console.error('Mail exception: ', ex);
             }
             
             onAfterAction && onAfterAction("share");
