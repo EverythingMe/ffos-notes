@@ -35,7 +35,8 @@ var App = new function() {
             "CONFIRM_TRASH_NOTE": "Tap OK to move this note to the Trash",
             "CONFIRM_DELETE_NOTE": "Are you sure you want to permanently delete this note?",
             "ADD_IMAGE_TITLE": "Attach a photo to your note:",
-            "IMAGE_NOT_SUPPORTED": "This feature is not supported on your device"
+            "IMAGE_NOT_SUPPORTED": "This feature is not supported on your device",
+            "SHARE_EMAIL_SUBJECT": "My Note"
         },
         ORDERS = [
             {
@@ -1200,14 +1201,18 @@ var App = new function() {
         function actionShare() {
             onBeforeAction && onBeforeAction("share");
             
+            var elContent = $("note-content"),
+                noteContent = elContent.value || elContent.textContent || elContent.innerText || elContent.innerHTML,
+                act = new MozActivity({
+                    'name': 'new',
+                    'data': {
+                        'type': 'mail',
+                        'URI': 'mailto:' +
+                                '?subject=' + encodeURIComponent(TEXTS.SHARE_EMAIL_SUBJECT) +
+                                '&body=' + encodeURIComponent(noteContent)
+                    }
+                });
             
-            var act = new MozActivity({
-                'name': 'new',
-                'data': {
-                    'type': 'mail',
-                    'URI': "mailto:?subject=My+Note&body=" + encodeURIComponent($("note-content").value)
-                }
-            });
             act.onsuccess = function(e){ };
             act.onerror = function(e){ };
             
