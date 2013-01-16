@@ -1210,7 +1210,7 @@ var App = new function() {
             Console.info('Mail URL: ' + mailURL);
             
             try {
-                var act = MozActivity({
+                var act = new MozActivity({
                     'name': 'new',
                     'data': {
                         'type': 'mail',
