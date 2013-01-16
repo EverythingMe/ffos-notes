@@ -1203,19 +1203,21 @@ var App = new function() {
             
             var elContent = $("note-content"),
                 noteContent = elContent.value || elContent.textContent || elContent.innerText || elContent.innerHTML,
+                mailURL = 'mailto:' +
+                            '?subject=' + encodeURIComponent(TEXTS.SHARE_EMAIL_SUBJECT) +
+                            '&body=' + encodeURIComponent(noteContent),
                 act = new MozActivity({
                     'name': 'new',
                     'data': {
                         'type': 'mail',
-                        'URI': 'mailto:' +
-                                '?subject=' + encodeURIComponent(TEXTS.SHARE_EMAIL_SUBJECT) +
-                                '&body=' + encodeURIComponent(noteContent)
+                        'URI': mailURL
                     }
                 });
             
             act.onsuccess = function(e){ };
             act.onerror = function(e){ };
             
+            Console.info('mail URL: ' + mailURL);
             
             onAfterAction && onAfterAction("share");
         }
