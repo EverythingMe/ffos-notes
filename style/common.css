@@ -61,6 +61,9 @@ section[role="region"] > header:first-child input[type="text"] {
     display: none;
     padding: 0;
 }
+section[role="region"]#note > header:first-child input[type="text"] {
+    padding: 0 8.6rem 0 3rem;
+}
 section[role="region"].edit-title > header:first-child h1 {
     display: none;
 }
@@ -658,4 +661,15 @@ section[role="region"] > header:first-child menu[type="toolbar"] {
 
 body.loading .card:not(.active) {
     display: none;
+}
+
+.loggedin section[role="region"] > header:first-child {
+    background-image: url(../images/header_bg_green.png);
+}
+.loggedin section[role="region"] > header:first-child > button .icon:after, section[role="region"] > header:first-child > a .icon:after {
+    background-image: url(../images/header_negative_green.png);
+    background-color: #498722;
+}
+.loggedin section[role="region"] > header:first-child menu[type="toolbar"] a:last-child, section[role="region"] > header:first-child menu[type="toolbar"] button:last-child {
+    background-image: url(../images/separator_green.png);
 }
