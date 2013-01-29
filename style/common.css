@@ -1,3 +1,6 @@
+html {
+    font-size: 10px;
+}
 body, div, p, ul, li, input, textarea, h1, h2, h3 {
     margin: 0;
     padding: 0;
@@ -12,128 +15,36 @@ body {
     background: #fff;
 }
 
-
-.card > .header {
+section[role="region"] > header:first-child input[type="text"] {
     position: absolute;
     top: 0;
     left: 0;
-    right: 0;
-    z-index: 50;
-    height: 49px;
-    line-height: 49px;
+    font-size: 2.5rem/4.8rem;
+    width: 100%;
+    height: 100%;
+    background: transparent;
+    border: none;
     color: #fff;
-    padding: 0 60px 4px 30px;
-    background: transparent url(../images/header_bg_orange.png) 0 0 repeat-x;
+    padding: 0 5.6rem 0 3rem;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+    display: none;
 }
-    .card .header h1 {
-        font-size: 11pt;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-    }
-    .card .header input {
-        position: absolute;
-        top: 0;
-        left: 0;
-        font-size: 22px;
-        width: 100%;
-        height: 46px;
-        background: transparent;
-        border: none;
-        color: #fff;
-        padding: 0 56px 0 40px;
-        -moz-box-sizing: border-box;
-        box-sizing: border-box;
-        display: none;
-    }
-    .edit-title .header h1 {
-        display: none;
-    }
-    .edit-title .header input {
-        display: block;
-        z-index: 50;
-    }
-    .card .header b {
-        position: absolute;
-        top: 0;
-        bottom: 4px;
-        cursor: pointer;
-        font-size: 0;
-        text-indent: -100px;
-        z-index: 100;
-    }
-        .card .header b span {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-        }
-    .card .header b.topleft {
-        left: 0;
-        width: 20px;
-        background: transparent url(../images/bg_overlay_orange.png) 0 0 no-repeat;
-    }
-        .card .header b.topleft span {
-            left: 2px;
-            background: transparent url(../images/back.png) 50% 50% no-repeat;
-        }
-        .card .header b.topleft:before {
-            content: '';
-            position: absolute;
-            top: 0;
-            bottom: 0;
-            right: -1px;
-            width: 2px;
-            background: transparent url(../images/div_line_sm_orange.png) 0 0 no-repeat;
-        }
-    .card .header b.topright {
-        right: 0;
-        width: 50px;
-    }
-        .card .header b.topright:before {
-            content: '';
-            position: absolute;
-            top: 0;
-            right: 0;
-            width: 50px;
-            height: 50px;
-        }
-        .card .header b.topright:after {
-            content: '';
-            position: absolute;
-            top: 0;
-            bottom: 0;
-            left: -1px;
-            width: 2px;
-            background: transparent url(../images/div_line_lg_orange.png) 0 0 no-repeat;
-        }
-        
-        
-.card .header b#button-notebook-menu span {
-    left: -1px;
-    background: transparent url(../images/iconaction_menu_30x30.png) 50% 50% no-repeat;
+section[role="region"]#note > header:first-child input[type="text"] {
+    padding: 0 8.6rem 0 3rem;
 }
-.card .header b#button-notebook-add span {
-    background: transparent url(../images/iconaction_new_30x30.png) 50% 50% no-repeat;
+section[role="region"].edit-title > header:first-child h1 {
+    display: none;
 }
-#button-note-save span {
-    background: transparent url('../images/sprite.png') -40px 0 no-repeat;
-    top: 50%;
-    left: 50%;
-    right: auto;
-    bottom: auto;
-    width: 27px;
-    height: 22px;
-    margin: -11px 0 0 -13px;
+section[role="region"].edit-title > header:first-child input[type="text"] {
+    display: block;
+    z-index: 50;
 }
-#button-note-cancel span {
-    background: transparent url(../images/iconaction_cancel_30x30.png) 50% 50% no-repeat;
+section[role="region"] > header:first-child menu[type="toolbar"] {
+    position: relative;
+    z-index: 100;
 }
-.readonly #button-note-cancel span {
-    background: transparent url(../images/back.png) 50% 50% no-repeat;
-}
-    
+
 .card .footer {
     position: absolute;
     bottom: 0;
@@ -169,7 +80,7 @@ body {
         height: 40px;
         opacity: 0;
     }
-    
+
 .card > .content {
     position: absolute;
     top: 49px;
@@ -260,7 +171,7 @@ body {
             position: relative;
             margin-top: 15px;
         }
-        
+
         #note #note-resources .image {
             height: 60px;
             padding-left: 90px;
@@ -287,7 +198,7 @@ body {
                 background-repeat: no-repeat;
                 background-size: cover;
             }
-        
+
     #note #button-note-save {
         opacity: 0;
         pointer-events: none;
@@ -298,7 +209,7 @@ body {
         opacity: 1;
         pointer-events: inherit;
     }
-    
+
 #note.card.readonly > .content {
     top: 49px;
 }
@@ -314,7 +225,7 @@ body {
     #note.readonly > .footer {
         display: block;
     }
-    
+
 #note-edit-actions {
     position: absolute;
     top: 49px;
@@ -352,8 +263,8 @@ body {
     #note-edit-actions li:last-child {
         border-right: none;
     }
-    
-    
+
+
 #image-fullscreen {
     position: absolute;
     top: 0;
@@ -392,7 +303,7 @@ body {
         text-overflow: ellipsis;
         white-space: nowrap;
     }
-    
+
 .empty {
     position: absolute;
     top: 0;
@@ -523,7 +434,7 @@ body {
                     width: 1px;
                     background: #fdfdfd;
                 }
-                
+
             #note-info .fields li .value {
                 position: relative;
             }
@@ -533,7 +444,7 @@ body {
             }
 
 
-.search-results #main .header,
+.search-results #main header,
 .search-results #main .footer,
 .search-results #main .empty {
     display: none;
@@ -671,4 +582,15 @@ body {
     width: 24px;
     height: 26px;
     margin: -11px 0 0 -12px;
+}
+
+.loggedin section[role="region"] > header:first-child {
+    background-image: url(../images/header_bg_green.png);
+}
+.loggedin section[role="region"] > header:first-child > button .icon:after, section[role="region"] > header:first-child > a .icon:after {
+    background-image: url(../images/header_negative_green.png);
+    background-color: #498722;
+}
+.loggedin section[role="region"] > header:first-child menu[type="toolbar"] a:last-child, section[role="region"] > header:first-child menu[type="toolbar"] button:last-child {
+    background-image: url(../images/separator_green.png);
 }
