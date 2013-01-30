@@ -1,7 +1,7 @@
 {
     "name": "Notes",
     "description": "Notes app",
-    "launch_path": "/ffos-notes/js-binaryindex.html",
+    "launch_path": "/ffos-notes/js-binary/index.html",
     "developer": {
         "name": "DoAT",
         "url": "http://everything.me/"

@@ -6,66 +6,70 @@
 	<script src="oauth/sha1.js"></script>
 	<script src="http://code.jquery.com/jquery-1.8.3.min.js"></script>
 	<script>
-		var EVERNOTE_SERVER = "https://sandbox.evernote.com",
-			OAUTH_CONSUMER_KEY = "ranbena",
-			OAUTH_CONSUMER_SECRET = "a4d80c714dcd93c3",
+	var EVERNOTE_SERVER = "https://sandbox.evernote.com",
+			OAUTH_CONSUMER_KEY = "israhack",
+			OAUTH_CONSUMER_SECRET = "76034784d7dd7aa5",
 			OAUTH_TOKEN_SECRET = "",
 			NOTESTORE_HOST = EVERNOTE_SERVER,
 			NOTESTORE_PORT = "443",
 			NOTESTORE_PROTOCOL = "https",
-			OAUTH_SIGNATURE_METHOD = "HMAC-SHA1",
-			NOTES_APP_CALLBACK_URL = "file://localhost/Users/ranbena/workspace/doat/ffos-notes/js-binary/testJsThrift.html",
+			OAUTH_SIGNATURE_METHOD = "PLAINTEXT",
+			NOTES_APP_CALLBACK_URL = "file://localhost/Users/matias/Sites/doat/ffos-notes/js-binary/testJsThrift.html",
 			REQUEST_TOKEN_URL = EVERNOTE_SERVER+"/oauth",
 			ACCESS_TOKEN_URL = EVERNOTE_SERVER+"/oauth",
 			AUTHORIZATION_URL = EVERNOTE_SERVER+"/OAuth.action";
 
-		function signForm(form) {
-			var accessor = { 
-		    	consumerSecret: OAUTH_CONSUMER_SECRET,
-		    	tokenSecret: OAUTH_TOKEN_SECRET
-		    };
-		    var message = {
-		    	action: REQUEST_TOKEN_URL,
-		    	method: "POST",
-				parameters: [
-					["oauth_consumer_key", OAUTH_CONSUMER_KEY],
-					["oauth_signature_method", OAUTH_SIGNATURE_METHOD],
-					["oauth_timestamp", ""],
-					["oauth_nonce", ""],
-					["oauth_signature", ""],
-					["oauth_callback", NOTES_APP_CALLBACK_URL]
-				]
-		    };
+		var processTwitterXHR = function(url, method, params, callback) {
+	    var target_url = buildTwitterURL(url, method, params);
+	    var xhr = new XMLHttpRequest({mozSystem: true});
+	    xhr.open(method, target_url, true);
+	    xhr.onreadystatechange = function() {
+	      if (xhr.readyState === 4) {
+	        callback(xhr);
+	      }
+	    };
+	    xhr.send();
+	  };
 
-		    OAuth.setTimestampAndNonce(message);
-		    OAuth.SignatureMethod.sign(message, accessor);
+	  var buildTwitterURL = function(url, method, parameters) {
+	    var accessor = {
+	      token: null,
+	      tokenSecret: null,
+	      consumerKey: OAUTH_CONSUMER_KEY,
+	      consumerSecret: OAUTH_CONSUMER_SECRET
+	    };
 
-		    var parameterMap = OAuth.getParameterMap(message.parameters);
-		    /*var redirectUrl = ACCESS_TOKEN_URL+"?";
-		    for (var p in parameterMap) {
-		        var input = document.createElement("input");
-		        input.type = "hidden";
-		        input.name = p;
-		        input.value = parameterMap[p];
-		        form.appendChild(input);
-		    }
-		    return true;*/
+	    // # Add saved twitter acc details
+	    var message = {
+	      action: url,
+	      method: method,
+	      parameters: parameters
+	    };
 
-		    $.ajax({
-		    	"type": "post",
-		    	"url": ACCESS_TOKEN_URL,
-		    	"data": parameterMap,
-		    	"success": function() {
-		    		alert(1);
-		    	},
-		    	"error": function() {
-		    		alert(0);
-		    	}
-		    });
+	    OAuth.completeRequest(message, accessor);
+	    OAuth.SignatureMethod.sign(message, accessor);
+	    return url + '?' + OAuth.formEncode(message.parameters);
+	  };
+
+
+
+
+		function signForm(form) {			//
+
+
+			processTwitterXHR(
+	      ACCESS_TOKEN_URL,
+	      'GET',
+	      {oauth_callback : NOTES_APP_CALLBACK_URL,oauth_signature_method : OAUTH_SIGNATURE_METHOD},
+	      function(xhr) {
+	        console.log(xhr.responseText);
+	      }
+	    );
+
 		}
 
 		function getTokens(consumerName) {
-		    var accessor = { 
+		    var accessor = {
 		    	consumerKey: OAUTH_CONSUMER_KEY,
 		    	consumerSecret: OAUTH_CONSUMER_SECRET,
 		    	tokenSecret: OAUTH_TOKEN_SECRET,
@@ -105,13 +109,13 @@
 		                              +"\n"+requestAccess.responseText);
 		                    }
 		                };
-		                requestAccess.open(message.method, message.action, true); 
+		                requestAccess.open(message.method, message.action, true);
 		                requestAccess.setRequestHeader("Authorization", OAuth.getAuthorizationHeader("", message.parameters));
 		                requestAccess.send();
 		            }
 		        }
 		    };
-		    requestToken.open(message.method, message.action, true); 
+		    requestToken.open(message.method, message.action, true);
 		    requestToken.setRequestHeader("Authorization", authorizationHeader);
 		    requestToken.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
 		    requestToken.send(requestBody);
