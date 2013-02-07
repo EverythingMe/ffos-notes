@@ -7,6 +7,7 @@
         "name": "DoAT",
         "url": "http://everything.me/"
     },
+    "appcache_path": "/notes.appcache",
     "fullscreen": "true",
     "orientation": "portrait",
     "icons": {
