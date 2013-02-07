@@ -1,0 +1,3 @@
+[submodule "js/lib/enml-js"]
+	path = js/lib/enml-js
+	url = git@github.com:EverythingMe/enml-js.git
