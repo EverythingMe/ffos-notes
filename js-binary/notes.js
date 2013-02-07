@@ -130,9 +130,12 @@ var finishAuth = function() {
 window.onload = function() {
 	$('login').addEventListener('click', getTempToken);
 	$('fetchNotebooks').addEventListener('click', fetchNotebooks);
-	$('fetchTags').addEventListener('click', fetchTags);
-	$('search').addEventListener('click', findNotes);
+	$('fetchNotebook').addEventListener('click', getNotebook);
+	$('fetchNote').addEventListener('click', getNote);
+	$('fetchResource').addEventListener('click', getResource);
 
+	document.cookie = 'oauth_token=S%3Ds1%3AU%3D5a3fd%3AE%3D144065d8a8e%3AC%3D13caeac5e8e%3AP%3D185%3AA%3Disrahack%3AH%3D354f2adcef13d54e224b16408daea27d';
+	document.cookie = 'noteStoreUrl=https%3A%2F%2Fsandbox.evernote.com%2Fshard%2Fs1%2Fnotestore';
 	if ((new RegExp("(?:^|;\\s*)" + escape('oauth_token').replace(/[\-\.\+\*]/g, "\\$&") + "\\s*\\=")).test(document.cookie) && (new RegExp("(?:^|;\\s*)" + escape('noteStoreUrl').replace(/[\-\.\+\*]/g, "\\$&") + "\\s*\\=")).test(document.cookie)) {
 		oauth_token = document.cookie.replace(new RegExp("(?:^|.*;\\s*)" + escape('oauth_token').replace(/[\-\.\+\*]/g, "\\$&") + "\\s*\\=\\s*((?:[^;](?!;))*[^;]?).*"), "$1");
 		noteStoreUrl = document.cookie.replace(new RegExp("(?:^|.*;\\s*)" + escape('noteStoreUrl').replace(/[\-\.\+\*]/g, "\\$&") + "\\s*\\=\\s*((?:[^;](?!;))*[^;]?).*"), "$1");
@@ -147,9 +150,7 @@ window.onload = function() {
 function fetchNotebooks() {
 	var callback = {
 		onSuccess: function(notebooks) {
-			for (var i = 0; i < notebooks.length; i++) {
-				$("listNotebooks").innerHTML += notebooks[i].name+"\n";
-			}
+			$("listNotebooks").innerHTML += JSON.stringify(notebooks, true, 4)+"\n";
 		},
 		onFailure: function(error) {
 			alert("listNotebooks received error: "+error);
@@ -157,35 +158,55 @@ function fetchNotebooks() {
 	};
 	noteStore.listNotebooks(decodeURIComponent(oauth_token), callback.onSuccess, callback.onFailure);
 }
-
-function fetchTags() {
-	var callback = {
-		onSuccess: function(tags) {
-			for (var i = 0; i < tags.length; i++) {
-				$("listTags").innerHTML += tags[i].name+"\n";
-			}
-		},
-		onFailure: function(error) {
-			alert("listTags received error: "+error);
-		}
-	};
-	noteStore.listTags(decodeURIComponent(oauth_token), callback.onSuccess, callback.onFailure);
-}
-
-function findNotes() {
+function getNotebook() {
+	var guid = $("notebookguid").value;
+	if (guid.length == 0) {
+		alert('You must enter a notebook guid');
+		return;
+	}
 	var noteFilter = new NoteFilter();
-		noteFilter.words = $('searchValue') || "started";
-
+		noteFilter.notebookGuid = guid;
 	var callback = {
-		onSuccess: function(noteList) {
-			var notes = noteList.notes;
-			for (var i = 0; i < notes.length; i++) {
-				$("findNotes").innerHTML += notes[i].title+"\n";
-			}
+		onSuccess: function(notebook) {
+			$("getNotebook").innerHTML += JSON.stringify(notebook, true, 4)+"\n";
 		},
 		onFailure: function(error) {
-			alert(error);
+			alert("getNotebook received error: "+error);
 		}
 	};
 	noteStore.findNotes(decodeURIComponent(oauth_token), noteFilter, 0, 20, callback.onSuccess, callback.onFailure);
+}
+function getNote() {
+	var guid = $("noteguid").value;
+	if (guid.length == 0) {
+		alert('You must enter a note guid');
+		return;
+	}
+	var callback = {
+		onSuccess: function(note) {
+			$("notecontent").innerHTML = note.content;
+			console.log(note.content);
+			$("getNote").innerHTML = JSON.stringify(note.resources, true, 4)+"\n";
+		},
+		onFailure: function(error) {
+			alert("getNote received error: "+error);
+		}
+	};
+	noteStore.getNote(decodeURIComponent(oauth_token), guid, true, true, false, false, callback.onSuccess,callback.onFailure);
+}
+function getResource() {
+	var guid = $("resourceguid").value;
+	if (guid.length == 0) {
+		alert('You must enter a note guid');
+		return;
+	}
+	var callback = {
+		onSuccess: function(resource) {
+			$("getResource").innerHTML = JSON.stringify(resource, true, 4)+"\n";
+		},
+		onFailure: function(error) {
+			alert("getResource received error: "+error);
+		}
+	};
+	noteStore.getResource(decodeURIComponent(oauth_token), guid, true, false, true, true, callback.onSuccess, callback.onFailure);
 }

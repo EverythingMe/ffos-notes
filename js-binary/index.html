@@ -23,10 +23,13 @@
 		<div id="logged" style="display:none;">
 			<h3>Notebooks: <button type="button" id="fetchNotebooks">Fetch Notebooks</button></h3>
 			<pre id="listNotebooks"> </pre>
-			<h3>Tags: <button type="button" id="fetchTags">Fetch Tags</button></h3>
-			<pre id="listTags"> </pre>
-			<h3>Search results: <input type="text" id="searchValue" value="" /><button type="button" id="search">Search</button></h3>
-			<pre id="findNotes"> </pre>
+			<h3>Notebook Notes: <input type="text" id="notebookguid" value="085db3e9-a4fa-47e2-b33c-6b9121a5fce8" /> <button type="button" id="fetchNotebook">Get Notebook</button></h3>
+			<pre id="getNotebook"> </pre>
+			<h3>Note: <input type="text" id="noteguid" value="23f0c8bc-1751-4d5d-9997-8aac74a4b715" /> <button type="button" id="fetchNote">Get Note</button></h3>
+			<div id="notecontent" contenteditable></div>
+			<textarea id="getNote"> </textarea>
+			<h3>Resource: <input type="text" id="resourceguid" value="ae1f246d-0451-4aba-bf91-072ae486fbfa" /> <button type="button" id="fetchResource">Get Resource</button></h3>
+			<pre id="getResource"> </pre>
 		</div>
 	</body>
 </html>
