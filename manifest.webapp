@@ -1,16 +1,16 @@
 {
     "name": "Notes",
     "description": "Notes app",
-    "launch_path": "/ffos-notes/js-binary/index.html",
+    "launch_path": "/js-binary/index.html",
     "developer": {
         "name": "DoAT",
         "url": "http://everything.me/"
     },
-    "appcache_path": "/ffos-notes/notes.appcache",
+    "appcache_path": "/notes.appcache",
     "fullscreen": "true",
     "orientation": "portrait",
     "icons": {
-        "128": "/ffos-notes/images/icon.png"
+        "128": "/images/icon.png"
     },
     "locales": {
       "en-US": {

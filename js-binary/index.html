@@ -1,129 +1,32 @@
 <!DOCTYPE html >
 <html>
-<head>
-	<title></title>
-	<script src="oauth/oauth.js"></script>
-	<script src="oauth/sha1.js"></script>
-	<script src="http://code.jquery.com/jquery-1.8.3.min.js"></script>
-	<script>
-	var EVERNOTE_SERVER = "https://sandbox.evernote.com",
-			OAUTH_CONSUMER_KEY = "israhack",
-			OAUTH_CONSUMER_SECRET = "76034784d7dd7aa5",
-			OAUTH_TOKEN_SECRET = "",
-			NOTESTORE_HOST = EVERNOTE_SERVER,
-			NOTESTORE_PORT = "443",
-			NOTESTORE_PROTOCOL = "https",
-			OAUTH_SIGNATURE_METHOD = "PLAINTEXT",
-			NOTES_APP_CALLBACK_URL = "file://localhost/Users/matias/Sites/doat/ffos-notes/js-binary/testJsThrift.html",
-			REQUEST_TOKEN_URL = EVERNOTE_SERVER+"/oauth",
-			ACCESS_TOKEN_URL = EVERNOTE_SERVER+"/oauth",
-			AUTHORIZATION_URL = EVERNOTE_SERVER+"/OAuth.action";
+	<head>
+		<title></title>
+		<script src="thrift.js"></script>
+		<script src="thrift-binary.js"></script>
 
-		var processTwitterXHR = function(url, method, params, callback) {
-	    var target_url = buildTwitterURL(url, method, params);
-	    var xhr = new XMLHttpRequest({mozSystem: true});
-	    xhr.open(method, target_url, true);
-	    xhr.onreadystatechange = function() {
-	      if (xhr.readyState === 4) {
-	        callback(xhr);
-	      }
-	    };
-	    xhr.send();
-	  };
+		<script src="evernote/Errors_types.js"></script>
+		<script src="evernote/Limits_types.js"></script>
+		<script src="evernote/Types_types.js"></script>
+		<script src="evernote/NoteStore_types.js"></script>
+		<script src="evernote/UserStore_types.js"></script>
+		<script src="evernote/NoteStore.js"></script>
+		<script src="evernote/UserStore.js"></script>
 
-	  var buildTwitterURL = function(url, method, parameters) {
-	    var accessor = {
-	      token: null,
-	      tokenSecret: null,
-	      consumerKey: OAUTH_CONSUMER_KEY,
-	      consumerSecret: OAUTH_CONSUMER_SECRET
-	    };
-
-	    // # Add saved twitter acc details
-	    var message = {
-	      action: url,
-	      method: method,
-	      parameters: parameters
-	    };
-
-	    OAuth.completeRequest(message, accessor);
-	    OAuth.SignatureMethod.sign(message, accessor);
-	    return url + '?' + OAuth.formEncode(message.parameters);
-	  };
-
-
-
-
-		function signForm(form) {			//
-
-
-			processTwitterXHR(
-	      ACCESS_TOKEN_URL,
-	      'GET',
-	      {oauth_callback : NOTES_APP_CALLBACK_URL,oauth_signature_method : OAUTH_SIGNATURE_METHOD},
-	      function(xhr) {
-	        console.log(xhr.responseText);
-	      }
-	    );
-
-		}
-
-		function getTokens(consumerName) {
-		    var accessor = {
-		    	consumerKey: OAUTH_CONSUMER_KEY,
-		    	consumerSecret: OAUTH_CONSUMER_SECRET,
-		    	tokenSecret: OAUTH_TOKEN_SECRET,
-		    	serviceProvider: {
-		    		accessTokenUrl: ACCESS_TOKEN_URL,
-		    		requestTokenURL: REQUEST_TOKEN_URL
-		    	}
-		    };
-		    var message = {
-		        method: "post",
-		        action: accessor.serviceProvider.requestTokenURL,
-		    	parameters: [["scope", "http://www.google.com/m8/feeds/"]]
-		    };
-		    var requestBody = OAuth.formEncode(message.parameters);
-		    OAuth.completeRequest(message, accessor);
-		    var authorizationHeader = OAuth.getAuthorizationHeader("", message.parameters);
-		    var requestToken = new XMLHttpRequest();
-		    requestToken.onreadystatechange = function receiveRequestToken() {
-		        if (requestToken.readyState == 4) {
-		            var dump = requestToken.status+" "+requestToken.statusText
-		                  +"\n"+requestToken.getAllResponseHeaders()
-		                  +"\n"+requestToken.responseText;
-		            if (confirm(dump)) {
-		                var results = OAuth.decodeForm(requestToken.responseText);
-		                message = {method: "post", action: accessor.serviceProvider.accessTokenURL};
-		                OAuth.completeRequest(message,
-		                    { consumerKey   : accessor.consumerKey
-		                    , consumerSecret: accessor.consumerSecret
-		                    , token         : OAuth.getParameter(results, "oauth_token")
-		                    , tokenSecret   : OAuth.getParameter(results, "oauth_token_secret")
-		                    });
-		                var requestAccess = new XMLHttpRequest();
-		                requestAccess.onreadystatechange = function receiveAccessToken() {
-		                    if (requestAccess.readyState == 4) {
-		                        alert(requestAccess.status+" "+requestAccess.statusText
-		                              +"\n"+requestAccess.getAllResponseHeaders()
-		                              +"\n"+requestAccess.responseText);
-		                    }
-		                };
-		                requestAccess.open(message.method, message.action, true);
-		                requestAccess.setRequestHeader("Authorization", OAuth.getAuthorizationHeader("", message.parameters));
-		                requestAccess.send();
-		            }
-		        }
-		    };
-		    requestToken.open(message.method, message.action, true);
-		    requestToken.setRequestHeader("Authorization", authorizationHeader);
-		    requestToken.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-		    requestToken.send(requestBody);
-		}
-
-		signForm();
-	</script>
-</head>
-<body>
-</body>
+		<script src="oauth/oauth.js"></script>
+		<script src="oauth/sha1.js"></script>
+		<script src="notes.js"></script>
+	</head>
+	<body>
+		<h3>Authentication token: <button type="button" id="login">Login</button></h3>
+		<pre id="authResult"> </pre>
+		<div id="logged" style="display:none;">
+			<h3>Notebooks: <button type="button" id="fetchNotebooks">Fetch Notebooks</button></h3>
+			<pre id="listNotebooks"> </pre>
+			<h3>Tags: <button type="button" id="fetchTags">Fetch Tags</button></h3>
+			<pre id="listTags"> </pre>
+			<h3>Search results: <input type="text" id="searchValue" value="" /><button type="button" id="search">Search</button></h3>
+			<pre id="findNotes"> </pre>
+		</div>
+	</body>
 </html>
