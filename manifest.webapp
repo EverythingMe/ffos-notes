@@ -1,8 +1,11 @@
 {
     "name": "Notes",
     "description": "Notes app",
-    "version": "1.0.6",
-    "launch_path": "/index.html",
+    "launch_path": "/js-binary/index.html",
+    "type": "certified",
+    "permissions": {
+        "systemXHR": {}
+    },
     "developer": {
         "name": "DoAT",
         "url": "http://everything.me/"
