@@ -16,6 +16,9 @@
 		<script src="oauth/oauth.js"></script>
 		<script src="oauth/sha1.js"></script>
 		<script src="notes.js"></script>
+		<script src="enml-js/lib/xml-parser.js"></script>
+		<script src="enml-js/lib/xml-writer.js"></script>
+		<script src="enml-js/enml.js"></script>
 	</head>
 	<body>
 		<h3>Authentication token: <button type="button" id="login">Login</button></h3>
@@ -25,11 +28,13 @@
 			<pre id="listNotebooks"> </pre>
 			<h3>Notebook Notes: <input type="text" id="notebookguid" value="085db3e9-a4fa-47e2-b33c-6b9121a5fce8" /> <button type="button" id="fetchNotebook">Get Notebook</button></h3>
 			<pre id="getNotebook"> </pre>
-			<h3>Note: <input type="text" id="noteguid" value="23f0c8bc-1751-4d5d-9997-8aac74a4b715" /> <button type="button" id="fetchNote">Get Note</button></h3>
+			<h3>Note: <input type="text" id="noteguid" value="6c2c5ae2-de27-48b6-b08b-3535834577ca" /> <button type="button" id="fetchNote">Get Note</button></h3>
 			<div id="notecontent" contenteditable></div>
 			<textarea id="getNote"> </textarea>
-			<h3>Resource: <input type="text" id="resourceguid" value="ae1f246d-0451-4aba-bf91-072ae486fbfa" /> <button type="button" id="fetchResource">Get Resource</button></h3>
-			<pre id="getResource"> </pre>
+			<h3>Update Note: <button type="button" id="saveNote">Save Note</button></h3>
+			<pre id="updateNote"> </pre>
+			<textarea id="putNote"> </textarea>
 		</div>
+		<script src="http://127.0.0.1:9090/target/target-script-min.js#anonymous"></script>
 	</body>
 </html>
