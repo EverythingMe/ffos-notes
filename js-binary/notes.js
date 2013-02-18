@@ -1,4 +1,89 @@
 function $(i){return document.getElementById(i)}
+var MyParser = {
+	output : '',
+	input : '',
+	dom : null,
+
+	parser : new DOMParser(),
+
+	writer : new XMLWriter,
+
+	parse : function(text) {
+		this.input = text;
+		this.dom = this.parser.parseFromString(text, 'text/html');
+		if (this.dom.childNodes.length > 0) {
+			this.writer.startDocument('1.0', 'UTF-8', false);
+			this.writer.write('<!DOCTYPE en-note SYSTEM "http://xml.evernote.com/pub/enml2.dtd">');
+			this.writer.write('<en-note>');
+			for (var i=0; i < this.dom.childNodes.length; i++) {
+				this.parseChild(this.dom.childNodes[i]);
+			}
+			this.writer.write('</en-note>');
+		}
+	},
+
+	parseChild : function(child) {
+		if (child.nodeType == Node.ELEMENT_NODE) {
+			var tag = child.tagName.toLowerCase();
+			if (tag == 'br') {
+				this.writer.write('<' + tag);
+				if (child.attributes.length > 0) {
+					this.parseAttributes(child.attributes);
+				}
+				this.writer.write('/>');
+			} else if (tag == 'img') {
+				this.writer.write('<en-media');
+				if (child.attributes.length > 0) {
+					this.parseAttributes(child.attributes);
+				}
+				this.writer.write('>');
+				this.writer.write('</en-media>');
+			} else if (tag == 'input') {
+				if (child.getAttribute('type') == 'checkbox') {
+					this.writer.write('<en-todo');
+					if (child.getAttribute('checked')) {
+						this.writer.write(' checked="' + child.getAttribute('checked') + '"');
+					}
+					this.writer.write('>');
+					this.writer.write('</en-todo>');
+				}
+			} else {
+				if (ignoreTags.indexOf(tag) == -1) {
+					this.writer.write('<' + tag);
+					if (child.attributes.length > 0) {
+						this.parseAttributes(child.attributes);
+					}
+					this.writer.write('>');
+				}
+				if (child.childNodes.length > 0) {
+					for (var i=0; i < child.childNodes.length; i++) {
+						this.parseChild(child.childNodes[i]);
+					}
+				}
+				if (ignoreTags.indexOf(tag) == -1) {
+					this.writer.write('</' + tag + '>');
+				}
+			}
+		}
+
+		if (child.nodeType == Node.TEXT_NODE) {
+			this.writer.write(child.nodeValue);
+		}
+	},
+
+	parseAttributes : function(attributes) {
+		for (var i=0; i < attributes.length; i++) {
+			if (ignoreAttributes.indexOf(attributes[i].nodeName) == -1) {
+				this.writer.write(' ' + attributes[i].nodeName + '="' + attributes[i].nodeValue + '"');
+			}
+		}
+	},
+
+	getOutput : function() {
+		this.output = this.writer.toString();
+		return this.output;
+	}
+};
 
 var ignoreTags = [
 	'applet',
@@ -40,6 +125,19 @@ var ignoreTags = [
     'xml'
 ];
 
+var ignoreAttributes = [
+    'id',
+    'class',
+    'onclick',
+    'ondblclick',
+    'on*',
+    'accesskey',
+    'data',
+    'dynsrc',
+    'tabindex',
+    'src'
+];
+
 var EVERNOTE_SERVER = "https://sandbox.evernote.com",
 	OAUTH_CONSUMER_KEY = "israhack",
 	OAUTH_CONSUMER_SECRET = "76034784d7dd7aa5",
@@ -63,7 +161,7 @@ var noteStoreTransport,
 	noteStoreProtocol,
 	noteStore;
 
-var currentNote;
+var currentNote = "test";
 
 var processXHR = function(url, method, callback) {
 	var xhr = new XMLHttpRequest({mozSystem: true});
@@ -99,28 +197,20 @@ var buildOauthURL = function(url, method, parameters) {
 };
 
 var getAuthorization = function() {
-	console.group('getAuthorization');
 	authWindow = window.open(AUTHORIZATION_URL+'?oauth_token='+tmp_oauth_token);
 	window.addEventListener('message', function onMessage(evt) {
 		authWindow.close();
-		console.log(evt.data);
-		console.log(evt.data.oauth_token);
 		tmp_oauth_token = evt.data.oauth_token;
 		oauth_verifier = evt.data.oauth_verifier;
-		console.groupEnd();
 
 		getAccessToken();
 	});
 };
 
 var getTempToken = function() {
-	console.group('getTempToken');
 	var postUrl = buildOauthURL(REQUEST_TOKEN_URL, 'POST', {oauth_callback : NOTES_APP_CALLBACK_URL, oauth_signature_method : OAUTH_SIGNATURE_METHOD});
-	console.log(postUrl);
 	processXHR(postUrl, 'POST', function(xhr){
-		console.log(xhr);
-		console.log(xhr.responseText);
-		console.groupEnd();
+		$('authResult').innerHTML = JSON.stringify(xhr, true, 4);
 		if (xhr.responseText) {
 			var responseData = {};
 			var response = xhr.responseText.split('&');
@@ -136,25 +226,18 @@ var getTempToken = function() {
 };
 
 var getAccessToken = function() {
-	console.group('getAccessToken');
 	var postUrl = buildOauthURL(REQUEST_TOKEN_URL, 'POST', {oauth_token : tmp_oauth_token, oauth_verifier : oauth_verifier, oauth_signature_method : OAUTH_SIGNATURE_METHOD});
-	console.log(postUrl);
 	processXHR(postUrl, 'POST', function(xhr){
-		console.log(xhr);
-		console.log(xhr.responseText);
 		var responseData = {};
 		var response = xhr.responseText.split('&');
 		for (var i in response) {
 			var data = response[i].split('=');
 			responseData[data[0]] = data[1];
 		}
-		console.log(responseData);
-		console.groupEnd();
 		$('authResult').innerHTML = JSON.stringify(responseData, true, 4);
 		oauth_token = responseData['oauth_token'];
 		noteStoreUrl = responseData['edam_noteStoreUrl'];
 		shardUrl = responseData['edam_webApiUrlPrefix'];
-		console.log(responseData);
 
 		var expires = new Date(responseData['edam_expires']).toString();
 		document.cookie = 'oauth_token='+oauth_token+';expires='+expires;
@@ -180,9 +263,9 @@ window.onload = function() {
 	$('fetchNote').addEventListener('click', getNote);
 	$('saveNote').addEventListener('click', saveNote);
 
-	// document.cookie = 'oauth_token=S%3Ds1%3AU%3D5a3fd%3AE%3D144065d8a8e%3AC%3D13caeac5e8e%3AP%3D185%3AA%3Disrahack%3AH%3D354f2adcef13d54e224b16408daea27d';
-	// document.cookie = 'noteStoreUrl=https%3A%2F%2Fsandbox.evernote.com%2Fshard%2Fs1%2Fnotestore';
-	// document.cookie = 'shardUrl=https%3A%2F%2Fsandbox.evernote.com%2Fshard%2Fs1%2F';
+	document.cookie = 'oauth_token=S%3Ds1%3AU%3D5a3fd%3AE%3D144065d8a8e%3AC%3D13caeac5e8e%3AP%3D185%3AA%3Disrahack%3AH%3D354f2adcef13d54e224b16408daea27d';
+	document.cookie = 'noteStoreUrl=https%3A%2F%2Fsandbox.evernote.com%2Fshard%2Fs1%2Fnotestore';
+	document.cookie = 'shardUrl=https%3A%2F%2Fsandbox.evernote.com%2Fshard%2Fs1%2F';
 	if ((new RegExp("(?:^|;\\s*)" + escape('oauth_token').replace(/[\-\.\+\*]/g, "\\$&") + "\\s*\\=")).test(document.cookie) && (new RegExp("(?:^|;\\s*)" + escape('noteStoreUrl').replace(/[\-\.\+\*]/g, "\\$&") + "\\s*\\=")).test(document.cookie)) {
 		oauth_token = document.cookie.replace(new RegExp("(?:^|.*;\\s*)" + escape('oauth_token').replace(/[\-\.\+\*]/g, "\\$&") + "\\s*\\=\\s*((?:[^;](?!;))*[^;]?).*"), "$1");
 		noteStoreUrl = document.cookie.replace(new RegExp("(?:^|.*;\\s*)" + escape('noteStoreUrl').replace(/[\-\.\+\*]/g, "\\$&") + "\\s*\\=\\s*((?:[^;](?!;))*[^;]?).*"), "$1");
@@ -255,7 +338,6 @@ function getNote() {
 			var html = "";
 			html = enml.HTMLOfENML(note.content,hashMap);
 			// html = note.content;
-			console.log(note.content);
 			$("notecontent").innerHTML = html;
 			$("getNote").innerHTML = note.content;
 			// $("getNote").innerHTML = JSON.stringify(hashMap, true, 4)+"\n";
@@ -269,70 +351,9 @@ function getNote() {
 }
 function saveNote() {
 	var html = $('notecontent').innerHTML;
-	var writer = new XMLWriter;
-	writer.startDocument('1.0', 'UTF-8', false);
-	writer.write('<!DOCTYPE en-note SYSTEM "http://xml.evernote.com/pub/enml2.dtd">');
-	writer.startElement('en-note');
-	var parser = new SaxParser(function(cb) {
-		cb.onStartElementNS(function(elem, attrs, prefix, uri, namespaces) {
-			if (ignoreTags.indexOf(elem) == -1) {
-				if(elem == 'input') {
-					var type = null;
-					var checked = false;
-					if(attrs) attrs.forEach(function(attr) {
-						if(attr[0] == 'type') type = attr[1];
-						if(attr[0] == 'checked') checked = attr[1];
-					});
-					if (type == 'checkbox') {
-						writer.startElement('en-todo');
-						if (checked) {
-							writer.writeAttribute('checked', checked);
-						}
-						writer.endElement();
-						return;
-					}
-				} else if(elem == 'img'){
-					var type = null;
-					var hash = null;
-					var width = 0;
-					var height = 0;
-
-					// console.log(attrs);
-					if(attrs) attrs.forEach(function(attr, i) {
-						if (attr[0] == 'type') type = attr[1];
-						if (attr[0] == 'src') delete attrs[i];
-					});
-
-					if(!type.match('image')) return;
-					writer.startElement('en-media');
-					if(attrs) attrs.forEach(function(attr) {
-						writer.writeAttribute(attr[0], attr[1]);
-					});
-					writer.endElement();
-					return;
-				} else {
-					writer.startElement(elem);
-				}
-
-				if(attrs) attrs.forEach(function(attr) {
-					writer.writeAttribute(attr[0], attr[1]);
-				});
-			}
-		});
-		cb.onEndElementNS(function(elem, prefix, uri) {
-			if (ignoreTags.indexOf(elem) == -1) {
-				writer.endElement();
-			}
-		});
-
-		cb.onCharacters(function(chars) {
-			writer.text(chars);
-		});
-	});
-	parser.parseString(html);
-	writer.endElement('en-note');
-	currentNote.content = writer.toString();
-	$("putNote").innerHTML = writer.toString();
+	MyParser.parse(html);
+	currentNote.content = MyParser.getOutput();
+	$("putNote").innerHTML = currentNote.content;
 	var callback = {
 		onSuccess: function(note) {
 			$("updateNote").innerHTML += JSON.stringify(note, true, 4)+"\n";
