@@ -1,0 +1,348 @@
+<html>
+<head>
+<script src="enml-js/lib/xml-parser.js"></script>
+<script src="enml-js/lib/xml-writer.js"></script>
+<script src="enml-js/enml.js"></script>
+<script>
+
+var MyParser = {
+	output : '',
+	input : '',
+	dom : null,
+
+	parser : new DOMParser(),
+
+	writer : new XMLWriter,
+
+	parse : function(text) {
+		this.input = text;
+		this.dom = this.parser.parseFromString(text, 'text/html');
+		if (this.dom.childNodes.length > 0) {
+			this.writer.startDocument('1.0', 'UTF-8', false);
+			this.writer.write('<!DOCTYPE en-note SYSTEM "http://xml.evernote.com/pub/enml2.dtd">');
+			this.writer.write('<en-note>');
+			for (var i=0; i < this.dom.childNodes.length; i++) {
+				this.parseChild(this.dom.childNodes[i]);
+			}
+			this.writer.write('</en-note>');
+			this.output = this.writer.toString();
+			console.log(this.output);
+		}
+	},
+
+	parseChild : function(child) {
+		if (child.nodeType == Node.ELEMENT_NODE) {
+			var tag = child.tagName.toLowerCase();
+			if (tag == 'br') {
+				this.writer.write('<' + tag);
+				if (child.attributes.length > 0) {
+					this.parseAttributes(child.attributes);
+				}
+				this.writer.write('/>');
+			} else if (tag == 'img') {
+				this.writer.write('<en-media');
+				if (child.attributes.length > 0) {
+					this.parseAttributes(child.attributes);
+				}
+				this.writer.write('>');
+				this.writer.write('</en-media>');
+			} else if (tag == 'input') {
+				if (child.getAttribute('type') == 'checkbox') {
+					this.writer.write('<en-todo');
+					if (child.getAttribute('checked')) {
+						this.writer.write(' checked="' + child.getAttribute('checked') + '"');
+					}
+					this.writer.write('>');
+					this.writer.write('</en-todo>');
+				}
+			} else {
+				if (ignoreTags.indexOf(tag) == -1) {
+					this.writer.write('<' + tag);
+					if (child.attributes.length > 0) {
+						this.parseAttributes(child.attributes);
+					}
+					this.writer.write('>');
+				}
+				if (child.childNodes.length > 0) {
+					for (var i=0; i < child.childNodes.length; i++) {
+						this.parseChild(child.childNodes[i]);
+					}
+				}
+				if (ignoreTags.indexOf(tag) == -1) {
+					this.writer.write('</' + tag + '>');
+				}
+			}
+		}
+
+		if (child.nodeType == Node.TEXT_NODE) {
+			this.writer.write(child.nodeValue);
+		}
+	},
+
+	parseAttributes : function(attributes) {
+		for (var i=0; i < attributes.length; i++) {
+			if (ignoreAttributes.indexOf(attributes[i].nodeName) == -1) {
+				this.writer.write(' ' + attributes[i].nodeName + '="' + attributes[i].nodeValue + '"');
+			}
+		}
+	}
+};
+function $(i){return document.getElementById(i)}
+
+var enmlString = '<?xml version="1.0" encoding="UTF-8"?>' +
+'<!DOCTYPE en-note SYSTEM "http://xml.evernote.com/pub/enml2.dtd">' +
+'<en-note>' +
+    '<div>Hey Yo!,</div>' +
+    '<div>this <a shape="rect" href="#">will be my</a> <strong>sync</strong> test</div>' +
+    '<div>' +
+        '<ol>' +
+            '<li>one</li>' +
+            '<li>two</li>' +
+        '</ol>' +
+        '<div>' +
+            '<ul>' +
+                '<li>what</li>' +
+                '<li>another</li>' +
+                '<li>list</li>' +
+            '</ul>' +
+            '<div>Todo:</div>' +
+            '<div>' +
+                '<en-todo checked="true"></en-todo>finish ENML -> HTML' +
+                '<div>' +
+                    '<en-todo></en-todo>finish HTML -> ENML' +
+                    '<div>' +
+                        '<en-todo></en-todo>start sync process' +
+                    '</div>' +
+                    '<div><br clear="none"/></div>' +
+                    '<div><en-media alt="Evernote Logo" hash="4914ced8925f9adcc1c58ab87813c81f" type="image/png"></en-media></div>' +
+                    '<div><br clear="none"/></div>' +
+                '</div>' +
+            '</div>' +
+        '</div>' +
+    '</div>' +
+'</en-note>';
+
+var htmlString = '<html>' +
+    '<head>' +
+        '<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>' +
+    '</head>' +
+    '<body style="word-wrap: break-word; -webkit-nbsp-mode: space; -webkit-line-break: after-white-space;">' +
+        '<div>Hey Yo!,</div>' +
+        '<div>this <a shape="rect" href="#">will be my</a> <strong>sync</strong> test</div>' +
+        '<div>' +
+            '<ol>' +
+                '<li>one</li>' +
+                '<li>two</li>' +
+            '</ol>' +
+            '<div>' +
+                '<ul>' +
+                    '<li>what</li>' +
+                    '<li>another</li>' +
+                    '<li>list</li>' +
+                '</ul>' +
+                '<div>Todo:</div>' +
+                '<div>' +
+                    '<input type="checkbox" checked="true"/>finish ENML -&gt; HTML' +
+                    '<div>' +
+                        '<input type="checkbox"/>finish HTML -&gt; ENML' +
+                        '<div>' +
+                            '<input type="checkbox"/>start sync process' +
+                        '</div>' +
+                        '<div><br clear="none"/></div>' +
+                        '<div>' +
+                            '<img src="data:image/png;base64,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" alt="Evernote Logo" hash="4914ced8925f9adcc1c58ab87813c81f" type="image/png"/>' +
+                            '<div><br clear="none"/></div>' +
+                        '</div>' +
+                    '</div>' +
+                '</div>' +
+            '</div>' +
+        '</div>' +
+    '</body>' +
+'</html>';
+
+var ignoreTags = [
+	'applet',
+    'base',
+    'basefont',
+    'bgsound',
+    'blink',
+    'body',
+    'button',
+    'dir',
+    'embed',
+    'fieldset',
+    'form',
+    'frame',
+    'frameset',
+    'head',
+    'html',
+    'iframe',
+    'ilayer',
+    'isindex',
+    'label',
+    'layer,',
+    'legend',
+    'link',
+    'marquee',
+    'menu',
+    'meta',
+    'noframes',
+    'noscript',
+    'object',
+    'optgroup',
+    'option',
+    'param',
+    'plaintext',
+    'script',
+    'select',
+    'style',
+    'textarea',
+    'xml'
+];
+
+var ignoreAttributes = [
+    'id',
+    'class',
+    'onclick',
+    'ondblclick',
+    'on*',
+    'accesskey',
+    'data',
+    'dynsrc',
+    'tabindex',
+    'src',
+    'type'
+];
+
+function convert() {
+	var html = enml.HTMLOfENML(enmlString, {
+		"4914ced8925f9adcc1c58ab87813c81f" : "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"
+	});
+	console.log(html);
+}
+var parser;
+function revert(){
+	MyParser.parse($('html').innerHTML);
+	// var writer = new XMLWriter;
+	// writer.startDocument('1.0', 'UTF-8', false);
+	// writer.write('<!DOCTYPE en-note SYSTEM "http://xml.evernote.com/pub/enml2.dtd">');
+	// writer.startElement('en-note');
+	// parser = new SaxParser(function(cb) {
+	// 	cb.onError(function(str){
+	// 		console.log(str);
+	// 	});
+
+	// 	cb.onStartElementNS(function(elem, attrs, prefix, uri, namespaces) {
+	// 		if (ignoreTags.indexOf(elem) == -1) {
+	// 			if(elem == 'input') {
+	// 				var type = null;
+	// 				var checked = false;
+	// 				if(attrs) attrs.forEach(function(attr) {
+	// 					if(attr[0] == 'type') type = attr[1];
+	// 					if(attr[0] == 'checked') checked = attr[1];
+	// 				});
+	// 				if (type == 'checkbox') {
+	// 					writer.startElement('en-todo');
+	// 					if(attrs) attrs.forEach(function(attr) {
+	// 						if (attr[0] != 'type') {
+	// 							writer.writeAttribute(attr[0], attr[1]);
+	// 						}
+	// 					});
+	// 					writer.endElement('');
+	// 					return;
+	// 				}
+	// 			} else if(elem == 'img'){
+	// 				writer.startElement('en-media');
+	// 				var type = null;
+	// 				var hash = null;
+	// 				var width = 0;
+	// 				var height = 0;
+
+	// 				// console.log(attrs);
+	// 				if(attrs) attrs.forEach(function(attr, i) {
+	// 					if (attr[0] == 'type') type = attr[1];
+	// 					if (attr[0] == 'src') delete attrs[i];
+	// 				});
+
+	// 				if(attrs) attrs.forEach(function(attr) {
+	// 					writer.writeAttribute(attr[0], attr[1]);
+	// 				});
+	// 				writer.endElement();
+	// 				return;
+	// 			} else {
+	// 				writer.startElement(elem);
+	// 			}
+
+	// 			if(attrs) attrs.forEach(function(attr) {
+	// 				writer.writeAttribute(attr[0], attr[1]);
+	// 			});
+	// 		}
+	// 	});
+	// 	cb.onEndElementNS(function(elem, prefix, uri) {
+	// 		if (ignoreTags.indexOf(elem) == -1) {
+	// 			writer.endElement();
+	// 		}
+	// 	});
+
+	// 	cb.onCharacters(function(chars) {
+	// 		writer.text(chars);
+	// 	});
+	// });
+	// parser.parseString(htmlString);
+	// writer.endElement('en-note');
+	// var enml = writer.toString();
+	// console.log(enml);
+}
+
+window.onload = function() {
+	$('enmltohtml').addEventListener('click', convert);
+	$('htmltoenml').addEventListener('click', revert);
+}
+</script>
+</head>
+<body>
+	<div id="html" contenteditable>
+
+		<html>
+		    <head>
+		        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+		    </head>
+		    <body style="word-wrap: break-word; -webkit-nbsp-mode: space; -webkit-line-break: after-white-space;">
+		        <div style="color:red;">Hey Yo!,</div>
+		        <div>this <a shape="rect" href="#">will be my</a> <strong>sync</strong> test</div>
+		        <div>
+		            <ol>
+		                <li>one</li>
+		                <li>two</li>
+		            </ol>
+		            <div>
+		                <ul>
+		                    <li>what</li>
+		                    <li>another</li>
+		                    <li>list</li>
+		                </ul>
+		                <div>Todo:</div>
+		                <div>
+		                    <input type="checkbox" checked="true"/>finish ENML -&gt; HTML
+		                    <div>
+		                        <input type="checkbox"/>finish HTML -&gt; ENML
+		                        <div>
+		                            <input type="checkbox"/>start sync process
+		                        </div>
+		                        <div><br clear="none"/></div>
+		                        <div>
+		                            <img src="data:image/png;base64,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" alt="Evernote Logo" hash="4914ced8925f9adcc1c58ab87813c81f" type="image/png"/>
+		                            <div><br clear="none"/></div>
+		                        </div>
+		                    </div>
+		                </div>
+		            </div>
+		        </div>
+		    </body>
+		</html>
+
+	</div>
+	<button type="button" id="enmltohtml">ENML -> HTML</button>
+	<button type="button" id="htmltoenml">HTML -> ENML</button>
+</body>
+</html>
