@@ -262,14 +262,16 @@ window.onload = function() {
 	$('fetchNotebook').addEventListener('click', getNotebook);
 	$('fetchNote').addEventListener('click', getNote);
 	$('saveNote').addEventListener('click', saveNote);
+	$('getSyncState').addEventListener('click', getSyncState);
+	$('getSyncChunk').addEventListener('click', getSyncChunk);
 
-	document.cookie = 'oauth_token=S%3Ds1%3AU%3D5a3fd%3AE%3D144065d8a8e%3AC%3D13caeac5e8e%3AP%3D185%3AA%3Disrahack%3AH%3D354f2adcef13d54e224b16408daea27d';
+	document.cookie = 'oauth_token=S%3Ds1%3AU%3D5a3fd%3AE%3D14449f53aad%3AC%3D13cf2440ead%3AP%3D185%3AA%3Disrahack%3AH%3D891197086e3f797afaf6876bb35209a7';
 	document.cookie = 'noteStoreUrl=https%3A%2F%2Fsandbox.evernote.com%2Fshard%2Fs1%2Fnotestore';
 	document.cookie = 'shardUrl=https%3A%2F%2Fsandbox.evernote.com%2Fshard%2Fs1%2F';
-	if ((new RegExp("(?:^|;\\s*)" + escape('oauth_token').replace(/[\-\.\+\*]/g, "\\$&") + "\\s*\\=")).test(document.cookie) && (new RegExp("(?:^|;\\s*)" + escape('noteStoreUrl').replace(/[\-\.\+\*]/g, "\\$&") + "\\s*\\=")).test(document.cookie)) {
-		oauth_token = document.cookie.replace(new RegExp("(?:^|.*;\\s*)" + escape('oauth_token').replace(/[\-\.\+\*]/g, "\\$&") + "\\s*\\=\\s*((?:[^;](?!;))*[^;]?).*"), "$1");
-		noteStoreUrl = document.cookie.replace(new RegExp("(?:^|.*;\\s*)" + escape('noteStoreUrl').replace(/[\-\.\+\*]/g, "\\$&") + "\\s*\\=\\s*((?:[^;](?!;))*[^;]?).*"), "$1");
-		shardUrl = document.cookie.replace(new RegExp("(?:^|.*;\\s*)" + escape('shardUrl').replace(/[\-\.\+\*]/g, "\\$&") + "\\s*\\=\\s*((?:[^;](?!;))*[^;]?).*"), "$1");
+	oauth_token = document.cookie.replace(new RegExp("(?:^|.*;\\s*)" + escape('oauth_token').replace(/[\-\.\+\*]/g, "\\$&") + "\\s*\\=\\s*((?:[^;](?!;))*[^;]?).*"), "$1");
+	noteStoreUrl = document.cookie.replace(new RegExp("(?:^|.*;\\s*)" + escape('noteStoreUrl').replace(/[\-\.\+\*]/g, "\\$&") + "\\s*\\=\\s*((?:[^;](?!;))*[^;]?).*"), "$1");
+	shardUrl = document.cookie.replace(new RegExp("(?:^|.*;\\s*)" + escape('shardUrl').replace(/[\-\.\+\*]/g, "\\$&") + "\\s*\\=\\s*((?:[^;](?!;))*[^;]?).*"), "$1");
+	if ((oauth_token && oauth_token != '' && oauth_token != 'undefined') && (noteStoreUrl && noteStoreUrl != '' && noteStoreUrl != 'undefined') && (shardUrl && shardUrl != '' && shardUrl != 'undefined')) {
 		var data = {
 			oauth_token : oauth_token,
 			noteStoreUrl : noteStoreUrl,
@@ -363,4 +365,27 @@ function saveNote() {
 		}
 	};
 	noteStore.updateNote(decodeURIComponent(oauth_token), currentNote, callback.onSuccess, callback.onFailure);
+}
+function getSyncState() {
+	var callback = {
+		onSuccess: function(state) {
+			$("syncState").innerHTML = JSON.stringify(state, true, 4);
+		},
+		onFailure: function(error) {
+			alert("getSyncState received error: "+error);
+		}
+	};
+	noteStore.getSyncState(decodeURIComponent(oauth_token), callback.onSuccess, callback.onFailure);
+}
+function getSyncChunk() {
+	var afterUSN = $('afterUSN').value;
+	var callback = {
+		onSuccess: function(chunk) {
+			$("syncChunk").innerHTML = JSON.stringify(chunk, true, 4);
+		},
+		onFailure: function(error) {
+			alert("getSyncChunk received error: "+error);
+		}
+	};
+	noteStore.getSyncChunk(decodeURIComponent(oauth_token), afterUSN, 10, true, callback.onSuccess, callback.onFailure);
 }
