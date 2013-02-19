@@ -24,7 +24,7 @@
 	</head>
 	<body>
 		<h3>Authentication token: <button type="button" id="login">Login</button></h3>
-		<pre id="authResult"> </pre>
+		<textarea id="authResult"></textarea>
 		<div id="logged" style="display:none;">
 			<h3>Notebooks: <button type="button" id="fetchNotebooks">Fetch Notebooks</button></h3>
 			<pre id="listNotebooks"> </pre>
@@ -36,7 +36,10 @@
 			<h3>Update Note: <button type="button" id="saveNote">Save Note</button></h3>
 			<pre id="updateNote"> </pre>
 			<textarea id="putNote"> </textarea>
+			<h3>Sync State: <button type="button" id="getSyncState">Get Sync State</button></h3>
+			<textarea id="syncState"> </textarea>
+			<h3>Sync Chunk: <input type="text" name="afterUSN" id="afterUSN" value="0" /><button type="button" id="getSyncChunk">Get Sync Chunk</button></h3>
+			<textarea id="syncChunk"> </textarea>
 		</div>
-		<script src="http://127.0.0.1:9090/target/target-script-min.js#anonymous"></script>
 	</body>
 </html>
