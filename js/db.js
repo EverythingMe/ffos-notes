@@ -147,7 +147,7 @@ var DB = new function() {
     // given data and table, return an object
     function unserialize(data, table) {
         var objName = schema[table].objectName;
-        return new window[objName](data);
+        return new window.Models[objName](data);
     }
     
     
