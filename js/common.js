@@ -112,6 +112,9 @@ var App = new function() {
         }, false);
 
         document.body.classList.remove(CLASS_LOADING);
+
+        Evernote.init();
+        $("button-evernote-login").addEventListener("click", Evernote.login);
     };
     
     function setupCache() {
