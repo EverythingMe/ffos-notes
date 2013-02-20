@@ -170,7 +170,7 @@ var App = new function() {
     function initUser(){
         DB.getUsers({"id": DEFAULT_USER.id}, function onSuccess(users) {
             if (users.length === 0) {
-                user = new User(DEFAULT_USER);
+                user = new Models.User(DEFAULT_USER);
                 DB.addUser(user, function onSuccess() {
                     self.getUserNotes();
                 });
