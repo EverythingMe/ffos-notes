@@ -1491,6 +1491,7 @@ function formatDate(date) {
 function $(s) { return document.getElementById(s); }
 function html(el, s) { el.innerHTML = (s || "").replace(/</g, '&lt;'); }
 
-window.onload = function onLoad() {
+window.onload = function() {
     navigator.mozL10n.ready(App.init);
+    $('search').addEventListener('onsubmit', function(){return false;});
 }

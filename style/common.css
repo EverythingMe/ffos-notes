@@ -663,6 +663,18 @@ body.loading .card:not(.active) {
     display: none;
 }
 
+#button-evernote-login {
+    width: 254px;
+    height: 24px;
+    background: url("../images/evernote-login.png") no-repeat scroll 0 0 transparent;
+    padding: 0;
+    border: 0 none;
+    margin: 0;
+    position: absolute;
+    bottom: 5px;
+    left: 8px;
+}
+
 .loggedin section[role="region"] > header:first-child {
     background-image: url(../images/header_bg_green.png);
 }
@@ -672,4 +684,7 @@ body.loading .card:not(.active) {
 }
 .loggedin section[role="region"] > header:first-child menu[type="toolbar"] a:last-child, section[role="region"] > header:first-child menu[type="toolbar"] button:last-child {
     background-image: url(../images/separator_green.png);
+}
+.loggedin #button-evernote-login {
+    display: none;
 }
