@@ -1,7 +1,7 @@
 {
     "name": "Notes",
     "description": "Notes app",
-    "launch_path": "/js-binary/index.html",
+    "launch_path": "/index.html",
     "type": "certified",
     "permissions": {
         "systemXHR": {}
