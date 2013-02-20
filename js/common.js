@@ -158,6 +158,9 @@ var App = new function() {
         });
         
         DB.init(initUser);
+
+        Evernote.init();
+        $("button-evernote-login").addEventListener("click", Evernote.login);
     };
     
     function setupCache() {
