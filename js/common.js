@@ -1452,3 +1452,8 @@ function formatDate(date) {
 
 function $(s) { return document.getElementById(s); }
 function html(el, s) { el.innerHTML = (s || "").replace(/</g, '&lt;'); }
+
+window.onload = function() {
+    App.init();
+    $('search').addEventListener('onsubmit', function(){return false;});
+}

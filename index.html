@@ -19,12 +19,13 @@
         <link href="shared/style/headers.css" rel="stylesheet" type="text/css" />
         <link href="style/common.css" rel="stylesheet" type="text/css" />
     </head>
-    <body onload="App.init();" class="loggedin">
+    <body>
         <div id="container" class="cards">
             <div class="card drawer" id="notebooks" data-gutter="50">
                 <h2>Notebooks <b id="button-new-notebook"></b></h2>
                 <b class="card-next"></b>
                 <ul id="notebooks-list"></ul>
+                <button id="button-evernote-login"></button>
             </div>
             <section class="card active" id="main" role="region">
                 <header>
@@ -36,7 +37,7 @@
                     <input type="text" value="" id="edit-notebook-name" name="edit-notebook-name" />
                 </header>
                 <div class="content">
-                    <form method="get" action="" id="search" class="sprited" onsubmit="return false;">
+                    <form method="get" action="" id="search" class="sprited">
                         <input type="text" id="searchNotes" name="searchNotes" />
                     </form>
                     <ul class="notebook-notes"></ul>
