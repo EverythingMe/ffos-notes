@@ -161,6 +161,10 @@ var noteStoreTransport,
 	noteStoreProtocol,
 	noteStore;
 
+var userStoreTransport,
+	userStoreProtocol,
+	userStore;
+
 var currentNote = "test";
 
 var processXHR = function(url, method, callback) {
@@ -254,10 +258,15 @@ var finishAuth = function() {
 	noteStoreTransport = new Thrift.BinaryHttpTransport(decodeURIComponent(noteStoreUrl));
     noteStoreProtocol = new Thrift.BinaryProtocol(noteStoreTransport, false, false);
     noteStore = new NoteStoreClient(noteStoreProtocol, noteStoreProtocol);
+
+    userStoreTransport = new Thrift.BinaryHttpTransport(EVERNOTE_SERVER + '/edam/user');
+    userStoreProtocol = new Thrift.BinaryProtocol(userStoreTransport, false, false);
+    userStore = new UserStoreClient(userStoreProtocol, userStoreProtocol);
 };
 
 window.onload = function() {
 	$('login').addEventListener('click', getTempToken);
+	$('fetchUser').addEventListener('click', fetchUser);
 	$('fetchNotebooks').addEventListener('click', fetchNotebooks);
 	$('fetchNotebook').addEventListener('click', getNotebook);
 	$('fetchNote').addEventListener('click', getNote);
@@ -265,7 +274,7 @@ window.onload = function() {
 	$('getSyncState').addEventListener('click', getSyncState);
 	$('getSyncChunk').addEventListener('click', getSyncChunk);
 
-	document.cookie = 'oauth_token=S%3Ds1%3AU%3D5a3fd%3AE%3D14449f53aad%3AC%3D13cf2440ead%3AP%3D185%3AA%3Disrahack%3AH%3D891197086e3f797afaf6876bb35209a7';
+	document.cookie = 'oauth_token=S%3Ds1%3AU%3D5a3fd%3AE%3D144984cd164%3AC%3D13d409ba566%3AP%3D185%3AA%3Disrahack%3AV%3D2%3AH%3D35b9aff642416ef1be59dceb45837c9c';
 	document.cookie = 'noteStoreUrl=https%3A%2F%2Fsandbox.evernote.com%2Fshard%2Fs1%2Fnotestore';
 	document.cookie = 'shardUrl=https%3A%2F%2Fsandbox.evernote.com%2Fshard%2Fs1%2F';
 	oauth_token = document.cookie.replace(new RegExp("(?:^|.*;\\s*)" + escape('oauth_token').replace(/[\-\.\+\*]/g, "\\$&") + "\\s*\\=\\s*((?:[^;](?!;))*[^;]?).*"), "$1");
@@ -280,6 +289,17 @@ window.onload = function() {
 		$('authResult').innerHTML = JSON.stringify(data, true, 4);
 		finishAuth();
 	}
+}
+function fetchUser() {
+	var callback = {
+		onSuccess: function(user) {
+			$("getUser").innerHTML = JSON.stringify(user, true, 4)+"\n";
+		},
+		onFailure: function(error) {
+			alert("getUser received error: "+error);
+		}
+	};
+	userStore.getUser(decodeURIComponent(oauth_token), callback.onSuccess, callback.onFailure);
 }
 function fetchNotebooks() {
 	var callback = {
@@ -341,7 +361,7 @@ function getNote() {
 			html = enml.HTMLOfENML(note.content,hashMap);
 			// html = note.content;
 			$("notecontent").innerHTML = html;
-			$("getNote").innerHTML = note.content;
+			$("getNote").innerHTML = JSON.stringify(note, true, 4);
 			// $("getNote").innerHTML = JSON.stringify(hashMap, true, 4)+"\n";
 			// $("getNote").innerHTML += "\n\n\n"+JSON.stringify(resMap, true, 4)+"\n";
 		},
@@ -358,6 +378,7 @@ function saveNote() {
 	$("putNote").innerHTML = currentNote.content;
 	var callback = {
 		onSuccess: function(note) {
+			alert('update note OK');
 			$("updateNote").innerHTML += JSON.stringify(note, true, 4)+"\n";
 		},
 		onFailure: function(error) {
@@ -382,10 +403,11 @@ function getSyncChunk() {
 	var callback = {
 		onSuccess: function(chunk) {
 			$("syncChunk").innerHTML = JSON.stringify(chunk, true, 4);
+			console.log(JSON.stringify(chunk.notes));
 		},
 		onFailure: function(error) {
 			alert("getSyncChunk received error: "+error);
 		}
 	};
-	noteStore.getSyncChunk(decodeURIComponent(oauth_token), afterUSN, 10, true, callback.onSuccess, callback.onFailure);
+	noteStore.getSyncChunk(decodeURIComponent(oauth_token), afterUSN, 100, true, callback.onSuccess, callback.onFailure);
 }
