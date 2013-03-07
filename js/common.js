@@ -76,7 +76,7 @@ var App = new function() {
                 "type": "date"
             }
         ],
-        SEARCH_FIELDS = ["text", "title"];
+        SEARCH_FIELDS = ["content", "title"];
     
     this.init = function() {
         DEBUG && Console.init(LOGGER_NAMESPACE);
@@ -156,11 +156,8 @@ var App = new function() {
         elButtonNewNote.addEventListener("click", function() {
             self.newNote();
         });
-        
-        DB.init(initUser);
 
-        Evernote.init();
-        $("button-evernote-login").addEventListener("click", Evernote.login);
+        DB.init(initUser);
     };
     
     function setupCache() {
@@ -169,9 +166,9 @@ var App = new function() {
             window.location.reload();
         }, false);
     }
-    
+
     function initUser(){
-        DB.getUsers({"id": DEFAULT_USER.id}, function onSuccess(users) {
+        DB.getUsers({}, function onSuccess(users) {
             if (users.length === 0) {
                 user = new Models.User(DEFAULT_USER);
                 DB.addUser(user, function onSuccess() {
@@ -181,8 +178,17 @@ var App = new function() {
                 user = users[0];
                 self.getUserNotes();
             }
+            Evernote.init(user);
         });
     }
+
+    this.getUser = function() {
+        return user;
+    };
+
+    this.updateUserData = function(data, c, e) {
+        user.set(data, c, e);
+    };
     
     this.getUserNotes = function() {
         user.getNotebooks(function(notebooks) {
@@ -201,6 +207,7 @@ var App = new function() {
         user.newNotebook({
             "name": name
         }, function(notebook) {
+            self.addQueue('Notebook', notebook);
             NotebookView.show(notebook);
             
             self.newNote(notebook, function(note){
@@ -219,7 +226,8 @@ var App = new function() {
         }
         
         notebook.newNote({
-            "notebookId": notebook.getId()
+            "notebook_id": notebook.getId(),
+            "notebookGuid": notebook.getGuid()
         }, function onSuccess(note){
             self.showNote(note, notebook);
             
@@ -233,6 +241,18 @@ var App = new function() {
 
     this.getNotes = function() {
         return notes;
+    };
+
+    this.addQueue = function addQueue(type, obj) {
+        new Models.Queue({
+            rel : type,
+            rel_id : obj.getId(),
+            rel_content : obj
+        }).set(onAddQueue);
+    };
+
+    this.getQueues = function getQueues(cbSuccess, cbError) {
+        DB.getQueues({}, cbSuccess, cbError);
     };
     
     this.showNote = function showNote(note, notebook) {
@@ -283,6 +303,21 @@ var App = new function() {
         
         cards.goTo(cards.CARDS.MAIN);
     };
+
+    this.refershNotebooksList = function() {
+        NotebooksList.refresh();
+    };
+
+    function onAddQueue(queue) {
+        console.log('onAddQueue');
+        if (user.isValidEvernoteUser()) {
+            if (queue.getRel() == 'Notebook') {
+                Evernote.processNotebookQueue(queue);
+            } else if (queue.getRel() == 'Note') {
+                Evernote.processNoteQueue(queue);
+            }
+        }
+    }
     
     function onCardMove() {
         Notification.hide();
@@ -308,21 +343,24 @@ var App = new function() {
             notebook.set({
                 "name": newName
             }, function onSuccess() {
+                self.addQueue('Notebook', notebook);
                 NotebooksList.refresh();
                 NotebookView.show(notebook);
             });
         }
     }
     
-    function onNotebookDelete(notebook) {
+    function onNotebookDelete(notebookAffected) {
         if (confirm(TEXTS.PROMPT_DELETE_NOTEBOOK)) {
-            notebook.trash(function onSuccess() {
+            notebookAffected.trash(function onSuccess(notebook) {
+                self.addQueue('Notebook', notebook);
                 NotebooksList.refresh();
             });
         }
     }
     
     function onNoteSave(noteAffected) {
+        self.addQueue('Note', noteAffected);
         self.showNotes();
         NotebooksList.refresh();
     }
@@ -333,7 +371,7 @@ var App = new function() {
             return;
         }
         
-        if (noteAffected.getName() == "" && noteAffected.getContent() == "") {
+        if (noteAffected.getName() == "" && noteAffected.getContent(true) == "") {
             noteAffected.remove(function onSuccess(){
                 self.showNotes();
                 NotebooksList.refresh(); 
@@ -346,6 +384,7 @@ var App = new function() {
     }
     
     function onNoteRestore(noteAffected) {
+        self.addQueue('Note', noteAffected);
         self.showTrashedNotes();
         NotebooksList.refresh();
         
@@ -358,6 +397,7 @@ var App = new function() {
     }
     
     function onNoteDelete(noteAffected) {
+        self.addQueue('Note', noteAffected);
         self.showTrashedNotes();
         NotebooksList.refresh();
     }
@@ -374,6 +414,7 @@ var App = new function() {
         note.set({
             "notebook_id": newNotebookId
         }, function onSuccess() {
+            self.addQueue('Note', noteAffected);
             note.getNotebook(function(notebook) {
                 notebook.set({
                     "numberOfNotes": notebook.getNumberOfNotes()+1
@@ -400,7 +441,7 @@ var App = new function() {
     }
     
     function getNoteNameFromContent(content) {
-        return (content || "").split("\n")[0];
+        return (content || "").split(/<br[^>]*>/i)[0];
     }
     
     var NotebooksList = new function() {
@@ -532,7 +573,7 @@ var App = new function() {
             onTitleChange = options.onTitleChange;
             onResourceClick = options.onResourceClick;
             
-            elContent = el.querySelector("textarea");
+            elContent = el.querySelector("#note-content");
             elResources = el.querySelector("#note-resources");
             elTitle = el.querySelector("h1");
             elEditTitle = el.querySelector("input");
@@ -564,13 +605,19 @@ var App = new function() {
         };
         
         this.show = function(note, notebook) {
-            var noteContent = note.getContent(),
+            var noteContent = note.getContent(true).match(/<body[^>]*>([\w\W]*)<\/body>/),
                 noteName = note.getName();
+
+            if (noteContent && noteContent.length > 1) {
+                noteContent = noteContent[1];
+            } else {
+                noteContent = note.getContent(true);
+            }
 
             noteContentBeforeEdit = noteContent;
             noteNameBeforeEdit = noteName;
             
-            elContent.value = noteContent;
+            elContent.innerHTML = noteContent;
             self.setTitle(noteName);
             self.loadResources(note);
             
@@ -609,7 +656,7 @@ var App = new function() {
         this.getCurrentNotebook = function() { return currentNotebook; };
         
         this.setTitle = function(title) {
-            html(elTitle, title || getNoteNameFromContent(elContent.value) || TEXTS.NEW_NOTE);
+            html(elTitle, title || getNoteNameFromContent(elContent.innerHTML) || TEXTS.NEW_NOTE);
             elEditTitle.value = title || "";
         };
         
@@ -630,13 +677,14 @@ var App = new function() {
         };
         
         this.save = function() {
-            var content = elContent.value,
-                name = elEditTitle.value;
+            var content = elContent.innerHTML,
+                name = elEditTitle.value || elTitle.innerHTML;
+
             
             currentNote.set({
                 "title": name,
-                "text": content
-            }, function onSuccess(){
+                "content": content
+            }, function onSuccess(note){
                 onSave && onSave(currentNote);
             }, function onError(){
                 Console.error("Error saving note!");
@@ -682,13 +730,13 @@ var App = new function() {
         };
         
         this.changed = function() {
-            return noteContentBeforeEdit !== elContent.value || noteNameBeforeEdit !== elEditTitle.value;
+            return noteContentBeforeEdit !== elContent.innerHTML || noteNameBeforeEdit !== elEditTitle.value;
         };
         
         function onContentKeyUp(e) {
-            if (elContent.value) {
+            if (elContent.innerHTML) {
                 elSave.classList.add(CLASS_WHEN_VISIBLE);
-                !elEditTitle.value && (html(elTitle, getNoteNameFromContent(elContent.value)));
+                !elEditTitle.value && (html(elTitle, getNoteNameFromContent(elContent.innerHTML)));
             } else {
                 elSave.classList.remove(CLASS_WHEN_VISIBLE);
                 self.setTitle();
@@ -704,7 +752,7 @@ var App = new function() {
         }
         
         function onContentBlur(e) {
-            if (elContent.value) {
+            if (elContent.innerHTML) {
                 el.classList.remove(EMPTY_CONTENT_CLASS);
             } else {
                 el.classList.add(EMPTY_CONTENT_CLASS);
@@ -1031,6 +1079,7 @@ var App = new function() {
                     "name": newName
                 }, function cbSuccess() {
                     self.setTitle(newName);
+                    App.addQueue('Notebook', currentNotebook);
                     onChange && onChange();
                 }, function cbError() {
                     
@@ -1048,10 +1097,19 @@ var App = new function() {
         
         function getNoteElement(note) {
             var el = document.createElement("li");
+            
+            var content = note.getContent(true).match(/<body[^>]*>([\w\W]*)<\/body>/);
+            if (content && content.length > 1) {
+                content = content[1];
+            } else {
+                content = note.getContent(true);
+            }
+            var title = (note.getName() || getNoteNameFromContent(content));
+            
             el.className = "note";
             el.dataset.noteId = note.getId();
-            el.innerHTML = '<div><span class="text">' + (note.getName() || getNoteNameFromContent(note.getContent())).replace(/</g, '&lt;') + '</span> <span class="time">' + prettyDate(note.getDateUpdated()) + '</span></div>' +
-                            '<div class="title">' + note.getContent().replace(/</g, '&lt;') + '</div>';/* +
+            el.innerHTML = '<div><span class="text">' + title + '</span> <span class="time">' + prettyDate(note.getDateUpdated()) + '</span></div>' +
+                            '<div class="title">' + getNoteNameFromContent(content) + '</div>';/* +
                             (note.getImages().length > 0? '<div class="image" style="background-image: url(' + note.getImages()[0].src + ')"></div>' : '');*/
             
             if (note.isTrashed()) {
@@ -1065,8 +1123,8 @@ var App = new function() {
             if (!sortby) return notes;
             
             notes.sort(function(a, b){
-                var valA = a['data_' + sortby] || (sortby == "title" && a['data_text']) || '',
-                    valB = b['data_' + sortby] || (sortby == "title" && b['data_text']) || '';
+                var valA = a['data_' + sortby] || (sortby == "title" && a['data_content']) || '',
+                    valB = b['data_' + sortby] || (sortby == "title" && b['data_content']) || '';
                 
                 return valA > valB? (isDesc?-1:1)*1 : valA < valB? (isDesc?1:-1)*1 : 0;
             });

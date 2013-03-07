@@ -7,6 +7,8 @@ var Models = new function() {
         this.data_name = "";
         this.data_date_created = "";
         this.data_metadata = {};
+        this.data_last_update_count = 0;
+        this.data_last_sync_time = 0;
         
         function init(options) {
             updateObject(self, options);
@@ -42,9 +44,23 @@ var Models = new function() {
         this.getNotes = function(filters, cbSuccess, cbError) {
             DB.getNotes(filters, cbSuccess, cbError);
         };
+
+        this.isValidEvernoteUser = function() {
+            return (self.data_oauth_token && self.data_note_store_url && self.data_expires > new Date().getTime());
+        };
         
         this.getId = function() { return self.data_id; };
         this.getDateCreated = function() { return self.data_date_created; };
+        this.getOauthToken = function() { return self.data_oauth_token; };
+        this.getNoteStoreUrl = function() { return self.data_note_store_url; };
+        this.getShardUrl = function() { return self.data_shard_url; };
+        this.getExpires = function() { return self.data_expires; };
+        this.getLastUpdateCount = function() { return self.data_last_update_count; };
+        this.getLastSyncTime = function() { return self.data_last_sync_time; };
+
+        this.export = function() {
+            return exportModel(self);
+        };
         
         function validate() {
             if (!self.data_id) {
@@ -167,14 +183,17 @@ var Models = new function() {
         };
         
         this.getId = function() { return self.data_id; };
+        this.getGuid = function() { return self.data_guid; };
         this.getName = function() { return self.data_name; };
         this.getUserId = function() { return self.data_user_id; };
         this.getTrashed = function() { return self.data_trashed; };
         this.getNumberOfNotes = function() { return self.data_numberOfNotes; };
         this.getNumberOfTrashedNotes = function() { return self.data_numberOfTrashedNotes; };
 
-        init(initOptions);
-        
+        this.export = function() {
+            return exportModel(self);
+        };
+
         function validate() {
             if (!self.data_id){
                 self.data_id = "nb_" + new Date().getTime() + "_" + Math.round(Math.random()*100000);
@@ -189,6 +208,8 @@ var Models = new function() {
             (self.data_numberOfNotes < 0) && (self.data_numberOfNotes = 0);
             (self.data_numberOfTrashedNotes < 0) && (self.data_numberOfTrashedNotes = 0);
         }
+
+        init(initOptions);
     };
 
     this.Note = function(initOptions) {
@@ -196,7 +217,7 @@ var Models = new function() {
         
         this.data_id = "";
         this.data_title = "";
-        this.data_text = "";
+        this.data_content = "";
         this.data_country = "";
         this.data_city = "";
         this.data_date_created = null;
@@ -205,12 +226,18 @@ var Models = new function() {
         this.data_notebook_id = null;
         this.data_metadata = {};
         
+        this.html_content = "";
+
         function init(options) {
             updateObject(self, options);
             validate();
         }
         
         this.set = function(options, cbSuccess, cbError) {
+            if (options.content) {
+                options.content = Evernote.html2enml(options.content);
+                self.html_content = "";
+            }
             updateObject(self, options);
             validate();
             
@@ -269,15 +296,28 @@ var Models = new function() {
             });
         };
         
+        this.getContent = function(html) {
+            if (html) {
+                if (self.html_content.length == 0) {
+                    self.html_content = Evernote.enml2html(self);
+                }
+                return self.html_content;
+            }
+            return self.data_content;
+        };
+
         this.getId = function() { return self.data_id; };
+        this.getGuid = function() { return self.data_guid; };
         this.getName = function() { return self.data_title; };
-        this.getContent = function() { return self.data_text; };
         this.getDateCreated = function() { return self.data_date_created; };
         this.getDateUpdated = function() { return self.data_date_updated; };
         this.getNotebookId = function() { return self.data_notebook_id; };
+        this.getNotebookGuid = function() { return self.data_notebookGuid; };
         this.isTrashed = function() { return self.data_trashed; };
-        
-        init(initOptions);
+
+        this.export = function() {
+            return exportModel(self);
+        };
         
         function validate() {
             if (!self.data_id) {
@@ -292,6 +332,65 @@ var Models = new function() {
                 self.data_date_updated = new Date().getTime();
             }
         }
+        
+        init(initOptions);
+    };
+
+    this.Queue = function(initOptions) {
+        var self = this;
+        
+        this.data_id = "";
+        this.data_rel = "";
+        this.data_rel_id = "";
+        this.data_rel_content = "";
+        
+        function init(options) {
+            updateObject(self, options);
+            validate();
+
+            return self;
+        }
+        
+        this.set = function(cbSuccess, cbError) {
+            DB.getQueues({
+                rel_id: self.getRelId(),
+                rel: self.getRel()
+            }, function(results){
+                if (results.length == 0) {
+                    DB.addQueue(self, cbSuccess, cbError);
+                } else {
+                    self.setId(results[0].getId());
+                    DB.updateQueue(self, cbSuccess, cbError);
+                }
+            });
+            
+            return self;
+        };
+
+        this.remove = function(cbSuccess, cbError) {
+            DB.removeQueue(self, cbSuccess, cbError);
+
+            return self;
+        };
+        
+        this.getId = function() { return self.data_id; };
+        this.getRel = function() { return self.data_rel; };
+        this.getRelId = function() { return self.data_rel_id; };
+        this.getRelContent = function() { return self.data_rel_content; };
+        
+        this.setId = function(id) { self.data_id = id; };
+
+        this.export = function() {
+            return exportModel(self);
+        };
+        
+        function validate() {
+            if (!self.data_id) {
+                self.data_id = "queue_" + new Date().getTime() + "_" + Math.round(Math.random()*100000);
+            }
+        }
+        
+        init(initOptions);
     };
 
     this.NoteResource = function(initOptions) {
@@ -308,12 +407,6 @@ var Models = new function() {
         function init(options) {
             updateObject(self, options);
             validate();
-        }
-        
-        function validate() {
-            if (!self.data_id) {
-                self.data_id = "nr_" + new Date().getTime() + "_" + Math.round(Math.random()*100000);
-            }
         }
         
         this.set = function(options, cbSuccess, cbError) {
@@ -335,6 +428,16 @@ var Models = new function() {
         this.getSize = function() { return self.data_size; };
         this.getType = function() { return self.data_type; };
         this.getNoteId = function() { return self.data_noteId; };
+
+        this.export = function() {
+            return exportModel(self);
+        };
+        
+        function validate() {
+            if (!self.data_id) {
+                self.data_id = "nr_" + new Date().getTime() + "_" + Math.round(Math.random()*100000);
+            }
+        }
         
         init(initOptions);
     };
@@ -347,6 +450,18 @@ var ResourceTypes = {
 function updateObject(obj, options) {
     if (!options) return;
     for (var k in options) {
-        obj['data_' + k] = options[k];
+        key = 'data_' + k;
+        if (k.indexOf('data_') !== -1) {
+            key = k;
+        }
+        obj[key] = options[k];
     }
+}
+
+function exportModel(obj) {
+    var expObj = {};
+    for (var k in obj) {
+        expObj[k.replace('data_', '')] = obj[k];
+    }
+    return expObj;
 }

@@ -1,5 +1,5 @@
 CACHE MANIFEST
-# ver 1.29
+# ver 1.30
 
 index.html
 images/icon.png
@@ -17,6 +17,7 @@ images/iconaction_new_30x30.png
 images/toolbar_bg.png
 js/Cards.js
 js/common.js
+js/evernote.js
 js/Console.js
 js/db.js
 js/dialog.js

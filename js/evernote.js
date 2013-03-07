@@ -13,78 +13,60 @@ var Evernote = new function() {
         ACCESS_TOKEN_URL = EVERNOTE_SERVER+"/oauth",
         AUTHORIZATION_URL = EVERNOTE_SERVER+"/OAuth.action",
 
-        IGNORE_TAGS = [
-            'applet',
-            'base',
-            'basefont',
-            'bgsound',
-            'blink',
-            'body',
-            'button',
-            'dir',
-            'embed',
-            'fieldset',
-            'form',
-            'frame',
-            'frameset',
-            'head',
-            'html',
-            'iframe',
-            'ilayer',
-            'isindex',
-            'label',
-            'layer,',
-            'legend',
-            'link',
-            'marquee',
-            'menu',
-            'meta',
-            'noframes',
-            'noscript',
-            'object',
-            'optgroup',
-            'option',
-            'param',
-            'plaintext',
-            'script',
-            'select',
-            'style',
-            'textarea',
-            'xml'
-        ],
-        IGNORE_ATTRS = [
-            'id',
-            'class',
-            'onclick',
-            'ondblclick',
-            'on*',
-            'accesskey',
-            'data',
-            'dynsrc',
-            'tabindex',
-            'src'
-        ];
+        tmp_oauth_token,
+        oauth_verifier,
+        oauth_token,
+        note_store_url,
+        shard_url,
+        expires,
+        last_update_count,
+        last_sync_time,
 
-    this.tmp_oauth_token = null;
-    this.oauth_verifier = null;
-    this.oauth_token = null;
-    this.noteStoreUrl = null;
-    this.shardUrl = null;
+        syncChunks = [],
+        syncElements = 0,
+        syncMaxEntries = 100,
 
-    this.noteStoreTransport = null;
-    this.noteStoreProtocol = null;
-    this.noteStore = null;
-    this.note = null;
+        queueList = {
+            notebooks : [],
+            notes : []
+        },
 
-    this.init = function() {
+        noteStoreTransport,
+        noteStoreProtocol,
+        noteStore;
 
+    this.init = function(user) {
+        if (user.isValidEvernoteUser()) {
+            markLoggedin();
+
+            oauth_token = user.getOauthToken();
+            note_store_url = user.getNoteStoreUrl();
+            shard_url = user.getShardUrl();
+            expires = user.getExpires();
+            last_update_count = user.getLastUpdateCount();
+            last_sync_time = user.getLastSyncTime();
+
+            initNoteStore();
+
+            if (last_sync_time == 0) {
+                self.startFullSync();
+            } else {
+                self.getSyncState();
+            }
+        } else {
+            $("button-evernote-login").style.display = "block";
+            $("button-evernote-login").addEventListener("click", Evernote.login);
+        }
     };
 
     this.processXHR = function(url, method, callback) {
+        console.log('processXHR url: '+url);
         var xhr = new XMLHttpRequest({mozSystem: true});
         xhr.open(method, url, true);
         xhr.onreadystatechange = function() {
             if (xhr.readyState === 4) {
+                console.log('processXHR response: '+JSON.stringify(xhr));
+                console.log('processXHR responseText: '+xhr.responseText);
                 if (typeof callback == 'function') {
                     callback(xhr);
                 }
@@ -113,17 +95,6 @@ var Evernote = new function() {
         return url + '?' + OAuth.formEncode(message.parameters);
     };
 
-    this.getAuthorization = function() {
-        authWindow = window.open(AUTHORIZATION_URL+'?oauth_token='+self.tmp_oauth_token);
-        window.addEventListener('message', function onMessage(evt) {
-            authWindow.close();
-            self.tmp_oauth_token = evt.data.oauth_token;
-            self.oauth_verifier = evt.data.oauth_verifier;
-
-            self.getAccessToken();
-        });
-    };
-
     this.login = function() {
         var postUrl = self.buildOauthURL(REQUEST_TOKEN_URL, 'POST', {
             oauth_callback : NOTES_APP_CALLBACK_URL,
@@ -137,17 +108,28 @@ var Evernote = new function() {
                     var data = response[i].split('=');
                     responseData[data[0]] = data[1];
                 }
-                self.tmp_oauth_token = responseData['oauth_token'];
+                tmp_oauth_token = responseData['oauth_token'];
 
                 self.getAuthorization();
             }
         });
     };
 
+    this.getAuthorization = function() {
+        authWindow = window.open(AUTHORIZATION_URL+'?oauth_token='+tmp_oauth_token);
+        window.addEventListener('message', function onMessage(evt) {
+            authWindow.close();
+            tmp_oauth_token = evt.data.oauth_token;
+            oauth_verifier = evt.data.oauth_verifier;
+
+            self.getAccessToken();
+        });
+    };
+
     this.getAccessToken = function() {
         var postUrl = self.buildOauthURL(REQUEST_TOKEN_URL, 'POST', {
-            oauth_token : self.tmp_oauth_token, 
-            oauth_verifier : self.oauth_verifier, 
+            oauth_token : tmp_oauth_token, 
+            oauth_verifier : oauth_verifier, 
             oauth_signature_method : OAUTH_SIGNATURE_METHOD
         });
         self.processXHR(postUrl, 'POST', function(xhr){
@@ -157,23 +139,468 @@ var Evernote = new function() {
                 var data = response[i].split('=');
                 responseData[data[0]] = data[1];
             }
-            self.oauth_token = responseData['oauth_token'];
-            self.noteStoreUrl = responseData['edam_noteStoreUrl'];
-            self.shardUrl = responseData['edam_webApiUrlPrefix'];
-
-            var expires = new Date(responseData['edam_expires']).toString();
-            document.cookie = 'oauth_token='+self.oauth_token+';expires='+expires+';';
-            document.cookie = 'noteStoreUrl='+self.noteStoreUrl+';expires='+expires+';';
-            document.cookie = 'shardUrl='+self.shardUrl+';expires='+expires+';';
-            self.finishAuth();
+            oauth_token = decodeURIComponent(responseData['oauth_token']);
+            note_store_url = decodeURIComponent(responseData['edam_noteStoreUrl']);
+            shard_url = decodeURIComponent(responseData['edam_webApiUrlPrefix']);
+            expires = responseData['edam_expires'];
+            
+            self.finishAuthenticationProcess();
         });
     };
 
-    self.finishAuth = function() {
-        document.body.classList.add('loggedin');
+    this.finishAuthenticationProcess = function() {
+        markLoggedin();
 
-        self.noteStoreTransport = new Thrift.BinaryHttpTransport(decodeURIComponent(self.noteStoreUrl));
-        self.noteStoreProtocol = new Thrift.BinaryProtocol(self.noteStoreTransport, false, false);
-        self.noteStore = new NoteStoreClient(self.noteStoreProtocol, self.noteStoreProtocol);
+        var userStoreTransport = new Thrift.BinaryHttpTransport(EVERNOTE_SERVER + '/edam/user');
+        var userStoreProtocol = new Thrift.BinaryProtocol(userStoreTransport, false, false);
+        var userStore = new UserStoreClient(userStoreProtocol, userStoreProtocol);
+
+        initNoteStore();
+
+        last_update_count = App.getUser().getLastUpdateCount();
+        last_sync_time = App.getUser().getLastSyncTime();
+
+        var callback = self.getSyncState;
+        if (last_sync_time == 0) {
+            callback = self.startFullSync;
+        }
+
+        userStore.getUser(oauth_token, function(user){
+            delete user.id;
+            user.oauth_token = oauth_token;
+            user.note_store_url = note_store_url;
+            user.shard_url = shard_url;
+            user.expires = expires;
+            user.last_update_count = last_update_count;
+            user.last_sync_time = last_sync_time;
+            
+            App.updateUserData(user, callback);
+        }, self.onError);
     };
+
+    this.getSyncState = function() {
+        noteStore.getSyncState(oauth_token, function(state) {
+            if (state.fullSyncBefore > last_sync_time) {
+                self.startFullSync();
+            } else if(state.updateCount == last_update_count) {
+                self.sendChanges();
+            } else {
+                self.startIncrementalSync();
+            }
+        }, self.onError);
+    };
+
+    this.getSyncChunk = function(usn, max, full, c) {
+        noteStore.getSyncChunk(oauth_token, usn, max, full, c, self.onError);
+    };
+
+    this.startIncrementalSync = function() {
+        self.getSyncChunk(last_update_count, syncMaxEntries, false, self.processSyncChunk);
+    };
+    this.startFullSync = function() {
+        self.getSyncChunk(0, syncMaxEntries, true, self.processSyncChunk);
+    };
+    this.processSyncChunk = function(chunk) {
+        syncChunks.push(chunk);
+        if (chunk.chunkHighUSN < chunk.updateCount) {
+            self.getSyncChunk(chunk.chunkHighUSN, syncMaxEntries, true, self.processSyncChunk);
+        } else {
+            for(var i in syncChunks) {
+                if (syncChunks[i].notebooks) {
+                    syncElements += syncChunks[i].notebooks.length;
+                }
+                if (syncChunks[i].notes) {
+                    syncElements += syncChunks[i].notes.length;
+                }
+                last_update_count = syncChunks[i].updateCount;
+                last_sync_time = syncChunks[i].currentTime;
+                if (syncChunks[i].notebooks && syncChunks[i].notebooks.length > 0) {
+                    for (var j in syncChunks[i].notebooks) {
+                        DB.getNotebooks({guid: syncChunks[i].notebooks[j].guid}, function(results){
+                            if (results.length == 0) {
+                                App.getUser().newNotebook(syncChunks[i].notebooks[j], self.processNotebookNotes);
+                            } else {
+                                results[0].set(syncChunks[i].notebooks[j], self.processNotebookNotes);
+                            }
+                        });
+                    }
+                } else {
+                    self.processNotesChunk();
+                }
+            }
+        }
+    };
+    this.processNotesChunk = function(notebookGuid) {
+        for(var i in syncChunks) {
+            for (var j in syncChunks[i].notes) {
+                if (!notebookGuid) {
+                    self.getNote(syncChunks[i].notes[j].guid, function(note){
+                        DB.getNotes({guid: syncChunks[i].notes[j].guid}, function(results){
+                            if (results.length == 0) {
+                                notebook.newNote(note);
+                            } else {
+                                results[0].set(note);
+                            }
+                            self.finishSync();
+                        });
+                    });
+                } else {
+                    if (syncChunks[i].notes[j].notebookGuid == notebookGuid) {
+                        self.getNote(syncChunks[i].notes[j].guid, function(note){
+                            DB.getNotes({guid: syncChunks[i].notes[j].guid}, function(results){
+                                if (results.length == 0) {
+                                    notebook.newNote(note);
+                                } else {
+                                    results[0].set(note);
+                                }
+                                self.finishSync();
+                            });
+                        });
+                    }
+                }
+            }
+        }
+    };
+    this.processNotebookNotes = function(notebook) {
+        syncElements = syncElements-1;
+        self.processNotesChunk(notebook.getGuid());
+    };
+    this.finishSync = function() {
+        syncElements = syncElements-1;
+        if (syncElements == 0) {
+            App.updateUserData({
+                last_update_count : last_update_count,
+                last_sync_time : last_sync_time
+            });
+            App.refershNotebooksList();
+            self.sendChanges();
+        }
+    };
+
+    this.sendChanges = function() {
+        App.getQueues(function(queues){
+            if (queues.length > 0) {
+                for(var i in queues) {
+                    if (queues[i].getRel() == 'Notebook') {
+                        queueList.notebooks.push(queues[i]);
+                    } else if (queues[i].getRel() == 'Note') {
+                        queueList.notes.push(queues[i]);
+                    }
+                }
+                self.processQueueList();
+            }
+        });
+    };
+
+    this.processQueueList = function() {
+        var queue = null;
+        if (queueList.notebooks.length > 0) {
+            queue = queueList.notebooks.pop();
+            self.processNotebookQueue(queue);
+        } else if (queueList.notes.length > 0) {
+            queue = queueList.notes.pop();
+            self.processNoteQueue(queue);
+        } else {
+            self.finishProcessQueueList();
+        }
+    };
+    this.processNotebookQueue = function(queue) {
+        var notebook = new Models.Notebook(queue.getRelContent());
+        if (notebook.getGuid()) {
+            if (notebook.getTrashed()) {
+                self.deleteNotebook(notebook, function process() {
+                    queue.remove();
+                    self.processQueueList();
+                });
+            } else {
+                self.updateNotebook(notebook, function process() {
+                    queue.remove();
+                    self.processQueueList();
+                });
+            }
+        } else {
+            self.newNotebook(notebook, function process() {
+                queue.remove();
+                self.processQueueList();
+            });
+        }
+    };
+    this.processNoteQueue = function(queue) {
+        var note = new Models.Note(queue.getRelContent());
+        if (note.getGuid()) {
+            if (note.getTrashed()) {
+                self.deleteNote(note, function process() {
+                    queue.remove();
+                    self.processQueueList();
+                });
+            } else {
+                self.updateNote(note, function process() {
+                    queue.remove();
+                    self.processQueueList();
+                });
+            }
+        } else {
+            self.newNote(note, function process() {
+                queue.remove();
+                self.processQueueList();
+            });
+        }
+    };
+
+    this.finishProcessQueueList = function() {
+        console.log('finishProcessQueueList');
+    };
+
+    this.newNotebook = function(notebook, cbSuccess, cbError) {
+        noteStore.createNotebook(oauth_token, new Notebook(notebook.export()), function(remoteNotebook) {
+            notebook.set(remoteNotebook, cbSuccess);
+            if (App.getUser().getLastUpdateCount() < remoteNotebook.updateSequenceNum) {
+                App.updateUserData({
+                    last_update_count : remoteNotebook.updateSequenceNum
+                });
+            }
+        }, cbError || cbSuccess);
+    };
+    this.updateNotebook = function(notebook, cbSuccess, cbError) {
+        noteStore.updateNotebook(oauth_token, new Notebook(notebook.export()), function(remoteNotebook) {
+            notebook.set(remoteNotebook, cbSuccess);
+            if (App.getUser().getLastUpdateCount() < remoteNotebook.updateSequenceNum) {
+                App.updateUserData({
+                    last_update_count : remoteNotebook.updateSequenceNum
+                });
+            }
+        }, cbError || cbSuccess);
+    };
+    this.deleteNotebook = function(notebook, cbSuccess, cbError) {
+        console.log('this.deleteNotebook: ' + JSON.stringify(notebook, null, 4));
+        cbSuccess();
+    };
+
+    this.newNote = function(note, cbSuccess, cbError) {
+        DB.getNotebooks({"id": note.getNotebookId()}, function(notebook) {
+            if (notebook.length > 0) {
+                notebook = notebook[0];
+                note = note.set({notebookGuid : notebook.getGuid()});
+                noteStore.createNote(oauth_token, new Note(note.export()), function(remoteNote) {
+                    self.getNote(remoteNote.guid, function(remoteNote) {
+                        note.set(remoteNote);
+                        if (App.getUser().getLastUpdateCount() < remoteNote.updateSequenceNum) {
+                            App.updateUserData({
+                                last_update_count : remoteNote.updateSequenceNum
+                            });
+                        }
+                        cbSuccess();
+                    }, cbError || cbSuccess);
+                }, function(error) {
+                    console.log('noteStore.createNote error: ' + JSON.stringify(error, null, 4));
+                });
+            } else {
+                cbSuccess();
+            }
+        }, cbError || cbSuccess);
+    };
+    this.updateNote = function(note, cbSuccess, cbError) {
+        noteStore.updateNote(oauth_token, new Note(note.export()), function(remoteNote) {
+            self.getNote(remoteNote.guid, function(remoteNote) {
+                note.set(remoteNote);
+                if (App.getUser().getLastUpdateCount() < remoteNote.updateSequenceNum) {
+                    App.updateUserData({
+                        last_update_count : remoteNote.updateSequenceNum
+                    });
+                }
+                cbSuccess();
+            }, cbError || cbSuccess);
+        }, function(error) {
+            console.log('noteStore.updateNote error: ' + JSON.stringify(error, null, 4));
+        });
+    };
+    this.deleteNote = function(note, cbSuccess, cbError) {
+        console.log('this.deleteNote: ' + JSON.stringify(note, null, 4));
+        cbSuccess();
+    };
+    this.getNote = function(guid, cbSuccess, cbError) {
+        cbError = cbError || self.onError;
+        noteStore.getNote(oauth_token, guid, true, true, true, true, cbSuccess, cbError);
+    };
+
+    this.enml2html = function(note) {
+        var hashMap = {};
+        for (var r in note.resources) {
+            var key = "",
+                value = "",
+                bytes = [];
+            for (var i in note.resources[r].data.bodyHash) {
+                key += String("0123456789abcdef".substr((note.resources[r].data.bodyHash[i] >> 4) & 0x0F,1)) + "0123456789abcdef".substr(note.resources[r].data.bodyHash[i] & 0x0F,1);
+            }
+            for (var i in note.resources[r].data.body) {
+                value += String("0123456789abcdef".substr((note.resources[r].data.body[i] >> 4) & 0x0F,1)) + "0123456789abcdef".substr(note.resources[r].data.body[i] & 0x0F,1);
+            }
+            for(var i=0; i< value.length-1; i+=2){
+                bytes.push(parseInt(value.substr(i, 2), 16));
+            }
+            hashMap[key] = window.btoa(String.fromCharCode.apply(String, bytes));
+        }
+        return enml.HTMLOfENML(note.getContent(),hashMap);
+    };
+
+    this.html2enml = function(html) {
+        html = '<html><head></head><body>'+html+'</body></html>';
+        ENMLofHTML.parse(html);
+        return ENMLofHTML.getOutput();
+    };
+
+    this.onError = function() {};
+
+    function markLoggedin() {
+        document.body.classList.add('loggedin');
+        $("button-evernote-login").style.display = "none";
+    }
+
+    function initNoteStore() {
+        if (!noteStore) {
+            noteStoreTransport = new Thrift.BinaryHttpTransport(note_store_url);
+            noteStoreProtocol = new Thrift.BinaryProtocol(noteStoreTransport, false, false);
+            noteStore = new NoteStoreClient(noteStoreProtocol, noteStoreProtocol);
+        }
+    }
+};
+
+var ENMLofHTML = new function(){
+    var self = this;
+
+    this.output = '';
+    this.input = '';
+    this.dom = null;
+
+    this.parser = new DOMParser();
+
+    this.writer = new XMLWriter;
+
+    this.IGNORE_TAGS = [
+        'applet',
+        'base',
+        'basefont',
+        'bgsound',
+        'blink',
+        'body',
+        'button',
+        'dir',
+        'embed',
+        'fieldset',
+        'form',
+        'frame',
+        'frameset',
+        'head',
+        'html',
+        'iframe',
+        'ilayer',
+        'isindex',
+        'label',
+        'layer,',
+        'legend',
+        'link',
+        'marquee',
+        'menu',
+        'meta',
+        'noframes',
+        'noscript',
+        'object',
+        'optgroup',
+        'option',
+        'param',
+        'plaintext',
+        'script',
+        'select',
+        'style',
+        'textarea',
+        'xml'
+    ];
+    this.IGNORE_ATTRS = [
+        'id',
+        'class',
+        'onclick',
+        'ondblclick',
+        'on*',
+        'accesskey',
+        'data',
+        'dynsrc',
+        'tabindex',
+        'src'
+    ];
+
+    this.parse = function(text) {
+        self.input = text;
+        self.dom = self.parser.parseFromString(text, 'text/html');
+        if (self.dom.childNodes.length > 0) {
+            self.writer.startDocument('1.0', 'UTF-8', false);
+            self.writer.write('<!DOCTYPE en-note SYSTEM "http://xml.evernote.com/pub/enml2.dtd">');
+            self.writer.write('<en-note>');
+            for (var i=0; i < self.dom.childNodes.length; i++) {
+                self.parseChild(self.dom.childNodes[i]);
+            }
+            self.writer.write('</en-note>');
+        }
+    },
+
+    this.parseChild = function(child) {
+        if (child.nodeType == Node.ELEMENT_NODE) {
+            var tag = child.tagName.toLowerCase();
+            if (tag == 'br') {
+                self.writer.write('<' + tag);
+                if (child.attributes.length > 0) {
+                    self.parseAttributes(child.attributes);
+                }
+                self.writer.write('/>');
+            } else if (tag == 'img') {
+                self.writer.write('<en-media');
+                if (child.attributes.length > 0) {
+                    self.parseAttributes(child.attributes);
+                }
+                self.writer.write('>');
+                self.writer.write('</en-media>');
+            } else if (tag == 'input') {
+                if (child.getAttribute('type') == 'checkbox') {
+                    self.writer.write('<en-todo');
+                    if (child.getAttribute('checked')) {
+                        self.writer.write(' checked="' + child.getAttribute('checked') + '"');
+                    }
+                    self.writer.write('>');
+                    self.writer.write('</en-todo>');
+                }
+            } else {
+                if (self.IGNORE_TAGS.indexOf(tag) == -1) {
+                    self.writer.write('<' + tag);
+                    if (child.attributes.length > 0) {
+                        self.parseAttributes(child.attributes);
+                    }
+                    self.writer.write('>');
+                }
+                if (child.childNodes.length > 0) {
+                    for (var i=0; i < child.childNodes.length; i++) {
+                        self.parseChild(child.childNodes[i]);
+                    }
+                }
+                if (self.IGNORE_TAGS.indexOf(tag) == -1) {
+                    self.writer.write('</' + tag + '>');
+                }
+            }
+        }
+
+        if (child.nodeType == Node.TEXT_NODE) {
+            self.writer.write(child.nodeValue);
+        }
+    },
+
+    this.parseAttributes = function(attributes) {
+        for (var i=0; i < attributes.length; i++) {
+            if (self.IGNORE_ATTRS.indexOf(attributes[i].nodeName) == -1) {
+                self.writer.write(' ' + attributes[i].nodeName + '="' + attributes[i].nodeValue + '"');
+            }
+        }
+    },
+
+    this.getOutput = function() {
+        self.output = self.writer.toString();
+        return self.output;
+    }
 };

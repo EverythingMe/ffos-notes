@@ -1,6 +1,6 @@
 var DB = new function() {
     var self = this,
-        
+
         indexedDB = window.indexedDB || window.mozIndexedDB || window.webkitIndexedDB || window.msIndexedDB,
         IDBTransaction = window.IDBTransaction || window.webkitIDBTransaction || window.mozIDBTransaction,
         
@@ -23,6 +23,10 @@ var DB = new function() {
             },
             "users": {
                 "objectName": "User"
+            },
+            "queues": {
+                "objectName": "Queue",
+                "indexes": ["rel_id"]
             }
         };
         
@@ -41,7 +45,6 @@ var DB = new function() {
             })(table, obj);
         }
     };
-    
     
     this.get = function() { return db; };
     
@@ -79,7 +82,7 @@ var DB = new function() {
         };
         transaction.onfailure = self.onerror;
         
-        var request = transaction.objectStore(table).put(serialize(obj));
+        var request = transaction.objectStore(table).put(normalizeObj(serialize(obj)));
         request.onsuccess = function(e) {};
         request.onfailure = function(e) {};
         
@@ -111,7 +114,7 @@ var DB = new function() {
                 c && c(ret);
             }
         };
-        req.onfailure = self.onerror;
+        req.onfailure = e || self.onerror;
     };
     
     this.add = function(table, obj, c, e) {
@@ -123,7 +126,7 @@ var DB = new function() {
         transaction.onerror = self.onerror;
         
         var store = transaction.objectStore(table),
-            request = store.add(serialize(obj));
+            request = store.add(normalizeObj(serialize(obj)));
         request.onsuccess = function(e) {
         };
         request.onerror = function(e) {
@@ -131,6 +134,10 @@ var DB = new function() {
         
         Console.log("DB: add to -" + table + "-: ", obj);
     };
+
+    function normalizeObj(obj) {
+        return JSON.parse(JSON.stringify(obj));
+    }
     
     // convert Object to storable data 
     function serialize(obj) {
