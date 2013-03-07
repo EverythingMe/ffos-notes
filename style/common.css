@@ -664,6 +664,7 @@ body.loading .card:not(.active) {
 }
 
 #button-evernote-login {
+    display: none;
     width: 254px;
     height: 24px;
     background: url("../images/evernote-login.png") no-repeat scroll 0 0 transparent;
@@ -684,7 +685,4 @@ body.loading .card:not(.active) {
 }
 .loggedin section[role="region"] > header:first-child menu[type="toolbar"] a:last-child, section[role="region"] > header:first-child menu[type="toolbar"] button:last-child {
     background-image: url(../images/separator_green.png);
-}
-.loggedin #button-evernote-login {
-    display: none;
 }
