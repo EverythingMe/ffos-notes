@@ -339,7 +339,7 @@ var Evernote = new function() {
         var notebook = new Models.Notebook(queue.getRelContent());
         console.log('[FxOS-Notes] this.processNotebookQueue: '+JSON.stringify(notebook));
         if (notebook.getGuid()) {
-            if (notebook.getTrashed()) {
+            if (notebook.isTrashed()) {
                 self.deleteNotebook(notebook, function() {
                     queue.remove();
                     self.processQueueList();
@@ -360,8 +360,10 @@ var Evernote = new function() {
     this.processNoteQueue = function(queue) {
         var note = new Models.Note(queue.getRelContent());
         console.log('[FxOS-Notes] this.processNoteQueue: '+JSON.stringify(note));
+        console.log('[FxOS-Notes] this.processNoteQueue note.getGuid(): '+note.getGuid());
+        console.log('[FxOS-Notes] this.processNoteQueue note.isTrashed(): '+note.isTrashed());
         if (note.getGuid()) {
-            if (note.getTrashed()) {
+            if (note.isTrashed()) {
                 self.deleteNote(note, function() {
                     queue.remove();
                     self.processQueueList();
@@ -387,7 +389,7 @@ var Evernote = new function() {
     };
 
     this.newNotebook = function(notebook, cbSuccess, cbError) {
-        console.log('this.newNotebook');
+        console.log('[FxOS-Notes] this.newNotebook');
         noteStore.createNotebook(oauth_token, new Notebook(notebook.export()), function(remoteNotebook) {
             notebook.set(remoteNotebook, cbSuccess);
             if (App.getUser().getLastUpdateCount() < remoteNotebook.updateSequenceNum) {
@@ -398,7 +400,7 @@ var Evernote = new function() {
         }, cbError || cbSuccess);
     };
     this.updateNotebook = function(notebook, cbSuccess, cbError) {
-        console.log('this.updateNotebook');
+        console.log('[FxOS-Notes] this.updateNotebook');
         noteStore.updateNotebook(oauth_token, new Notebook(notebook.export()), function(remoteNotebook) {
             notebook.set(remoteNotebook, cbSuccess);
             if (App.getUser().getLastUpdateCount() < remoteNotebook.updateSequenceNum) {
@@ -414,7 +416,7 @@ var Evernote = new function() {
     };
 
     this.newNote = function(note, cbSuccess, cbError) {
-        console.log('this.newNote');
+        console.log('[FxOS-Notes] this.newNote');
         DB.getNotebooks({"id": note.getNotebookId()}, function(notebook) {
             if (notebook.length > 0) {
                 notebook = notebook[0];
@@ -427,7 +429,7 @@ var Evernote = new function() {
                                 last_update_count : remoteNote.updateSequenceNum
                             });
                         }
-                        cbSuccess();
+                        cbSuccess(remoteNote);
                     }, cbError || cbSuccess);
                 }, cbError || cbSuccess);
             } else {
@@ -436,7 +438,7 @@ var Evernote = new function() {
         }, cbError || cbSuccess);
     };
     this.updateNote = function(note, cbSuccess, cbError) {
-        console.log('this.updateNote');
+        console.log('[FxOS-Notes] this.updateNote');
         noteStore.updateNote(oauth_token, new Note(note.export()), function(remoteNote) {
             self.getNote(remoteNote.guid, function(remoteNote) {
                 note.set(remoteNote);
@@ -445,7 +447,7 @@ var Evernote = new function() {
                         last_update_count : remoteNote.updateSequenceNum
                     });
                 }
-                cbSuccess();
+                cbSuccess(remoteNote);
             }, cbError || cbSuccess);
         }, cbError || cbSuccess);
     };

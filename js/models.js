@@ -193,9 +193,9 @@ var Models = new function() {
         this.getGuid = function() { return self.data_guid; };
         this.getName = function() { return self.data_name; };
         this.getUserId = function() { return self.data_user_id; };
-        this.getTrashed = function() { return self.data_trashed; };
         this.getNumberOfNotes = function() { return self.data_numberOfNotes; };
         this.getNumberOfTrashedNotes = function() { return self.data_numberOfTrashedNotes; };
+        this.isTrashed = function() { return self.data_trashed; };
 
         this.export = function() {
             return exportModel(self);
