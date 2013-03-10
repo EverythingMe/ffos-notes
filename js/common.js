@@ -134,6 +134,7 @@ var App = new function() {
                 user = users[0];
                 self.getUserNotes();
             }
+
             Evernote.init(user);
         });
     }
@@ -329,9 +330,11 @@ var App = new function() {
     this.refershNotebooksList = function() {
         NotebooksList.refresh();
     };
+    this.refershNotebookView = function() {
+        NotebookView.show();
+    };
 
     function onAddQueue(queue) {
-        console.log('onAddQueue');
         if (user.isValidEvernoteUser()) {
             if (queue.getRel() == 'Notebook') {
                 Evernote.processNotebookQueue(queue);
@@ -430,6 +433,8 @@ var App = new function() {
         note.getNotebook(function(notebook) {
             notebook.set({
                 "numberOfNotes": notebook.getNumberOfNotes()-1
+            }, function(){
+                self.addQueue('Notebook', notebook);
             });
         });
         
@@ -440,6 +445,8 @@ var App = new function() {
             note.getNotebook(function(notebook) {
                 notebook.set({
                     "numberOfNotes": notebook.getNumberOfNotes()+1
+                }, function(){
+                    self.addQueue('Notebook', notebook);
                 });
                 
                 NotebooksList.refresh();
@@ -1028,7 +1035,6 @@ var App = new function() {
             
             currentNotebook = notebook;
             currentFilters = filters;
-            
             self.showNotes(currentSort, currentIsDesc, filters);
             
             if (!bDontScroll) {

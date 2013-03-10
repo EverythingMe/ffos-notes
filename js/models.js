@@ -9,6 +9,10 @@ var Models = new function() {
         this.data_metadata = {};
         this.data_last_update_count = 0;
         this.data_last_sync_time = 0;
+        this.data_oauth_token = "";
+        this.data_note_store_url = "";
+        this.data_shard_url = "";
+        this.data_expires = 0;
         
         function init(options) {
             updateObject(self, options);
@@ -46,7 +50,7 @@ var Models = new function() {
         };
 
         this.isValidEvernoteUser = function() {
-            return (self.data_oauth_token && self.data_note_store_url && self.data_expires > new Date().getTime());
+            return (self.getOauthToken() && self.getNoteStoreUrl() && self.getExpires() > new Date().getTime());
         };
         
         this.getId = function() { return self.data_id; };
@@ -178,7 +182,10 @@ var Models = new function() {
                     }
                 }
                 
-                self.set(options, cbSuccess, cbError);
+                self.set(options, function(notebook){
+                    App.addQueue('Notebook', notebook);
+                    cbSuccess(notebook);
+                }, cbError);
             }, cbError);
         };
         
@@ -450,9 +457,10 @@ var ResourceTypes = {
 function updateObject(obj, options) {
     if (!options) return;
     for (var k in options) {
-        key = 'data_' + k;
         if (k.indexOf('data_') !== -1) {
             key = k;
+        } else {
+            key = 'data_' + k;
         }
         obj[key] = options[k];
     }
@@ -460,8 +468,8 @@ function updateObject(obj, options) {
 
 function exportModel(obj) {
     var expObj = {};
-    for (var k in obj) {
-        expObj[k.replace('data_', '')] = obj[k];
+    for (var key in obj) {
+        expObj[key.replace('data_', '')] = obj[key];
     }
     return expObj;
 }
