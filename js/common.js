@@ -484,7 +484,7 @@ var App = new function() {
             for (var i=0; i<notebooks.length; i++) {
                 numberOfTrashedNotes += notebooks[i].getNumberOfTrashedNotes();
                 
-                if (!notebooks[i].getTrashed()) {
+                if (!notebooks[i].isTrashed()) {
                     createNotebookEntry(notebooks[i]);
                 }
             }
