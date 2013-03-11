@@ -439,7 +439,11 @@ var Evernote = new function() {
     };
     this.updateNote = function(note, cbSuccess, cbError) {
         console.log('[FxOS-Notes] this.updateNote');
-        noteStore.updateNote(oauth_token, new Note(note.export()), function(remoteNote) {
+        noteStore.updateNote(oauth_token, new Note({
+            guid : note.getGuid(),
+            title : note.getName(),
+            content : note.getContent()
+        }), function(remoteNote) {
             self.getNote(remoteNote.guid, function(remoteNote) {
                 note.set(remoteNote);
                 if (App.getUser().getLastUpdateCount() < remoteNote.updateSequenceNum) {

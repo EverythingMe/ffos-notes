@@ -183,8 +183,8 @@ var Models = new function() {
                 }
                 
                 self.set(options, function(notebook){
-                    App.addQueue('Notebook', notebook);
                     cbSuccess(notebook);
+                    App.addQueue('Notebook', notebook);
                 }, cbError);
             }, cbError);
         };
