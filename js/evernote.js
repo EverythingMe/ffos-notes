@@ -487,7 +487,7 @@ var Evernote = new function() {
 
     this.html2enml = function(html) {
         html = '<html><head></head><body>'+html+'</body></html>';
-        return ENMLofHTML.parse(html).getOutput();
+        return new ENMLofHTML().parse(html).getOutput();
     };
 
     this.onError = function() {};
@@ -506,7 +506,7 @@ var Evernote = new function() {
     }
 };
 
-var ENMLofHTML = new function(){
+var ENMLofHTML = function(){
     var self = this;
 
     this.output = '';

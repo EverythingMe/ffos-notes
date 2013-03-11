@@ -688,7 +688,7 @@ var App = new function() {
                 "title": name,
                 "content": content
             }, function onSuccess(note){
-                onSave && onSave(currentNote);
+                onSave && onSave(note);
             }, function onError(){
                 Console.error("Error saving note!");
             });
