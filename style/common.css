@@ -513,9 +513,9 @@ section[role="region"] > header:first-child menu[type="toolbar"] {
 }
 .empty:before {
     background-position: 0 -40px;
-    width: 150px;
+    width: 160px;
     height: 183px;
-    margin: -92px 0 0 -75px;
+    margin: -92px 0 0 -80px;
 }
 .notebook-fake .empty:before {
     background-position: 0 -240px;
