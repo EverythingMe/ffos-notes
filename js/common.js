@@ -230,12 +230,12 @@ var App = new function() {
         user.newNotebook({
             "name": name
         }, function(notebook) {
-            self.addQueue('Notebook', notebook);
-            NotebookView.show(notebook);
-            
+            NotebookView.show(notebook);            
             self.newNote(notebook, function(note){
                 cb && cb(notebook, note);
             });
+            
+            self.addQueue('Notebook', notebook);
         });
     };
 
@@ -368,9 +368,9 @@ var App = new function() {
             notebook.set({
                 "name": newName
             }, function onSuccess() {
-                self.addQueue('Notebook', notebook);
                 NotebooksList.refresh();
                 NotebookView.show(notebook);
+                self.addQueue('Notebook', notebook);
             });
         }
     }
@@ -378,16 +378,16 @@ var App = new function() {
     function onNotebookDelete(notebookAffected) {
         if (confirm(TEXTS.PROMPT_DELETE_NOTEBOOK)) {
             notebookAffected.trash(function onSuccess(notebook) {
-                self.addQueue('Notebook', notebook);
                 NotebooksList.refresh();
+                self.addQueue('Notebook', notebook);
             });
         }
     }
     
     function onNoteSave(noteAffected) {
-        self.addQueue('Note', noteAffected);
         self.showNotes();
         NotebooksList.refresh();
+        self.addQueue('Note', noteAffected);
     }
     
     function onNoteCancel(noteAffected, isChanged) {
@@ -409,22 +409,21 @@ var App = new function() {
     }
     
     function onNoteRestore(noteAffected) {
-        self.addQueue('Note', noteAffected);
         self.showTrashedNotes();
         NotebooksList.refresh();
         
         noteAffected.getNotebook(function onSuccess(notebook){
             var txt = TEXTS.NOTE_RESTORED.replace("{{notebook}}", notebook.getName());
             Notification.show(txt);
-        }, function onError() {
-            
-        });
+        }, function onError() {});
+        
+        self.addQueue('Note', noteAffected);
     }
     
     function onNoteDelete(noteAffected) {
-        self.addQueue('Note', noteAffected);
         self.showTrashedNotes();
         NotebooksList.refresh();
+        self.addQueue('Note', noteAffected);
     }
     
     function onNoteChangeNotebook(newNotebookId) {
@@ -441,7 +440,6 @@ var App = new function() {
         note.set({
             "notebook_id": newNotebookId
         }, function onSuccess() {
-            self.addQueue('Note', noteAffected);
             note.getNotebook(function(notebook) {
                 notebook.set({
                     "numberOfNotes": notebook.getNumberOfNotes()+1
@@ -453,9 +451,8 @@ var App = new function() {
                 NoteInfoView.selectNotebook(newNotebookId);
                 NotebookView.show(notebook);
             });
-        }, function onError() {
-            
-        });
+            self.addQueue('Note', noteAffected);
+        }, function onError() {});
     }
     
     function onResourceClick(resource) {
@@ -1111,11 +1108,9 @@ var App = new function() {
                     "name": newName
                 }, function cbSuccess() {
                     self.setTitle(newName);
-                    App.addQueue('Notebook', currentNotebook);
                     onChange && onChange();
-                }, function cbError() {
-                    
-                });
+                    App.addQueue('Notebook', currentNotebook);
+                }, function cbError() {});
             }
         };
 
