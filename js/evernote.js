@@ -231,13 +231,15 @@ var Evernote = new function() {
                 last_sync_time = syncChunks[i].currentTime;
                 if (syncChunks[i].notebooks && syncChunks[i].notebooks.length > 0) {
                     for (var j in syncChunks[i].notebooks) {
-                        DB.getNotebooks({guid: syncChunks[i].notebooks[j].guid}, function(results){
-                            console.log('[FxOS-Notes] DB.getNotebooks: '+JSON.stringify(results));
-                            if (results.length == 0) {
-                                App.getUser().newNotebook(syncChunks[i].notebooks[j], self.processNotebookNotes);
-                            } else {
-                                results[0].set(syncChunks[i].notebooks[j], self.processNotebookNotes);
-                            }
+                        self.getNotebook(syncChunks[i].notebooks[j].guid, function(notebook){
+                            DB.getNotebooks({guid: notebook.guid}, function(results){
+                                console.log('[FxOS-Notes] DB.getNotebooks: '+JSON.stringify(results));
+                                if (results.length == 0) {
+                                    App.getUser().newNotebook(notebook, self.processNotebookNotes);
+                                } else {
+                                    results[0].set(notebook, self.processNotebookNotes);
+                                }
+                            });
                         });
                     }
                 } else {
@@ -463,10 +465,14 @@ var Evernote = new function() {
         cbError = cbError || self.onError;
         noteStore.getNote(oauth_token, guid, true, true, true, true, cbSuccess, cbError);
     };
+    this.getNotebook = function(guid, cbSuccess, cbError) {
+        cbError = cbError || self.onError;
+        noteStore.getNotebook(oauth_token, guid, cbSuccess, cbError);
+    };
 
     this.enml2html = function(note) {
         var hashMap = {};
-        var noteResources = note.getResources() || [];
+        var noteResources = note.data_resources || [];
         for (var r in noteResources) {
             var key = "",
                 value = "",
