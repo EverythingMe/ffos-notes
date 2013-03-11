@@ -640,8 +640,8 @@ var App = new function() {
             } else {
                 noteContent = note.getContent(true);
             }
-
-            noteContentBeforeEdit = noteContent;
+            
+            noteContentBeforeEdit = noteContent.replace('/>','>');
             noteNameBeforeEdit = noteName;
             
             elContent.innerHTML = noteContent;
@@ -707,7 +707,6 @@ var App = new function() {
             var content = elContent.innerHTML,
                 name = elEditTitle.value || elTitle.innerHTML;
 
-            
             currentNote.set({
                 "title": name,
                 "content": content
