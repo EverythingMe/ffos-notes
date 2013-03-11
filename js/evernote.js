@@ -466,15 +466,16 @@ var Evernote = new function() {
 
     this.enml2html = function(note) {
         var hashMap = {};
-        for (var r in note.resources) {
+        var noteResources = note.getResources() || [];
+        for (var r in noteResources) {
             var key = "",
                 value = "",
                 bytes = [];
-            for (var i in note.resources[r].data.bodyHash) {
-                key += String("0123456789abcdef".substr((note.resources[r].data.bodyHash[i] >> 4) & 0x0F,1)) + "0123456789abcdef".substr(note.resources[r].data.bodyHash[i] & 0x0F,1);
+            for (var i in noteResources[r].data.bodyHash) {
+                key += String("0123456789abcdef".substr((noteResources[r].data.bodyHash[i] >> 4) & 0x0F,1)) + "0123456789abcdef".substr(noteResources[r].data.bodyHash[i] & 0x0F,1);
             }
-            for (var i in note.resources[r].data.body) {
-                value += String("0123456789abcdef".substr((note.resources[r].data.body[i] >> 4) & 0x0F,1)) + "0123456789abcdef".substr(note.resources[r].data.body[i] & 0x0F,1);
+            for (var i in noteResources[r].data.body) {
+                value += String("0123456789abcdef".substr((noteResources[r].data.body[i] >> 4) & 0x0F,1)) + "0123456789abcdef".substr(noteResources[r].data.body[i] & 0x0F,1);
             }
             for(var i=0; i< value.length-1; i+=2){
                 bytes.push(parseInt(value.substr(i, 2), 16));
@@ -486,8 +487,7 @@ var Evernote = new function() {
 
     this.html2enml = function(html) {
         html = '<html><head></head><body>'+html+'</body></html>';
-        ENMLofHTML.parse(html);
-        return ENMLofHTML.getOutput();
+        return ENMLofHTML.parse(html).getOutput();
     };
 
     this.onError = function() {};
@@ -581,6 +581,8 @@ var ENMLofHTML = new function(){
             }
             self.writer.write('</en-note>');
         }
+
+        return self;
     },
 
     this.parseChild = function(child) {

@@ -242,9 +242,13 @@ var Models = new function() {
         
         this.set = function(options, cbSuccess, cbError) {
             if (options.content) {
-                options.content = Evernote.html2enml(options.content);
+                console.log('indexOf: '+options.content.indexOf('<!DOCTYPE en-note SYSTEM "http://xml.evernote.com/pub/enml2.dtd">'));
+                if (options.content.indexOf('<!DOCTYPE en-note SYSTEM "http://xml.evernote.com/pub/enml2.dtd">') == -1) {
+                    options.content = Evernote.html2enml(options.content);
+                }
                 self.html_content = "";
             }
+            
             updateObject(self, options);
             validate();
             
@@ -291,7 +295,8 @@ var Models = new function() {
         
         
         this.getResources = function(cbSuccess, cbError) {
-            DB.getNoteResources({"noteId": self.getId()}, cbSuccess, cbError);
+            return self.data_resources;
+            // DB.getNoteResources({"noteId": self.getId()}, cbSuccess, cbError);
         };
         
         this.newResource = function(options, cbSuccess, cbError) {
