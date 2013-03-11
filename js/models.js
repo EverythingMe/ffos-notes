@@ -295,8 +295,8 @@ var Models = new function() {
         
         
         this.getResources = function(cbSuccess, cbError) {
-            return self.data_resources;
-            // DB.getNoteResources({"noteId": self.getId()}, cbSuccess, cbError);
+            // return self.data_resources;
+            DB.getNoteResources({"noteId": self.getId()}, cbSuccess, cbError);
         };
         
         this.newResource = function(options, cbSuccess, cbError) {
