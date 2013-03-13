@@ -105,23 +105,27 @@ var Evernote = new function() {
     };
 
     this.login = function() {
-        var postUrl = self.buildOauthURL(REQUEST_TOKEN_URL, 'POST', {
-            oauth_callback : NOTES_APP_CALLBACK_URL,
-            oauth_signature_method : OAUTH_SIGNATURE_METHOD
-        });
-        self.processXHR(postUrl, 'POST', function(xhr){
-            if (xhr.responseText) {
-                var responseData = {};
-                var response = xhr.responseText.split('&');
-                for (var i in response) {
-                    var data = response[i].split('=');
-                    responseData[data[0]] = data[1];
-                }
-                tmp_oauth_token = responseData['oauth_token'];
+        if (navigator.online) {
+            var postUrl = self.buildOauthURL(REQUEST_TOKEN_URL, 'POST', {
+                oauth_callback : NOTES_APP_CALLBACK_URL,
+                oauth_signature_method : OAUTH_SIGNATURE_METHOD
+            });
+            self.processXHR(postUrl, 'POST', function(xhr){
+                if (xhr.responseText) {
+                    var responseData = {};
+                    var response = xhr.responseText.split('&');
+                    for (var i in response) {
+                        var data = response[i].split('=');
+                        responseData[data[0]] = data[1];
+                    }
+                    tmp_oauth_token = responseData['oauth_token'];
 
-                self.getAuthorization();
-            }
-        });
+                    self.getAuthorization();
+                }
+            });
+        } else {
+            alert('You must be connected to the internet in order to connect with Evernote.');
+        }
     };
 
     this.getAuthorization = function() {
@@ -353,11 +357,13 @@ var Evernote = new function() {
                     self.processQueueList();
                 });
             }
-        } else {
+        } else if (!notebook.isTrashed()) {
             self.newNotebook(notebook, function() {
                 queue.remove();
                 self.processQueueList();
             });
+        } else {
+            self.processQueueList();
         }
     };
     this.processNoteQueue = function(queue) {
@@ -377,11 +383,13 @@ var Evernote = new function() {
                     self.processQueueList();
                 });
             }
-        } else {
+        } else if (!note.isTrashed()) {
             self.newNote(note, function() {
                 queue.remove();
                 self.processQueueList();
             });
+        } else {
+            self.processQueueList();
         }
     };
 
@@ -489,7 +497,7 @@ var Evernote = new function() {
             }
             hashMap[key] = window.btoa(String.fromCharCode.apply(String, bytes));
         }
-        return enml.HTMLOfENML(note.getContent(),hashMap);
+        return enml.HTMLOfENML(note.getContent(false),hashMap);
     };
 
     this.html2enml = function(html) {
