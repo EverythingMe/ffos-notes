@@ -232,6 +232,7 @@ var Models = new function() {
         this.data_trashed = false;
         this.data_notebook_id = null;
         this.data_metadata = {};
+        this.data_resources = [];
         
         this.html_content = "";
 
