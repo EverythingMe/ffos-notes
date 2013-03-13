@@ -249,6 +249,7 @@ var Evernote = new function() {
         }
     };
     this.processNotesChunk = function(notebook) {
+        console.log('[FxOS-Notes] this.processNotesChunk (notebook): '+JSON.stringify(notebook));
         for(var i in syncChunks) {
             for (var j in syncChunks[i].notes) {
                 if (!notebook) {
