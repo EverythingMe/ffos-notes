@@ -93,7 +93,7 @@ var Cards = function(_options) {
                 el.style.cssText += "; width: " + drawerWidth + "px;";
             }
 
-            _this.CARDS[el.id.toUpperCase().replace(/-/g, "_")] = el.id;
+            _this.CARDS[el.id.toUpperCase().replace(/-/g, "_")] = i;
 
             addDefaultButtons(el, i);
         }

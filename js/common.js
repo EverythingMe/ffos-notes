@@ -145,14 +145,28 @@ var App = new function() {
             "onRename": onNotebookRename,
             "onDelete": onNotebookDelete
         });
-        
+
+        Settings.init({
+            "elCancel": $("button-settings-cancel"),
+            "elUsername": $("#settings .username"),
+            "elAccount": $("#settings .account"),
+            "elButtons": $("#settings .buttons"),
+            "elUploadLeft": $("#settings .upload-left"),
+            "elDaysLeft": $("#settings .days-left"),
+            "onCancel": function() {
+                cards.goTo(cards.CARDS.NOTEBOOKS);
+            }
+        });
         
         elButtonNewNote = $("button-notebook-add");
         
         $("button-new-notebook").addEventListener("click", self.promptNewNotebook);
-        
         $("button-notebook-search").addEventListener("click", SearchHandler.open);
-        
+        $("button-evernote-login").addEventListener("click", Evernote.login);
+        $("button-settings").addEventListener("click", function() {
+            cards.goTo(cards.CARDS.SETTINGS);
+        });
+       
         elButtonNewNote.addEventListener("click", function() {
             self.newNote();
         });
@@ -179,7 +193,11 @@ var App = new function() {
                 self.getUserNotes();
             }
 
-            Evernote.init(user);
+            if (user.isValidEvernoteUser) {
+                Evernote.init(user);
+            } else {
+                $("button-evernote-login").style.display = "block";
+            }
         });
     }
 
@@ -322,8 +340,12 @@ var App = new function() {
         }
     }
     
-    function onCardMove() {
+    function onCardMove(cardIndex) {
         Notification.hide();
+
+        if (cards && (cardIndex === cards.CARDS.SETTINGS)) {
+            Settings.update();
+        }
     }
     
     function onNotebookClick(type, notebook) {
@@ -1389,7 +1411,58 @@ var App = new function() {
                 }
             }
         }
-    }
+    };
+
+    var Settings = new function() {
+        var self = this,
+            elUsername, elAccount, elButtons, elUploadLeft, elDaysLeft;
+
+        this.init = function(options) {
+            elUsername = options.elUsername;
+            elAccount = options.elAccount;
+            elButtons = options.elButtons;
+            elUploadLeft = options.elUploadLeft;
+            elDaysLeft = options.elDaysLeft;
+            options.elCancel.addEventListener("click", options.onCancel);
+        };
+
+        this.update = function() {
+            var userData = user.export();
+
+            // username
+            $elUsername.innerHTML = userData.username || "";
+            
+            // account type
+            var type = userData.privilege == PrivilegeLevel.PREMIUM ? "Premium" : userData.privilege == PrivilegeLevel.NORMAL ? "Free" : "";
+            elAccount.innerHTML = type;
+            elButtons.classList.add(type.toLowerCase());
+
+            // upload left
+            elUploadLeft.innerHTML = getUploadLeft(userData.accounting.uploadLimit);
+            elDaysLeft.innerHTML = getDaysLeft(userData.accounting.uploadLimitEnd);
+        };
+
+        function getUploadLeft(num) {
+            if (!num) { return "" }
+
+            var steps = {'B': 1000000000, 'M': 1000000, 'K': 1000};
+
+            for (var k in steps) {
+                if (num >= steps[k]) {
+                    return Math.round(num/steps[k]*10)/10 + k;
+                }
+            }
+
+            return num;
+        }
+
+        function getDaysLeft(uploadLimitEnd) {
+            var diff = uploadLimitEnd - new Date().getTime();
+            diff = diff / (1000 * 60 * 60 * 24);
+            diff = parseInt(diff, 10);
+            return  diff;
+        }
+    };
 
     var Sorter = new function() {
         var self = this,

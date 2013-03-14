@@ -37,34 +37,29 @@ var Evernote = new function() {
 
     this.init = function(user) {
         console.log('[FxOS-Notes] Evernote.init()');
-        console.log('[FxOS-Notes] isValidEvernoteUser: '+user.isValidEvernoteUser());
-        if (user.isValidEvernoteUser()) {
-            markLoggedin();
+        
+        markLoggedin();
 
-            oauth_token = user.getOauthToken();
-            note_store_url = user.getNoteStoreUrl();
-            shard_url = user.getShardUrl();
-            expires = user.getExpires();
-            last_update_count = user.getLastUpdateCount();
-            last_sync_time = user.getLastSyncTime();
+        oauth_token = user.getOauthToken();
+        note_store_url = user.getNoteStoreUrl();
+        shard_url = user.getShardUrl();
+        expires = user.getExpires();
+        last_update_count = user.getLastUpdateCount();
+        last_sync_time = user.getLastSyncTime();
 
-            console.log('[FxOS-Notes] oauth_token: '+oauth_token);
-            console.log('[FxOS-Notes] note_store_url: '+note_store_url);
-            console.log('[FxOS-Notes] shard_url: '+shard_url);
-            console.log('[FxOS-Notes] expires: '+expires);
-            console.log('[FxOS-Notes] last_update_count: '+last_update_count);
-            console.log('[FxOS-Notes] last_sync_time: '+last_sync_time);
+        console.log('[FxOS-Notes] oauth_token: '+oauth_token);
+        console.log('[FxOS-Notes] note_store_url: '+note_store_url);
+        console.log('[FxOS-Notes] shard_url: '+shard_url);
+        console.log('[FxOS-Notes] expires: '+expires);
+        console.log('[FxOS-Notes] last_update_count: '+last_update_count);
+        console.log('[FxOS-Notes] last_sync_time: '+last_sync_time);
 
-            initNoteStore();
+        initNoteStore();
 
-            if (last_sync_time == 0) {
-                self.startFullSync();
-            } else {
-                self.getSyncState();
-            }
+        if (last_sync_time == 0) {
+            self.startFullSync();
         } else {
-            $("button-evernote-login").style.display = "block";
-            $("button-evernote-login").addEventListener("click", Evernote.login);
+            self.getSyncState();
         }
     };
 
