@@ -88,7 +88,6 @@ var Models = new function() {
         this.data_date_created = "";
         this.data_date_updated = "";
         this.data_metadata = {};
-        
         this.data_trashed = false;
         this.data_numberOfNotes = 0;
         this.data_numberOfTrashedNotes = 0;
@@ -150,7 +149,7 @@ var Models = new function() {
                 return;
             }
             
-            DB.updateMultiple("notes", {"notebook_id": self.getId()}, {"trashed": true}, function(){
+            DB.updateMultiple("notes", {"notebook_id": self.getId()}, {"trashed": true, "active": false}, function(){
                 self.updateNotesCount(cbSuccess, cbError, {"trashed": true});
             }, cbError);
         };
@@ -182,10 +181,7 @@ var Models = new function() {
                     }
                 }
                 
-                self.set(options, function(notebook){
-                    cbSuccess(notebook);
-                    App.addQueue('Notebook', notebook);
-                }, cbError);
+                self.set(options, cbSuccess, cbError);
             }, cbError);
         };
         
@@ -220,7 +216,8 @@ var Models = new function() {
     };
 
     this.Note = function(initOptions) {
-        var self = this;
+        var self = this,
+            html_content = "";
         
         this.data_id = "";
         this.data_title = "";
@@ -230,11 +227,10 @@ var Models = new function() {
         this.data_date_created = null;
         this.data_date_updated = null;
         this.data_trashed = false;
+        this.data_active = true;
         this.data_notebook_id = null;
         this.data_metadata = {};
         this.data_resources = [];
-        
-        this.html_content = "";
 
         function init(options) {
             updateObject(self, options);
@@ -247,7 +243,7 @@ var Models = new function() {
                 if (options.content.indexOf('<!DOCTYPE en-note SYSTEM "http://xml.evernote.com/pub/enml2.dtd">') == -1) {
                     options.content = Evernote.html2enml(options.content);
                 }
-                self.html_content = "";
+                html_content = "";
             }
             
             updateObject(self, options);
@@ -263,7 +259,10 @@ var Models = new function() {
         this.trash = function(cbSuccess, cbError) {
             if (self.data_trashed) return;
             
-            self.set({"trashed": true}, function onSuccess() {
+            self.set({
+                "trashed": true,
+                "active": false
+            }, function onSuccess() {
                 self.updateNotebookNotesCount(cbSuccess, cbError);
             }, cbError);
         };
@@ -271,7 +270,10 @@ var Models = new function() {
         this.restore = function(cbSuccess, cbError) {
             if (!self.data_trashed) return;
             
-            self.set({"trashed": false}, function onSuccess() {
+            self.set({
+                "trashed": false,
+                "active": true
+            }, function onSuccess() {
                 self.updateNotebookNotesCount(cbSuccess, cbError, {"trashed": false});
             }, cbError);
         };
@@ -311,10 +313,10 @@ var Models = new function() {
         
         this.getContent = function(html) {
             if (html) {
-                if (self.html_content.length == 0) {
-                    self.html_content = Evernote.enml2html(self);
+                if (html_content.length == 0) {
+                    html_content = Evernote.enml2html(self);
                 }
-                return self.html_content;
+                return html_content;
             }
             return self.data_content;
         };
@@ -327,6 +329,7 @@ var Models = new function() {
         this.getNotebookId = function() { return self.data_notebook_id; };
         this.getNotebookGuid = function() { return self.data_notebookGuid; };
         this.isTrashed = function() { return self.data_trashed; };
+        this.isActive = function() { return self.data_active; };
 
         this.export = function() {
             return exportModel(self);

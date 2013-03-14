@@ -247,7 +247,7 @@ var App = new function() {
     this.addQueue = function addQueue(type, obj) {
         new Models.Queue({
             rel : type,
-            rel_id : obj.getId(),
+            rel_id : obj.data_id || obj.id,
             rel_content : obj
         }).set(onAddQueue);
     };
@@ -401,7 +401,11 @@ var App = new function() {
     function onNoteDelete(noteAffected) {
         self.showTrashedNotes();
         NotebooksList.refresh();
-        self.addQueue('Note', noteAffected);
+        self.addQueue('Note', {
+            id : noteAffected.getId(),
+            guid : noteAffected.getGuid(),
+            expunge : true
+        });
     }
     
     function onNoteChangeNotebook(newNotebookId) {
@@ -410,8 +414,6 @@ var App = new function() {
         note.getNotebook(function(notebook) {
             notebook.set({
                 "numberOfNotes": notebook.getNumberOfNotes()-1
-            }, function(){
-                self.addQueue('Notebook', notebook);
             });
         });
         
@@ -421,8 +423,6 @@ var App = new function() {
             note.getNotebook(function(notebook) {
                 notebook.set({
                     "numberOfNotes": notebook.getNumberOfNotes()+1
-                }, function(){
-                    self.addQueue('Notebook', notebook);
                 });
                 
                 NotebooksList.refresh();
@@ -1282,6 +1282,7 @@ var App = new function() {
             if (confirm(TEXTS.CONFIRM_TRASH_NOTE)) {
                 NoteView.getCurrentNote().trash(function onSuccess() {
                     onAfterAction && onAfterAction("delete", true);
+                    App.addQueue('Note', NoteView.getCurrentNote());
                 }, function onError() {
                     
                 });
