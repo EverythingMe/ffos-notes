@@ -105,10 +105,10 @@ var Evernote = new function() {
     };
 
     this.login = function() {
-        // if (!navigator.online) {
-        //     alert('You must be connected to the internet in order to connect with Evernote.');
-        //     return false;
-        // }
+        if (!navigator.online) {
+            alert('You must be connected to the internet in order to connect with Evernote.');
+            return false;
+        }
         var postUrl = self.buildOauthURL(REQUEST_TOKEN_URL, 'POST', {
             oauth_callback : NOTES_APP_CALLBACK_URL,
             oauth_signature_method : OAUTH_SIGNATURE_METHOD

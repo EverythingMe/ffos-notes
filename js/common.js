@@ -150,14 +150,10 @@ var App = new function() {
                 self.getUserNotes();
             }
 
-<<<<<<< HEAD
-            Evernote.init(user);
-=======
-            if (user.isValidEvernoteUser) {
+            if (user.isValidEvernoteUser()) {
                 Evernote.init(user);
                 Settings.onLogin(user);
             }
->>>>>>> Added drawer footer
         });
     }
 
@@ -1451,9 +1447,6 @@ var App = new function() {
                 }
             }
         }
-<<<<<<< HEAD
-    }
-=======
     };
 
     var Settings = new function() {
@@ -1511,7 +1504,6 @@ var App = new function() {
             return  diff;
         }
     };
->>>>>>> Added drawer footer
 
     var Sorter = new function() {
         var self = this,
