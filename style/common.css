@@ -14,6 +14,12 @@ body {
     margin: 0 auto;
     background: #fff;
 }
+progress.pack-activity {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 1000;
+}
 
 section[role="region"] > header:first-child input[type="text"] {
     position: absolute;
@@ -651,6 +657,15 @@ body:not(.loggedin) .drawer footer {
     font-weight: 500;
     font-size: 1.4rem;
     line-height: 2rem;
+}
+.drawer footer progress {
+    float: left;
+    position: relative;
+    top: -0.4rem;
+    margin-right: 1.6rem;
+}
+body:not(.syncing) progress[role="sync"] {
+    display: none;
 }
 
 *[data-type=list] li {

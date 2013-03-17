@@ -330,6 +330,13 @@ var App = new function() {
         NotebookView.show();
     };
 
+    this.startSync = function() {
+        document.body.classList.add('syncing');
+    };
+    this.stopSync = function() {
+        document.body.classList.remove('syncing');
+    };
+
     function onAddQueue(queue) {
         if (user.isValidEvernoteUser()) {
             if (queue.getRel() == 'Notebook') {
@@ -1438,9 +1445,11 @@ var App = new function() {
             var userData = user.export();
             
             // account type
-            var type = userData.privilege == PrivilegeLevel.PREMIUM ? "Premium" : userData.privilege == PrivilegeLevel.NORMAL ? "Free" : "";
-            elAccount.innerHTML = type;
-            elButtons.classList.add(type.toLowerCase());
+            var type = userData.privilege == PrivilegeLevel.PREMIUM ? "Premium" : (userData.privilege == PrivilegeLevel.NORMAL ? "Free" : "");
+            if (type && typeof type === "string") {
+                elAccount.innerHTML = type;
+                elButtons.classList.add(type.toLowerCase());
+            }
 
             // upload left
             elUploadLeft.innerHTML = getUploadLeft(userData.accounting.uploadLimit);

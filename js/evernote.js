@@ -204,6 +204,7 @@ var Evernote = new function() {
     };
 
     this.getSyncChunk = function(usn, max, full, c) {
+        App.startSync();
         noteStore.getSyncChunk(oauth_token, usn, max, full, c, self.onError);
     };
 
@@ -316,6 +317,7 @@ var Evernote = new function() {
         self.processNotesChunk(notebook);
     };
     this.finishSync = function() {
+        App.stopSync();
         syncElements = syncElements-1;
         if (syncElements <= 0) {
             for(var i in syncChunks) {
@@ -363,6 +365,7 @@ var Evernote = new function() {
     };
 
     this.processQueueList = function() {
+        App.startSync();
         var queue = null;
         console.log('[FxOS-Notes] this.processQueueList');
         console.log('[FxOS-Notes] this.processQueueList queueList.notebooks.length: '+queueList.notebooks.length);
@@ -435,6 +438,7 @@ var Evernote = new function() {
     };
 
     this.finishProcessQueueList = function() {
+        App.stopSync();
         console.log('[FxOS-Notes] this.finishProcessQueueList');
         App.refershNotebooksList();
         App.refershNotebookView();
