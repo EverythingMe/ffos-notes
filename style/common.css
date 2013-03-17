@@ -331,7 +331,7 @@ section[role="region"] > header:first-child menu[type="toolbar"] {
 }
 
 #notebooks {
-    background: #3b3b3b;
+    background: #3b3b3b url(../shared/style/drawer/images/ui/pattern.png);
     color: #fff;
     box-shadow: -5px 0 5px 0 rgba(0, 0, 0, .3) inset;
 }
@@ -586,7 +586,6 @@ section[role="region"] > header:first-child menu[type="toolbar"] {
 }
 
 #button-evernote-login {
-    display: none;
     width: 254px;
     height: 24px;
     background: url("../images/evernote-login.png") no-repeat scroll 0 0 transparent;
@@ -596,6 +595,9 @@ section[role="region"] > header:first-child menu[type="toolbar"] {
     position: absolute;
     bottom: 5px;
     left: 8px;
+}
+.loggedin #button-evernote-login {
+    display: none;
 }
 
 .loggedin section[role="region"] > header:first-child {
@@ -620,14 +622,37 @@ section[role="region"] > header:first-child menu[type="toolbar"] {
 #settings .buttons.premium #button-premium{
     display: none;
 }
-/*
-*[data-type=list] h2 {
-    background: #595959;
-    line-height: 3.4rem;
-    text-indent: 2.9rem;
+.drawer footer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 2rem;
+    padding: 1rem 1.6rem;
+    background: rgba(0,0,0,.3);
+}
+body:not(.loggedin) .drawer footer {
+    display: none;
+}
+.drawer footer button {
+    background: url("../images/sprite.png") no-repeat -20.2rem -24.3rem;
+    border: 0;
+    border-radius: 0;
+    float: right;
+    height: 2.3rem;
+    margin: 0;
+    overflow: hidden;
+    padding: 0;
+    text-indent: -9000em;
+    width: 2.3rem;
+}
+.drawer footer span {
+    float: left;
+    font-weight: 500;
     font-size: 1.4rem;
-    color: #ffffff;
-}*/
+    line-height: 2rem;
+}
+
 *[data-type=list] li {
     min-height: 4.3rem;
     border-bottom: 0.1rem solid #E6E6E3;

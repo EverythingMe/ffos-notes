@@ -147,12 +147,16 @@ var App = new function() {
         });
 
         Settings.init({
+            "elSettings": $("button-settings"),
             "elCancel": $("button-settings-cancel"),
-            "elUsername": $("#settings .username"),
-            "elAccount": $("#settings .account"),
-            "elButtons": $("#settings .buttons"),
-            "elUploadLeft": $("#settings .upload-left"),
-            "elDaysLeft": $("#settings .days-left"),
+            "elUsername": document.querySelectorAll("#settings .username, .drawer .username"),
+            "elAccount": $$("#settings .account"),
+            "elButtons": $$("#settings .buttons"),
+            "elUploadLeft": $$("#settings .upload-left"),
+            "elDaysLeft": $$("#settings .days-left"),
+            "onEnter": function() {
+                cards.goTo(cards.CARDS.SETTINGS);
+            },
             "onCancel": function() {
                 cards.goTo(cards.CARDS.NOTEBOOKS);
             }
@@ -163,9 +167,6 @@ var App = new function() {
         $("button-new-notebook").addEventListener("click", self.promptNewNotebook);
         $("button-notebook-search").addEventListener("click", SearchHandler.open);
         $("button-evernote-login").addEventListener("click", Evernote.login);
-        $("button-settings").addEventListener("click", function() {
-            cards.goTo(cards.CARDS.SETTINGS);
-        });
        
         elButtonNewNote.addEventListener("click", function() {
             self.newNote();
@@ -195,8 +196,7 @@ var App = new function() {
 
             if (user.isValidEvernoteUser) {
                 Evernote.init(user);
-            } else {
-                $("button-evernote-login").style.display = "block";
+                Settings.onLogin(user);
             }
         });
     }
@@ -1424,13 +1424,18 @@ var App = new function() {
             elUploadLeft = options.elUploadLeft;
             elDaysLeft = options.elDaysLeft;
             options.elCancel.addEventListener("click", options.onCancel);
+            options.elSettings.addEventListener("click", options.onEnter);
+        };
+
+        this.onLogin = function(user) {
+            var username = user.export().username || "";
+            for (var i=0,len=elUsername.length; i<len; i++) {
+              elUsername[i].innerHTML = username;  
+            }
         };
 
         this.update = function() {
             var userData = user.export();
-
-            // username
-            $elUsername.innerHTML = userData.username || "";
             
             // account type
             var type = userData.privilege == PrivilegeLevel.PREMIUM ? "Premium" : userData.privilege == PrivilegeLevel.NORMAL ? "Free" : "";
@@ -1586,6 +1591,7 @@ function formatDate(date) {
 }
 
 function $(s) { return document.getElementById(s); }
+function $$(s) { return document.querySelector(s); }
 function html(el, s) { el.innerHTML = (s || "").replace(/</g, '&lt;'); }
 
 window.onload = function() {
