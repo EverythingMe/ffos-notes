@@ -194,7 +194,7 @@ var App = new function() {
                 self.getUserNotes();
             }
 
-            if (user.isValidEvernoteUser) {
+            if (user.isValidEvernoteUser()) {
                 Evernote.init(user);
                 Settings.onLogin(user);
             }
