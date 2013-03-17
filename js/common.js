@@ -91,14 +91,30 @@ var App = new function() {
             "onRename": onNotebookRename,
             "onDelete": onNotebookDelete
         });
-        
+
+        Settings.init({
+            "elSettings": $("button-settings"),
+            "elCancel": $("button-settings-cancel"),
+            "elUsername": document.querySelectorAll("#settings .username, .drawer .username"),
+            "elAccount": $$("#settings .account"),
+            "elButtons": $$("#settings .buttons"),
+            "elUploadLeft": $$("#settings .upload-left"),
+            "elDaysLeft": $$("#settings .days-left"),
+            "onEnter": function() {
+                cards.goTo(cards.CARDS.SETTINGS);
+            },
+            "onCancel": function() {
+                cards.goTo(cards.CARDS.NOTEBOOKS);
+            }
+        });
         
         elButtonNewNote = $("button-notebook-add");
         
         $("button-new-notebook").addEventListener("click", self.promptNewNotebook);
         
         $("button-notebook-search").addEventListener("click", SearchHandler.open);
-        
+        $("button-evernote-login").addEventListener("click", Evernote.login);
+       
         elButtonNewNote.addEventListener("click", function() {
             self.newNote();
         });
@@ -112,7 +128,6 @@ var App = new function() {
         document.body.classList.remove(CLASS_LOADING);
 
         Evernote.init();
-        $("button-evernote-login").addEventListener("click", Evernote.login);
         DB.init(initUser);
     };
     
@@ -135,7 +150,14 @@ var App = new function() {
                 self.getUserNotes();
             }
 
+<<<<<<< HEAD
             Evernote.init(user);
+=======
+            if (user.isValidEvernoteUser) {
+                Evernote.init(user);
+                Settings.onLogin(user);
+            }
+>>>>>>> Added drawer footer
         });
     }
 
@@ -1429,7 +1451,67 @@ var App = new function() {
                 }
             }
         }
+<<<<<<< HEAD
     }
+=======
+    };
+
+    var Settings = new function() {
+        var self = this,
+            elUsername, elAccount, elButtons, elUploadLeft, elDaysLeft;
+
+        this.init = function(options) {
+            elUsername = options.elUsername;
+            elAccount = options.elAccount;
+            elButtons = options.elButtons;
+            elUploadLeft = options.elUploadLeft;
+            elDaysLeft = options.elDaysLeft;
+            options.elCancel.addEventListener("click", options.onCancel);
+            options.elSettings.addEventListener("click", options.onEnter);
+        };
+
+        this.onLogin = function(user) {
+            var username = user.export().username || "";
+            for (var i=0,len=elUsername.length; i<len; i++) {
+              elUsername[i].innerHTML = username;  
+            }
+        };
+
+        this.update = function() {
+            var userData = user.export();
+            
+            // account type
+            var type = userData.privilege == PrivilegeLevel.PREMIUM ? "Premium" : userData.privilege == PrivilegeLevel.NORMAL ? "Free" : "";
+            elAccount.innerHTML = type;
+            elButtons.classList.add(type.toLowerCase());
+
+            // upload left
+            elUploadLeft.innerHTML = getUploadLeft(userData.accounting.uploadLimit);
+            elDaysLeft.innerHTML = getDaysLeft(userData.accounting.uploadLimitEnd);
+        };
+
+        function getUploadLeft(num) {
+            if (!num) { return "" }
+
+            var steps = {'B': 1000000000, 'M': 1000000, 'K': 1000};
+
+            for (var k in steps) {
+                if (num >= steps[k]) {
+                    return Math.round(num/steps[k]*10)/10 + k;
+                }
+            }
+
+            return num;
+        }
+
+        function getDaysLeft(uploadLimitEnd) {
+            var diff = uploadLimitEnd - new Date().getTime();
+            diff = diff / (1000 * 60 * 60 * 24);
+            diff = parseInt(diff, 10);
+            return  diff;
+        }
+    };
+>>>>>>> Added drawer footer
 
     var Sorter = new function() {
         var self = this,
@@ -1553,6 +1635,7 @@ function formatDate(date) {
 }
 
 function $(s) { return document.getElementById(s); }
+function $$(s) { return document.querySelector(s); }
 function html(el, s) { el.innerHTML = (s || "").replace(/</g, '&lt;'); }
 
 window.onload = function() {

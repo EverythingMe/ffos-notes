@@ -51,6 +51,10 @@
                 <b class="card-next"></b>
                 <ul id="notebooks-list"></ul>
                 <button id="button-evernote-login"></button>
+                <footer>
+                    <span class="username"></span>
+                    <button id="button-settings">Settings</button>
+                </footer>
             </div>
             <section class="card active" id="main" role="region">
                 <header>
@@ -122,6 +126,42 @@
                 <div class="content">
                     <ul class="fields"></ul>
                 </div>
+            </section>
+
+            <section class="card skin-organic" id="settings" role="region" data-type="list">
+                <header>
+                    <button id="button-settings-cancel"><span class="icon icon-close">close</span></button>
+                    <h1>Settings</h1>
+                </header>
+                <header>
+                    <h2>Connected to Evernote</h2>
+                </header>
+                <ul>
+                    <li><p>Signed in as <span class="username"></span></p></li>
+                    <li><p>Account type <em class="account"></em></p></li>
+                    <li>
+                        <p class="buttons">
+                            <button id="button-premium" onclick="alert('not implemented')">Go Premium</button>
+                            <button onclick="alert('not implemented')">Sign Out</button>
+                        </p>
+                    </li>
+                </ul>
+                <!--header>
+                    <h2>Evernote Email Address</h2>
+                </header>
+                <ul>
+                    <li>
+                        <p class="email">ranbena@everything.me</p>
+                        <p><button>Add to Contacts</button></p>
+                    </li>
+                </ul-->
+                <header>
+                    <h2>Current Monthly Usage</h2>
+                </header>
+                <ul>
+                    <li><p>Upload left <em class="upload-left"></em></p></li>
+                    <li><p>Days left <em class="days-left"></em></p></li>
+                </ul>
             </section>
         </div>
     </body>

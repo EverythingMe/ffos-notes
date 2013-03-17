@@ -561,7 +561,6 @@ var Evernote = new function() {
 
     function markLoggedin() {
         document.body.classList.add('loggedin');
-        $("button-evernote-login").style.display = "none";
     }
 
     function initNoteStore() {

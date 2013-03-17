@@ -664,7 +664,6 @@ body.loading .card:not(.active) {
 }
 
 #button-evernote-login {
-    display: none;
     width: 254px;
     height: 24px;
     background: url("../images/evernote-login.png") no-repeat scroll 0 0 transparent;
@@ -674,6 +673,9 @@ body.loading .card:not(.active) {
     position: absolute;
     bottom: 5px;
     left: 8px;
+}
+.loggedin #button-evernote-login {
+    display: none;
 }
 
 .loggedin section[role="region"] > header:first-child {
@@ -685,4 +687,84 @@ body.loading .card:not(.active) {
 }
 .loggedin section[role="region"] > header:first-child menu[type="toolbar"] a:last-child, section[role="region"] > header:first-child menu[type="toolbar"] button:last-child {
     background-image: url(../images/separator_green.png);
+}
+
+#settings .buttons:not(.premium) {
+    padding-left: 1rem;
+    padding-right: 1rem;
+}
+#settings .buttons:not(.premium) button{
+    width: 14rem;
+    margin: 0 0.5rem;
+}
+#settings .buttons.premium #button-premium{
+    display: none;
+}
+.drawer footer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 2rem;
+    padding: 1rem 1.6rem;
+    background: rgba(0,0,0,.3);
+}
+.drawer footer button {
+    background: url("../images/sprite.png") no-repeat -20.2rem -24.3rem;
+    border: 0;
+    border-radius: 0;
+    float: right;
+    height: 2.3rem;
+    margin: 0;
+    overflow: hidden;
+    padding: 0;
+    text-indent: -9000em;
+    width: 2.3rem;
+}
+.drawer footer span {
+    float: left;
+    font-weight: 500;
+    font-size: 1.4rem;
+    line-height: 2rem;
+}
+
+*[data-type=list] li {
+    min-height: 4.3rem;
+    border-bottom: 0.1rem solid #E6E6E3;
+    position: relative;
+}
+*[data-type=list] li:last-child {
+    border-bottom: 0;
+}
+*[data-type=list] p {
+    line-height: 2.3rem;
+    font-size: 1.6rem;
+    padding: 1rem 3rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+*[data-type=list] p em {
+    line-height: 2.3rem;
+    position: absolute;
+    right: 3rem;
+    text-indent: 1.5rem;
+    width: 5.9rem;
+    font-size: 1.4rem;
+    font-style: normal;
+    font-weight: 500;
+}
+*[data-type=list] p em:after {
+    background: url(../images/div_line_lg_gray.png) left top no-repeat;
+    background-size: 0.2rem 3.6rem;
+    position: absolute;
+    left: 0;
+    top: -0.7rem;
+    width: 0.2rem;
+    height: 3.6rem;
+    content: "";
+}
+
+body:not(.loggedin) .drawer footer {
+    display: none;
 }
