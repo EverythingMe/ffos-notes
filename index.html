@@ -41,10 +41,11 @@
         
         <link href="shared/style/headers.css" rel="stylesheet" type="text/css" />
         <link href="shared/style/buttons.css" rel="stylesheet" type="text/css" />
-        <link href="style/common.css" rel="Stylesheet" type="text/css" />
-        <link href="shared/style/responsive.css" rel="stylesheet" type="text/css" />
+        <link href="shared/style/progress_activity.css" rel="stylesheet" type="text/css" />
+        <link href="style/common.css" rel="stylesheet" type="text/css" />
     </head>
     <body class="loading">
+        <progress class="pack-activity" value="0" max="100" role="sync"></progress>
         <div id="container" class="cards">
             <div class="card drawer" id="notebooks" data-gutter="50">
                 <h2 data-l10n-id="notebooks">Notebooks <b id="button-new-notebook"></b></h2>
@@ -52,6 +53,7 @@
                 <ul id="notebooks-list"></ul>
                 <button id="button-evernote-login"></button>
                 <footer>
+                    <progress role="sync"></progress>
                     <span class="username"></span>
                     <button id="button-settings">Settings</button>
                 </footer>

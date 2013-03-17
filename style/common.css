@@ -727,6 +727,15 @@ body.loading .card:not(.active) {
     font-size: 1.4rem;
     line-height: 2rem;
 }
+.drawer footer progress {
+    float: left;
+    position: relative;
+    top: -0.4rem;
+    margin-right: 1.6rem;
+}
+body:not(.syncing) progress[role="sync"] {
+    display: none;
+}
 
 *[data-type=list] li {
     min-height: 4.3rem;
