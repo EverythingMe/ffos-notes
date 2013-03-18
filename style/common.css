@@ -368,7 +368,12 @@ section[role="region"] > header:first-child menu[type="toolbar"] {
         cursor: pointer;
     }
     #notebooks-list {
+         bottom: 40px;
         list-style-type: none;
+        overflow-y: scroll;
+        position: absolute;
+        top: 48px;
+        width: 100%;
     }
         #notebooks-list li {
             border-bottom: 1px solid #616666;
@@ -376,6 +381,10 @@ section[role="region"] > header:first-child menu[type="toolbar"] {
             font-size: 15px;
             cursor: pointer;
         }
+        #notebooks-list li:last-child {
+            border-bottom: 0;
+        }
+
 
 
 #search {
