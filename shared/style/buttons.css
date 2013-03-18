@@ -135,7 +135,7 @@ li .button:after {
   left: 0;
   right: 0;
   height: 0.2rem;
-  background: url( buttons/images/ui/shadow.png) repeat-x left bottom / auto 100%;
+  /*background: url( buttons/images/ui/shadow.png) repeat-x left bottom / auto 100%;*/
 }
 
 /* Press */
