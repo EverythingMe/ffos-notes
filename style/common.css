@@ -404,7 +404,7 @@ section[role="region"] > header:first-child menu[type="toolbar"] {
         cursor: pointer;
     }
     #notebooks-list {
-         bottom: 4rem;
+        bottom: 4rem;
         list-style-type: none;
         overflow-y: scroll;
         position: absolute;
@@ -422,6 +422,10 @@ section[role="region"] > header:first-child menu[type="toolbar"] {
         #notebooks-list li:last-child {
             border-bottom: 0;
         }
+        #notebooks-list li:last-child {
+            border-bottom: 0;
+        }
+
 
 #notebooks.active + section[role="region"] > header:first-child > button, #notebooks.active + section[role="region"] > header:first-child > a {
     background-position: 4rem center;
