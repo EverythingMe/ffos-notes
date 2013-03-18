@@ -168,8 +168,6 @@ var Evernote = new function() {
     };
 
     this.finishAuthenticationProcess = function() {
-        markLoggedin();
-
         var userStoreTransport = new Thrift.BinaryHttpTransport(EVERNOTE_SERVER + '/edam/user');
         var userStoreProtocol = new Thrift.BinaryProtocol(userStoreTransport, false, false);
         var userStore = new UserStoreClient(userStoreProtocol, userStoreProtocol);
@@ -192,6 +190,8 @@ var Evernote = new function() {
             user.expires = expires;
             user.last_update_count = last_update_count;
             user.last_sync_time = last_sync_time;
+
+            App.onLogin();
             
             App.updateUserData(user, callback);
         }, self.onError);
@@ -580,10 +580,6 @@ var Evernote = new function() {
     };
 
     this.onError = function() {};
-
-    function markLoggedin() {
-        document.body.classList.add('loggedin');
-    }
 
     function initNoteStore() {
         if (!noteStore) {

@@ -157,7 +157,7 @@ var App = new function() {
 
             if (user.isValidEvernoteUser()) {
                 Evernote.init(user);
-                Settings.onLogin(user);
+                self.onLogin(user);
             }
         });
     }
@@ -234,6 +234,7 @@ var App = new function() {
 
     this.updateUserData = function(data, c, e) {
         user.set(data, c, e);
+        Settings.update();
     };
     
     this.getUserNotes = function(signedout) {
@@ -367,6 +368,10 @@ var App = new function() {
     };
     this.stopSync = function() {
         document.body.classList.remove('syncing');
+    };
+
+    this.onLogin = function() {
+        document.body.classList.add('loggedin');
     };
 
     function validateNotebookName(name, id, cbSuccess, cbError) {
@@ -1506,15 +1511,13 @@ var App = new function() {
             options.elSettings.addEventListener("click", options.onEnter);
         };
 
-        this.onLogin = function(user) {
-            var username = user.export().username || "";
+        this.update = function() {
+            var userData = user.export();
+
+            var username = userData.username || "";
             for (var i=0,len=elUsername.length; i<len; i++) {
               elUsername[i].innerHTML = username;  
             }
-        };
-
-        this.update = function() {
-            var userData = user.export();
             
             // account type
             var type = userData.privilege == PrivilegeLevel.PREMIUM ? "Premium" : (userData.privilege == PrivilegeLevel.NORMAL ? "Free" : "");
