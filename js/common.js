@@ -712,13 +712,10 @@ var App = new function() {
             
             elResources.innerHTML = '';
             
-            note.getResources(function onSuccess(resources) {
-                for (var i=0; i<resources.length; i++) {
-                    self.addResource(resources[i]);
-                }
-            }, function onError() {
-                
-            });
+            var resources = note.getResources();
+            for (var i=0; i<resources.length; i++) {
+                self.addResource(resources[i]);
+            }
         };
         
         this.addResource = function(resource) {
@@ -1177,15 +1174,59 @@ var App = new function() {
             
             el.className = "note";
             el.dataset.noteId = note.getId();
-            el.innerHTML = '<div><span class="text">' + title + '</span> <span class="time">' + prettyDate(note.getDateUpdated()) + '</span></div>' +
-                            '<div class="title">' + getNoteNameFromContent(content) + '</div>';/* +
-                            (note.getImages().length > 0? '<div class="image" style="background-image: url(' + note.getImages()[0].src + ')"></div>' : '');*/
+            el.innerHTML = '<div>' +
+                               '<span class="text">' + title + '</span> <span class="time">' + prettyDate(note.getDateUpdated()) + '</span>' +
+                           '</div>' +
+                           '<div class="title">' + getNotePreview(content) + '</div>'
+            var resources = note.getResources();
+            if (resources.length > 0) {
+                var resource = resources[0],
+                    elResource = document.createElement('div'),
+                    src = "data:";
+
+                if (!resource.data.bodyHash) {
+                    src += resource.mime+";base64,"+resource.data.body;
+                } else {
+                    var value = "",
+                        bytes = [];
+                    for (var i in resource.data.body) {
+                        value += String("0123456789abcdef".substr((resource.data.body[i] >> 4) & 0x0F,1)) + "0123456789abcdef".substr(resource.data.body[i] & 0x0F,1);
+                    }
+                    for(var i=0; i< value.length-1; i+=2){
+                        bytes.push(parseInt(value.substr(i, 2), 16));
+                    }
+                    src += resource.mime+";base64,"+window.btoa(String.fromCharCode.apply(String, bytes));
+                }
+                elResource.className = 'image';
+                elResource.style.backgroundImage = 'url(' + src + ')';
+
+                el.appendChild(elResource);
+            }
             
             if (note.isTrashed()) {
                 el.className += " trashed";
             }
             
             return el;
+        }
+        
+        function getNotePreview(content) {
+            var preview = '';
+            
+            // remove all images from the content
+            content = content.replace(/<img[^>]*>/g, '');
+            
+            // split into lines
+            content = content.split(/<br[^>]*>/i);
+            
+            // iterate over the lines until we find one with content
+            // this is needed since there might be empty lines (if users start a note with line breaks)
+            while (!preview && content.length) {
+              preview = content[0];
+              content.splice(0, 1);
+            }
+            
+            return preview;
         }
         
         function sortNotes(notes, sortby, isDesc) {
