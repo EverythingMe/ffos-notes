@@ -14,7 +14,8 @@ var Evernote = new function() {
         AUTHORIZATION_URL = EVERNOTE_SERVER+"/OAuth.action",
 
         TEXTS = {
-            "NOTEBOOK_NAME_CONFLICT": "Your Evernote already has a notebook with the name '{{NOTEBOOK_NAME}}'. Do you want to keep the local notebook?"
+            "NOTEBOOK_NAME_CONFLICT": "Your Evernote already has a notebook with the name '{{NOTEBOOK_NAME}}'. Do you want to keep the local notebook?",
+            "NOT_REACHED_EVERNOTE": "Could not reach Evernote server. Make sure you are connected to the internet."
         },
 
         NAME_CONFLICT_POSTFIX = " - 1",
@@ -72,6 +73,7 @@ var Evernote = new function() {
         xhr.open(method, url, true);
         console.log('[FxOS-Notes] processXHR url: '+url);
         xhr.onreadystatechange = function() {
+
             if (xhr.readyState === 4) {
                 console.log('[FxOS-Notes] processXHR xhr: '+JSON.stringify(xhr));
                 console.log('[FxOS-Notes] processXHR xhr.responseText: '+xhr.responseText);
@@ -80,6 +82,7 @@ var Evernote = new function() {
                 }
             }
         };
+
         xhr.send();
     };
     
@@ -104,10 +107,6 @@ var Evernote = new function() {
     };
 
     this.login = function() {
-        if (!navigator.online) {
-            alert('You must be connected to the internet in order to connect with Evernote.');
-            return false;
-        }
         var postUrl = self.buildOauthURL(REQUEST_TOKEN_URL, 'POST', {
             oauth_callback : NOTES_APP_CALLBACK_URL,
             oauth_signature_method : OAUTH_SIGNATURE_METHOD
@@ -123,6 +122,8 @@ var Evernote = new function() {
                 tmp_oauth_token = responseData['oauth_token'];
 
                 self.getAuthorization();
+            } else {
+                alert(TEXTS.NOT_REACHED_EVERNOTE);
             }
         });
     };
