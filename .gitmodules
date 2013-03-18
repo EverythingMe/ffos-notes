@@ -1,6 +1,6 @@
 [submodule "js/lib/enml-js"]
 	path = js/lib/enml-js
-	url = git@github.com:EverythingMe/enml-js.git
+	url = https://github.com/EverythingMe/enml-js.git
 [submodule "js/lib/evernote"]
 	path = js/lib/evernote
-	url = git@github.com:EverythingMe/evernote-sdk-js.git
+	url = https://github.com/EverythingMe/evernote-sdk-js.git
