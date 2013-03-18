@@ -581,13 +581,13 @@ var App = new function() {
                 numberOfApps = notebook.getNumberOfNotes();
                 
             el.innerHTML = notebook.getName() + (numberOfApps? " (" + numberOfApps + ")" : "");
-            el.addEventListener("mousedown", function(){
+            el.addEventListener("touchstart", function(){
                 this.timeoutHold = window.setTimeout(function(){
                     el.edited = true;
                     onEditNotebook(notebook);
                 }, TIMEOUT_BEFORE_EDITING_NOTEBOOK);
             });
-            el.addEventListener("mouseup", function(){
+            el.addEventListener("touchend", function(){
                 window.clearTimeout(this.timeoutHold);
                 if (!this.edited) {
                     clickNotebook(notebook);
