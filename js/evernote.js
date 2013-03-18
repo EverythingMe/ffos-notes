@@ -13,6 +13,12 @@ var Evernote = new function() {
         ACCESS_TOKEN_URL = EVERNOTE_SERVER+"/oauth",
         AUTHORIZATION_URL = EVERNOTE_SERVER+"/OAuth.action",
 
+        TEXTS = {
+            "NOTEBOOK_NAME_CONFLICT": "Your Evernote already has a notebook with the name '{{NOTEBOOK_NAME}}'. Do you want to keep the local notebook?"
+        },
+
+        NAME_CONFLICT_POSTFIX = " - 1",
+
         tmp_oauth_token,
         oauth_verifier,
         oauth_token,
@@ -476,7 +482,16 @@ var Evernote = new function() {
                     last_update_count : remoteNotebook.updateSequenceNum
                 });
             }
-        }, cbError || cbSuccess);
+        }, function(error){
+            console.log('[FxOS-Notes] this.newNotebook error: '+ JSON.stringify(error));
+            if (error.parameter == "Notebook.name") {
+                notebook.set({
+                    name: notebook.getName() + NAME_CONFLICT_POSTFIX
+                }, function(notebook){
+                    self.newNotebook(notebook, cbSuccess);
+                });
+            }
+        });
     };
     this.updateNotebook = function(notebook, cbSuccess, cbError) {
         console.log('[FxOS-Notes] this.updateNotebook');

@@ -149,9 +149,13 @@ var Models = new function() {
                 return;
             }
             
-            DB.updateMultiple("notes", {"notebook_id": self.getId()}, {"trashed": true, "active": false}, function(){
-                self.updateNotesCount(cbSuccess, cbError, {"trashed": true});
+            DB.updateMultiple("notes", {"notebook_id": self.getId()}, {"trashed": true, "active": false, "notebook_id": null}, function(){
+                self.remove(cbSuccess, cbError);
             }, cbError);
+        };
+
+        this.remove = function(cbSuccess, cbError) {
+            DB.removeNotebook(self, cbSuccess, cbError);
         };
         
         this.restore = function(cbSuccess, cbError) {
@@ -270,12 +274,25 @@ var Models = new function() {
         this.restore = function(cbSuccess, cbError) {
             if (!self.data_trashed) return;
             
-            self.set({
-                "trashed": false,
-                "active": true
-            }, function onSuccess() {
-                self.updateNotebookNotesCount(cbSuccess, cbError, {"trashed": false});
-            }, cbError);
+            var args = [
+                {
+                    "trashed": false,
+                    "active": true
+                },
+                function onSuccess() {
+                    self.updateNotebookNotesCount(cbSuccess, cbError, {"trashed": false});
+                },
+                cbError
+            ];
+            
+            if (!self.getNotebookId()) {
+                DB.getNotebooks({}, function(notebooks){
+                    args[0].notebook_id = notebooks[0].getId();
+                    self.set.apply(self, args);
+                });
+            } else {
+                self.set.apply(self, args);
+            }
         };
         
         this.remove = function(cbSuccess, cbError) {

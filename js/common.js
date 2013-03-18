@@ -439,7 +439,11 @@ var App = new function() {
         if (confirm(TEXTS.PROMPT_DELETE_NOTEBOOK)) {
             notebookAffected.trash(function onSuccess(notebook) {
                 NotebooksList.refresh();
-                self.addQueue('Notebook', notebook);
+                self.addQueue('Notebook', {
+                    id : notebookAffected.getId(),
+                    guid : notebookAffected.getGuid(),
+                    expunge : true
+                });
             });
         }
     }
