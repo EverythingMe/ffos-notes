@@ -327,7 +327,9 @@ var App = new function() {
     this.promptNewNotebook = function() {
         var notebookName = prompt(TEXTS.NEW_NOTEBOOK, "");
         if (notebookName) {
-            self.newNotebook(notebookName);
+            validateNotebookName(notebookName, null, function(){
+                self.newNotebook(notebookName);    
+            });
         }
     };
     
@@ -367,6 +369,24 @@ var App = new function() {
         document.body.classList.remove('syncing');
     };
 
+    function validateNotebookName(name, id, cbSuccess, cbError) {
+        DB.getNotebooks({"name": name}, function(notebooks) {
+            var notebookWithNameExists = false;
+            for (var i in notebooks) {
+                if (notebooks[i].getName() === name && (!id || notebooks[i].getId() !== id)) {
+                    notebookWithNameExists = true;
+                    break;
+                }
+            }
+            if (notebookWithNameExists) {
+                alert(TEXTS.NOTEBOOK_NAME_ALREADY_EXISTS);
+                cbError && cbError();
+            } else {
+                cbSuccess && cbSuccess();    
+            }
+        });
+    };
+
     function onAddQueue(queue) {
         if (user.isValidEvernoteUser()) {
             if (queue.getRel() == 'Notebook') {
@@ -398,12 +418,14 @@ var App = new function() {
     function onNotebookRename(notebook) {
         var newName = prompt(TEXTS.PROMPT_RENAME_NOTEBOOK, notebook.getName() || "");
         if (newName) {
-            notebook.set({
-                "name": newName
-            }, function onSuccess() {
-                NotebooksList.refresh();
-                NotebookView.show(notebook);
-                self.addQueue('Notebook', notebook);
+            validateNotebookName(newName, notebook.getId(), function() {
+                notebook.set({
+                    "name": newName
+                }, function onSuccess() {
+                    NotebooksList.refresh();
+                    NotebookView.show(notebook);
+                    self.addQueue('Notebook', notebook);
+                });
             });
         }
     }
@@ -1130,20 +1152,25 @@ var App = new function() {
         
         this.saveEditTitle = function() {
             if (!currentNotebook) return;
-            
-            el.classList.remove(CLASS_EDIT_TITLE);
-            elEditTitle.blur();
-            
+
             var newName = elEditTitle.value;
-            if (newName != currentNotebook.getName()) {
-                currentNotebook.set({
-                    "name": newName
-                }, function cbSuccess() {
-                    self.setTitle(newName);
-                    onChange && onChange();
-                    App.addQueue('Notebook', currentNotebook);
-                }, function cbError() {});
-            }
+
+            validateNotebookName(newName, currentNotebook.getId(), function() {
+                el.classList.remove(CLASS_EDIT_TITLE);
+                elEditTitle.blur();
+                
+                if (newName != currentNotebook.getName()) {
+                    currentNotebook.set({
+                        "name": newName
+                    }, function cbSuccess() {
+                        self.setTitle(newName);
+                        onChange && onChange();
+                        App.addQueue('Notebook', currentNotebook);
+                    }, function cbError() {});
+                }
+            }, function() {
+                elEditTitle.focus();
+            });
         };
 
         this.getCurrent = function() {
