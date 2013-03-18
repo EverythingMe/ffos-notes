@@ -100,6 +100,10 @@ var App = new function() {
             "elButtons": $$("#settings .buttons"),
             "elUploadLeft": $$("#settings .upload-left"),
             "elDaysLeft": $$("#settings .days-left"),
+            "elSignout": $("button-evernote-logout"),
+            "onSignout": function() {
+                Evernote.logout();
+            },
             "onEnter": function() {
                 cards.goTo(cards.CARDS.SETTINGS);
             },
@@ -114,7 +118,7 @@ var App = new function() {
         
         $("button-notebook-search").addEventListener("click", SearchHandler.open);
         $("button-evernote-login").addEventListener("click", Evernote.login);
-       
+        
         elButtonNewNote.addEventListener("click", function() {
             self.newNote();
         });
@@ -139,15 +143,16 @@ var App = new function() {
     }
 
     function initUser(){
+        var signedout = window.location.search.indexOf('signedout') > -1;
         DB.getUsers({}, function onSuccess(users) {
             if (users.length === 0) {
                 user = new Models.User(DEFAULT_USER);
                 DB.addUser(user, function onSuccess() {
-                    self.getUserNotes();
+                    self.getUserNotes(signedout);
                 });
             } else {
                 user = users[0];
-                self.getUserNotes();
+                self.getUserNotes(signedout);
             }
 
             if (user.isValidEvernoteUser()) {
@@ -231,12 +236,12 @@ var App = new function() {
         user.set(data, c, e);
     };
     
-    this.getUserNotes = function() {
+    this.getUserNotes = function(signedout) {
         user.getNotebooks(function(notebooks) {
             if (notebooks.length == 0) {
                 self.newNotebook(TEXTS.FIRST_NOTEBOOK_NAME, function(notebook, note){
                     NotebooksList.refresh(notebooks);
-                });
+                }, signedout);
             } else {
                 self.showNotes(notebooks[0]);
                 NotebooksList.refresh(notebooks);
@@ -244,14 +249,16 @@ var App = new function() {
         });
     };
     
-    this.newNotebook = function(name, cb) {
+    this.newNotebook = function(name, cb, signedout) {
         user.newNotebook({
             "name": name
         }, function(notebook) {
-            NotebookView.show(notebook);            
-            self.newNote(notebook, function(note){
-                cb && cb(notebook, note);
-            });
+            NotebookView.show(notebook);
+            if (!signedout) {
+                self.newNote(notebook, function(note){
+                    cb && cb(notebook, note);
+                });
+            }
             
             self.addQueue('Notebook', notebook);
         });
@@ -1467,6 +1474,7 @@ var App = new function() {
             elUploadLeft = options.elUploadLeft;
             elDaysLeft = options.elDaysLeft;
             options.elCancel.addEventListener("click", options.onCancel);
+            options.elSignout.addEventListener("click", options.onSignout);
             options.elSettings.addEventListener("click", options.onEnter);
         };
 
