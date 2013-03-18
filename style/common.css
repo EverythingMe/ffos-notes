@@ -58,7 +58,7 @@ section[role="region"] > header:first-child menu[type="toolbar"] {
     right: 0;
     height: 40px;
     line-height: 40px;
-    z-index: 50;
+    z-index: 7;
     color: #fff;
     text-align: center;
     background: rgba(0, 0, 0, .8);
@@ -94,7 +94,7 @@ section[role="region"] > header:first-child menu[type="toolbar"] {
     left: 0;
     right: 0;
     padding-bottom: 40px;
-    z-index: 30;
+    z-index: 5;
     overflow-y: auto;
 }
 
