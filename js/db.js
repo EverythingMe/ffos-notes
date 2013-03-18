@@ -33,7 +33,7 @@ var DB = new function() {
     this.init = function(onSuccess) {
         self.open(onSuccess);
         
-        // automaticaly create helper methods (like getNotes, or removeNotebook)
+        /* automaticaly create helper methods (like getNotes, or removeNotebook) */
         for (var table in schema) {
             var obj = schema[table].objectName;
             
@@ -159,10 +159,11 @@ var DB = new function() {
     
     
     
-    this.destroy = function() {
+    this.destroy = function(cbSuccess) {
         var req = indexedDB.deleteDatabase(DB_NAME);
         
         req.onsuccess = function() {
+            cbSuccess && cbSuccess();
             console.log("Database destroyed.")
         };
         req.onerror = req.onblocked = function(ev) {
@@ -205,6 +206,10 @@ var DB = new function() {
     
         request.onsuccess = function(e) {
             db = e.target.result;
+
+            db.onversionchange = function(event) {
+                db.close();
+            };            
             
             Console.log("DB: Open success!", db);
             

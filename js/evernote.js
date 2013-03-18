@@ -123,6 +123,12 @@ var Evernote = new function() {
         });
     };
 
+    this.logout = function() {
+        DB.destroy(function(){
+            window.location.href = "?signedout";
+        });
+    };
+
     this.getAuthorization = function() {
         authWindow = window.open(AUTHORIZATION_URL+'?oauth_token='+tmp_oauth_token);
         window.addEventListener('message', function onMessage(evt) {
@@ -389,21 +395,28 @@ var Evernote = new function() {
                 self.processQueueList();
             });
         } else {
-            var notebook = new Models.Notebook(queue.getRelContent());
-            console.log('[FxOS-Notes] this.processNotebookQueue: '+JSON.stringify(notebook));
-            if (notebook.getGuid()) {
-                self.updateNotebook(notebook, function() {
-                    queue.remove();
-                    self.processQueueList();
-                });
-            } else if (!notebook.isTrashed()) {
-                self.newNotebook(notebook, function() {
-                    queue.remove();
-                    self.processQueueList();
-                });
-            } else {
-                self.processQueueList();
-            }
+            DB.getNotebooks({id : queue.getRelId()}, function(notebook){
+                if (notebook.length > 0) {
+                    notebook = notebook[0];
+
+                    console.log('[FxOS-Notes] this.processNotebookQueue: '+JSON.stringify(notebook));
+                    console.log('[FxOS-Notes] this.processNotebookQueue notebook.getGuid(): '+notebook.getGuid());
+                    console.log('[FxOS-Notes] this.processNotebookQueue notebook.isTrashed(): '+notebook.isTrashed());
+                    if (notebook.getGuid()) {
+                        self.updateNotebook(notebook, function() {
+                            queue.remove();
+                            self.processQueueList();
+                        });
+                    } else if (!notebook.isTrashed()) {
+                        self.newNotebook(notebook, function() {
+                            queue.remove();
+                            self.processQueueList();
+                        });
+                    } else {
+                        self.processQueueList();
+                    }
+                }
+            });
         }
     };
     this.processNoteQueue = function(queue) {
@@ -413,27 +426,32 @@ var Evernote = new function() {
                 self.processQueueList();
             })
         } else {
-            var note = new Models.Note(queue.getRelContent());
-            console.log('[FxOS-Notes] this.processNoteQueue: '+JSON.stringify(note));
-            console.log('[FxOS-Notes] this.processNoteQueue note.getGuid(): '+note.getGuid());
-            console.log('[FxOS-Notes] this.processNoteQueue note.isTrashed(): '+note.isTrashed());
-            if (note.getGuid()) {
-                self.updateNote(note, function(newNote) {
-                    if (note.isTrashed()) {
-                        self.deleteNote(newNote.guid);
+            DB.getNotes({id : queue.getRelId()}, function(note){
+                if (note.length > 0) {
+                    note = note[0];
+
+                    console.log('[FxOS-Notes] this.processNoteQueue: '+JSON.stringify(note));
+                    console.log('[FxOS-Notes] this.processNoteQueue note.getGuid(): '+note.getGuid());
+                    console.log('[FxOS-Notes] this.processNoteQueue note.isTrashed(): '+note.isTrashed());
+                    if (note.getGuid()) {
+                        self.updateNote(note, function(newNote) {
+                            if (note.isTrashed()) {
+                                self.deleteNote(newNote.guid);
+                            }
+                            queue.remove();
+                            self.processQueueList();
+                        });
+                    } else {
+                        self.newNote(note, function(newNote) {
+                            if (note.isTrashed()) {
+                                self.deleteNote(newNote.guid);
+                            }
+                            queue.remove();
+                            self.processQueueList();
+                        });
                     }
-                    queue.remove();
-                    self.processQueueList();
-                });
-            } else {
-                self.newNote(note, function(newNote) {
-                    if (note.isTrashed()) {
-                        self.deleteNote(newNote.guid);
-                    }
-                    queue.remove();
-                    self.processQueueList();
-                });
-            }
+                }
+            });
         }
     };
 
