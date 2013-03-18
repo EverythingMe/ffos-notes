@@ -239,7 +239,7 @@ var App = new function() {
     this.getUserNotes = function(signedout) {
         user.getNotebooks(function(notebooks) {
             if (notebooks.length == 0) {
-                self.newNotebook(TEXTS.FIRST_NOTEBOOK_NAME, function(notebook, note){
+                self.newNotebook(TEXTS.FIRST_NOTEBOOK_NAME, function(){
                     NotebooksList.refresh(notebooks);
                 }, signedout);
             } else {
@@ -256,10 +256,11 @@ var App = new function() {
             NotebookView.show(notebook);
             if (!signedout) {
                 self.newNote(notebook, function(note){
-                    cb && cb(notebook, note);
+                    cb && cb();
                 });
+            } else {
+                cb && cb();
             }
-            
             self.addQueue('Notebook', notebook);
         });
     };
@@ -522,7 +523,7 @@ var App = new function() {
         };
         
         this.refresh = function(notebooks) {
-            if (!notebooks) {
+            if (!notebooks || notebooks.length == 0) {
                 user.getNotebooks(self.refresh);
                 return;
             }
