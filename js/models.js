@@ -319,17 +319,26 @@ var Models = new function() {
         
         
         this.getResources = function(cbSuccess, cbError) {
-            // return self.data_resources;
-            DB.getNoteResources({"noteId": self.getId()}, cbSuccess, cbError);
+            return self.data_resources;
+            // DB.getNoteResources({"noteId": self.getId()}, cbSuccess, cbError);
         };
         
         this.newResource = function(options, cbSuccess, cbError) {
-            options.noteId = self.getId();
-            
-            var noteResource = new Models.NoteResource(options);
-            DB.addNoteResource(noteResource, function() {
-                cbSuccess && cbSuccess(noteResource);
-            });
+            self.data_resources.push(new Resource({
+                noteGuid : self.getGuid(),
+                mime : options.mime,
+                data : new Data({
+                    body : options.body,
+                    size : options.size
+                }),
+                attributes : new ResourceAttributes({
+                    fileName : options.name
+                })
+            }));
+
+            self.set({
+                resources : self.getResources()
+            }, cbSuccess, cbError);
         };
         
         this.getContent = function(html) {
