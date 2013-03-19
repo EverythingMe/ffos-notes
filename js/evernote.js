@@ -518,7 +518,21 @@ var Evernote = new function() {
             if (notebook.length > 0) {
                 notebook = notebook[0];
                 note = note.set({notebookGuid : notebook.getGuid()});
-                noteStore.createNote(oauth_token, new Note(note.export()), function(remoteNote) {
+                var noteData = note.export();
+                for(var k in noteData.resources) {
+                    noteData.resources[k] = new Resource({
+                        noteGuid : noteData.resources[k].noteGuid,
+                        mime : noteData.resources[k].mime,
+                        data : new Data({
+                            body : noteData.resources[k].data.body,
+                            size : noteData.resources[k].data.size
+                        }),
+                        attributes : new ResourceAttributes({
+                            fileName : noteData.resources[k].attributes.fileName
+                        })
+                    });
+                }
+                noteStore.createNote(oauth_token, new Note(noteData), function(remoteNote) {
                     self.getNote(remoteNote.guid, function(remoteNote) {
                         note.set(remoteNote);
                         if (App.getUser().getLastUpdateCount() < remoteNote.updateSequenceNum) {

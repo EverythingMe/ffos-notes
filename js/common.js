@@ -91,33 +91,13 @@ var App = new function() {
             "onRename": onNotebookRename,
             "onDelete": onNotebookDelete
         });
-
-        Settings.init({
-            "elSettings": $("button-settings"),
-            "elCancel": $("button-settings-cancel"),
-            "elUsername": document.querySelectorAll("#settings .username, .drawer .username"),
-            "elAccount": $$("#settings .account"),
-            "elButtons": $$("#settings .buttons"),
-            "elUploadLeft": $$("#settings .upload-left"),
-            "elDaysLeft": $$("#settings .days-left"),
-            "elSignout": $("button-evernote-logout"),
-            "onSignout": function() {
-                Evernote.logout();
-            },
-            "onEnter": function() {
-                cards.goTo(cards.CARDS.SETTINGS);
-            },
-            "onCancel": function() {
-                cards.goTo(cards.CARDS.NOTEBOOKS);
-            }
-        });
+        
         
         elButtonNewNote = $("button-notebook-add");
         
         $("button-new-notebook").addEventListener("click", self.promptNewNotebook);
         
         $("button-notebook-search").addEventListener("click", SearchHandler.open);
-        $("button-evernote-login").addEventListener("click", Evernote.login);
         
         elButtonNewNote.addEventListener("click", function() {
             self.newNote();
@@ -143,22 +123,18 @@ var App = new function() {
     }
 
     function initUser(){
-        var signedout = window.location.search.indexOf('signedout') > -1;
         DB.getUsers({}, function onSuccess(users) {
             if (users.length === 0) {
                 user = new Models.User(DEFAULT_USER);
                 DB.addUser(user, function onSuccess() {
-                    self.getUserNotes(signedout);
+                    self.getUserNotes();
                 });
             } else {
                 user = users[0];
-                self.getUserNotes(signedout);
+                self.getUserNotes();
             }
 
-            if (user.isValidEvernoteUser()) {
-                Evernote.init(user);
-                self.onLogin(user);
-            }
+            Evernote.init(user);
         });
     }
 
@@ -234,15 +210,14 @@ var App = new function() {
 
     this.updateUserData = function(data, c, e) {
         user.set(data, c, e);
-        Settings.update();
     };
     
-    this.getUserNotes = function(signedout) {
+    this.getUserNotes = function() {
         user.getNotebooks(function(notebooks) {
             if (notebooks.length == 0) {
-                self.newNotebook(TEXTS.FIRST_NOTEBOOK_NAME, function(){
+                self.newNotebook(TEXTS.FIRST_NOTEBOOK_NAME, function(notebook, note){
                     NotebooksList.refresh(notebooks);
-                }, signedout);
+                });
             } else {
                 self.showNotes(notebooks[0]);
                 NotebooksList.refresh(notebooks);
@@ -250,18 +225,15 @@ var App = new function() {
         });
     };
     
-    this.newNotebook = function(name, cb, signedout) {
+    this.newNotebook = function(name, cb) {
         user.newNotebook({
             "name": name
         }, function(notebook) {
-            NotebookView.show(notebook);
-            if (!signedout) {
-                self.newNote(notebook, function(note){
-                    cb && cb();
-                });
-            } else {
-                cb && cb();
-            }
+            NotebookView.show(notebook);            
+            self.newNote(notebook, function(note){
+                cb && cb(notebook, note);
+            });
+            
             self.addQueue('Notebook', notebook);
         });
     };
@@ -328,9 +300,7 @@ var App = new function() {
     this.promptNewNotebook = function() {
         var notebookName = prompt(TEXTS.NEW_NOTEBOOK, "");
         if (notebookName) {
-            validateNotebookName(notebookName, null, function(){
-                self.newNotebook(notebookName);    
-            });
+            self.newNotebook(notebookName);
         }
     };
     
@@ -361,35 +331,6 @@ var App = new function() {
     };
     this.refershNotebookView = function() {
         NotebookView.show();
-    };
-
-    this.startSync = function() {
-        document.body.classList.add('syncing');
-    };
-    this.stopSync = function() {
-        document.body.classList.remove('syncing');
-    };
-
-    this.onLogin = function() {
-        document.body.classList.add('loggedin');
-    };
-
-    function validateNotebookName(name, id, cbSuccess, cbError) {
-        DB.getNotebooks({"name": name}, function(notebooks) {
-            var notebookWithNameExists = false;
-            for (var i in notebooks) {
-                if (notebooks[i].getName() === name && (!id || notebooks[i].getId() !== id)) {
-                    notebookWithNameExists = true;
-                    break;
-                }
-            }
-            if (notebookWithNameExists) {
-                alert(TEXTS.NOTEBOOK_NAME_ALREADY_EXISTS);
-                cbError && cbError();
-            } else {
-                cbSuccess && cbSuccess();    
-            }
-        });
     };
 
     function onAddQueue(queue) {
@@ -423,14 +364,12 @@ var App = new function() {
     function onNotebookRename(notebook) {
         var newName = prompt(TEXTS.PROMPT_RENAME_NOTEBOOK, notebook.getName() || "");
         if (newName) {
-            validateNotebookName(newName, notebook.getId(), function() {
-                notebook.set({
-                    "name": newName
-                }, function onSuccess() {
-                    NotebooksList.refresh();
-                    NotebookView.show(notebook);
-                    self.addQueue('Notebook', notebook);
-                });
+            notebook.set({
+                "name": newName
+            }, function onSuccess() {
+                NotebooksList.refresh();
+                NotebookView.show(notebook);
+                self.addQueue('Notebook', notebook);
             });
         }
     }
@@ -439,11 +378,7 @@ var App = new function() {
         if (confirm(TEXTS.PROMPT_DELETE_NOTEBOOK)) {
             notebookAffected.trash(function onSuccess(notebook) {
                 NotebooksList.refresh();
-                self.addQueue('Notebook', {
-                    id : notebookAffected.getId(),
-                    guid : notebookAffected.getGuid(),
-                    expunge : true
-                });
+                self.addQueue('Notebook', notebook);
             });
         }
     }
@@ -554,7 +489,7 @@ var App = new function() {
         };
         
         this.refresh = function(notebooks) {
-            if (!notebooks || notebooks.length == 0) {
+            if (!notebooks) {
                 user.getNotebooks(self.refresh);
                 return;
             }
@@ -581,13 +516,13 @@ var App = new function() {
                 numberOfApps = notebook.getNumberOfNotes();
                 
             el.innerHTML = notebook.getName() + (numberOfApps? " (" + numberOfApps + ")" : "");
-            el.addEventListener("touchstart", function(){
+            el.addEventListener("mousedown", function(){
                 this.timeoutHold = window.setTimeout(function(){
                     el.edited = true;
                     onEditNotebook(notebook);
                 }, TIMEOUT_BEFORE_EDITING_NOTEBOOK);
             });
-            el.addEventListener("touchend", function(){
+            el.addEventListener("mouseup", function(){
                 window.clearTimeout(this.timeoutHold);
                 if (!this.edited) {
                     clickNotebook(notebook);
@@ -911,10 +846,9 @@ var App = new function() {
                 case "type":
                     break;
                 case "photo":
-                    output.type = ResourceTypes.IMAGE;
                     currentNote.newResource(output, function onSuccess(resource) {
-                        self.addResource(resource);
-                        el.classList.add(CLASS_WHEN_HAS_IMAGES);
+                        // self.addResource(resource);
+                        // el.classList.add(CLASS_WHEN_HAS_IMAGES);
                     }, function onError() {
                         
                     });
@@ -1161,25 +1095,20 @@ var App = new function() {
         
         this.saveEditTitle = function() {
             if (!currentNotebook) return;
-
+            
+            el.classList.remove(CLASS_EDIT_TITLE);
+            elEditTitle.blur();
+            
             var newName = elEditTitle.value;
-
-            validateNotebookName(newName, currentNotebook.getId(), function() {
-                el.classList.remove(CLASS_EDIT_TITLE);
-                elEditTitle.blur();
-                
-                if (newName != currentNotebook.getName()) {
-                    currentNotebook.set({
-                        "name": newName
-                    }, function cbSuccess() {
-                        self.setTitle(newName);
-                        onChange && onChange();
-                        App.addQueue('Notebook', currentNotebook);
-                    }, function cbError() {});
-                }
-            }, function() {
-                elEditTitle.focus();
-            });
+            if (newName != currentNotebook.getName()) {
+                currentNotebook.set({
+                    "name": newName
+                }, function cbSuccess() {
+                    self.setTitle(newName);
+                    onChange && onChange();
+                    App.addQueue('Notebook', currentNotebook);
+                }, function cbError() {});
+            }
         };
 
         this.getCurrent = function() {
@@ -1343,14 +1272,14 @@ var App = new function() {
                 act.onsuccess = function() {
                     if (!act.result.blob) return;
                     
-                    // convert the blob to an image (base64)
                     var reader = new FileReader();
-                    reader.readAsDataURL(act.result.blob);
+                    reader.readAsArrayBuffer(act.result.blob);
                     reader.onload = function onBlobRead(e) {
                         onAfterAction && onAfterAction("photo", {
-                            "name": photoLabel,
-                            "src": reader.result,
-                            "size": 0
+                            "name": "Photo-" + new Date().getTime() + "." + act.result.type.replace("image/", ""),
+                            "mime": act.result.type,
+                            "body": reader.result,
+                            "size": act.result.blob.size
                         });
                     };
                 };
@@ -1498,64 +1427,7 @@ var App = new function() {
                 }
             }
         }
-    };
-
-    var Settings = new function() {
-        var self = this,
-            elUsername, elAccount, elButtons, elUploadLeft, elDaysLeft;
-
-        this.init = function(options) {
-            elUsername = options.elUsername;
-            elAccount = options.elAccount;
-            elButtons = options.elButtons;
-            elUploadLeft = options.elUploadLeft;
-            elDaysLeft = options.elDaysLeft;
-            options.elCancel.addEventListener("click", options.onCancel);
-            options.elSignout.addEventListener("click", options.onSignout);
-            options.elSettings.addEventListener("click", options.onEnter);
-        };
-
-        this.update = function() {
-            var userData = user.export();
-
-            var username = userData.username || "";
-            for (var i=0,len=elUsername.length; i<len; i++) {
-              elUsername[i].innerHTML = username;  
-            }
-            
-            // account type
-            var type = userData.privilege == PrivilegeLevel.PREMIUM ? "Premium" : (userData.privilege == PrivilegeLevel.NORMAL ? "Free" : "");
-            if (type && typeof type === "string") {
-                elAccount.innerHTML = type;
-                elButtons.classList.add(type.toLowerCase());
-            }
-
-            // upload left
-            elUploadLeft.innerHTML = getUploadLeft(userData.accounting.uploadLimit);
-            elDaysLeft.innerHTML = getDaysLeft(userData.accounting.uploadLimitEnd);
-        };
-
-        function getUploadLeft(num) {
-            if (!num) { return "" }
-
-            var steps = {'B': 1000000000, 'M': 1000000, 'K': 1000};
-
-            for (var k in steps) {
-                if (num >= steps[k]) {
-                    return Math.round(num/steps[k]*10)/10 + k;
-                }
-            }
-
-            return num;
-        }
-
-        function getDaysLeft(uploadLimitEnd) {
-            var diff = uploadLimitEnd - new Date().getTime();
-            diff = diff / (1000 * 60 * 60 * 24);
-            diff = parseInt(diff, 10);
-            return  diff;
-        }
-    };
+    }
 
     var Sorter = new function() {
         var self = this,
@@ -1679,7 +1551,6 @@ function formatDate(date) {
 }
 
 function $(s) { return document.getElementById(s); }
-function $$(s) { return document.querySelector(s); }
 function html(el, s) { el.innerHTML = (s || "").replace(/</g, '&lt;'); }
 
 window.onload = function() {
