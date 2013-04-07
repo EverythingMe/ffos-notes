@@ -33,10 +33,7 @@ var Evernote = new function() {
         syncElements = 0,
         syncMaxEntries = 100,
 
-        queueList = {
-            notebooks : [],
-            notes : []
-        },
+        queueList = {},
 
         noteStoreTransport,
         noteStoreProtocol,
@@ -370,6 +367,10 @@ var Evernote = new function() {
         App.getQueues(function(queues){
             console.log('[FxOS-Notes] this.sendChanges: '+JSON.stringify(queues));
             if (queues.length > 0) {
+                queueList = {
+                    notebooks : [],
+                    notes : []
+                };
                 for(var i in queues) {
                     if (queues[i].getRel() == 'Notebook') {
                         queueList.notebooks.push(queues[i]);
@@ -403,8 +404,7 @@ var Evernote = new function() {
     this.processNotebookQueue = function(queue) {
         if (queue.getRelContent().expunge) {
             self.deleteNotebook(queue.getRelContent().guid, function(){
-                queue.remove();
-                self.processQueueList();
+                queue.remove(self.processQueueList);
             });
         } else {
             DB.getNotebooks({id : queue.getRelId()}, function(notebook){
@@ -416,13 +416,11 @@ var Evernote = new function() {
                     console.log('[FxOS-Notes] this.processNotebookQueue notebook.isTrashed(): '+notebook.isTrashed());
                     if (notebook.getGuid()) {
                         self.updateNotebook(notebook, function() {
-                            queue.remove();
-                            self.processQueueList();
+                            queue.remove(self.processQueueList);
                         });
                     } else if (!notebook.isTrashed()) {
                         self.newNotebook(notebook, function() {
-                            queue.remove();
-                            self.processQueueList();
+                            queue.remove(self.processQueueList);
                         });
                     } else {
                         self.processQueueList();
@@ -434,8 +432,7 @@ var Evernote = new function() {
     this.processNoteQueue = function(queue) {
         if (queue.getRelContent().expunge) {
             self.expungeNote(queue.getRelContent().guid, function(){
-                queue.remove();
-                self.processQueueList();
+                queue.remove(self.processQueueList);
             })
         } else {
             DB.getNotes({id : queue.getRelId()}, function(note){
@@ -450,16 +447,14 @@ var Evernote = new function() {
                             if (note.isTrashed()) {
                                 self.deleteNote(newNote.guid);
                             }
-                            queue.remove();
-                            self.processQueueList();
+                            queue.remove(self.processQueueList);
                         });
                     } else {
                         self.newNote(note, function(newNote) {
                             if (note.isTrashed()) {
                                 self.deleteNote(newNote.guid);
                             }
-                            queue.remove();
-                            self.processQueueList();
+                            queue.remove(self.processQueueList);
                         });
                     }
                 }
@@ -533,14 +528,16 @@ var Evernote = new function() {
                     });
                 }
                 noteStore.createNote(oauth_token, new Note(noteData), function(remoteNote) {
+                    console.log('[FxOS-Notes] this.newNote (noteStore.createNote): '+JSON.stringify(remoteNote));
                     self.getNote(remoteNote.guid, function(remoteNote) {
-                        note.set(remoteNote);
+                        console.log('[FxOS-Notes] this.newNote (self.getNote): '+JSON.stringify(remoteNote));
+                        udatedNote = note.set(remoteNote);
                         if (App.getUser().getLastUpdateCount() < remoteNote.updateSequenceNum) {
                             App.updateUserData({
                                 last_update_count : remoteNote.updateSequenceNum
                             });
                         }
-                        cbSuccess(remoteNote);
+                        cbSuccess(udatedNote);
                     }, cbError || cbSuccess);
                 }, cbError || cbSuccess);
             } else {
@@ -556,13 +553,13 @@ var Evernote = new function() {
             content : note.getContent()
         }), function(remoteNote) {
             self.getNote(remoteNote.guid, function(remoteNote) {
-                note.set(remoteNote);
+                udatedNote = note.set(remoteNote);
                 if (App.getUser().getLastUpdateCount() < remoteNote.updateSequenceNum) {
                     App.updateUserData({
                         last_update_count : remoteNote.updateSequenceNum
                     });
                 }
-                cbSuccess(remoteNote);
+                cbSuccess(udatedNote);
             }, cbError || cbSuccess);
         }, cbError || cbSuccess);
     };
@@ -590,16 +587,21 @@ var Evernote = new function() {
             var key = "",
                 value = "",
                 bytes = [];
-            for (var i in noteResources[r].data.bodyHash) {
-                key += String("0123456789abcdef".substr((noteResources[r].data.bodyHash[i] >> 4) & 0x0F,1)) + "0123456789abcdef".substr(noteResources[r].data.bodyHash[i] & 0x0F,1);
+
+            if (!noteResources[r].data.bodyHash) {
+                hashMap[md5(noteResources[r].data.body)] = window.btoa(noteResources[r].data.body);
+            } else {
+                for (var i in noteResources[r].data.bodyHash) {
+                    key += String("0123456789abcdef".substr((noteResources[r].data.bodyHash[i] >> 4) & 0x0F,1)) + "0123456789abcdef".substr(noteResources[r].data.bodyHash[i] & 0x0F,1);
+                }
+                for (var i in noteResources[r].data.body) {
+                    value += String("0123456789abcdef".substr((noteResources[r].data.body[i] >> 4) & 0x0F,1)) + "0123456789abcdef".substr(noteResources[r].data.body[i] & 0x0F,1);
+                }
+                for(var i=0; i< value.length-1; i+=2){
+                    bytes.push(parseInt(value.substr(i, 2), 16));
+                }
+                hashMap[key] = window.btoa(String.fromCharCode.apply(String, bytes));
             }
-            for (var i in noteResources[r].data.body) {
-                value += String("0123456789abcdef".substr((noteResources[r].data.body[i] >> 4) & 0x0F,1)) + "0123456789abcdef".substr(noteResources[r].data.body[i] & 0x0F,1);
-            }
-            for(var i=0; i< value.length-1; i+=2){
-                bytes.push(parseInt(value.substr(i, 2), 16));
-            }
-            hashMap[key] = window.btoa(String.fromCharCode.apply(String, bytes));
         }
         return enml.HTMLOfENML(note.getContent(false),hashMap);
     };
