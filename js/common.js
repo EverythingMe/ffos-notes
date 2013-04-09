@@ -1165,7 +1165,7 @@ var App = new function() {
         this.saveEditTitle = function() {
             if (!currentNotebook) return;
 
-            var newName = elEditTitle.value;
+            var newName = elEditTitle.value.replace(/(^[\s]+|[\s]+$)/g, '');
 
             validateNotebookName(newName, currentNotebook.getId(), function() {
                 el.classList.remove(CLASS_EDIT_TITLE);
