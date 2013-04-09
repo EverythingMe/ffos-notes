@@ -4,3 +4,6 @@
 [submodule "js/lib/evernote"]
 	path = js/lib/evernote
 	url = https://github.com/EverythingMe/evernote-sdk-js.git
+[submodule "js/lib/md5"]
+	path = js/lib/md5
+	url = https://github.com/blueimp/JavaScript-MD5.git
