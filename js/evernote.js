@@ -30,10 +30,19 @@ var Evernote = new function() {
         last_sync_time,
 
         syncChunks = [],
-        syncElements = 0,
         syncMaxEntries = 100,
 
-        queueList = {},
+        queueList = {
+            notebooks : [],
+            notes : []
+        },
+
+        syncList = {
+            notebooks : [],
+            notes : [],
+            expungedNotebooks : [],
+            expungedNotes : []
+        },
 
         noteStoreTransport,
         noteStoreProtocol,
@@ -229,131 +238,123 @@ var Evernote = new function() {
         } else {
             console.log('[FxOS-Notes] processSyncChunk: '+JSON.stringify(syncChunks));
             for(var i in syncChunks) {
-                if (syncChunks[i].notebooks) {
-                    syncElements += syncChunks[i].notebooks.length;
-                }
-                if (syncChunks[i].notes) {
-                    syncElements += syncChunks[i].notes.length;
-                }
-                last_update_count = syncChunks[i].updateCount;
-                last_sync_time = syncChunks[i].currentTime;
                 if (syncChunks[i].notebooks && syncChunks[i].notebooks.length > 0) {
                     for (var j in syncChunks[i].notebooks) {
-                        self.getNotebook(syncChunks[i].notebooks[j].guid, function(notebook){
-                            DB.getNotebooks({guid: notebook.guid}, function(results){
-                                console.log('[FxOS-Notes] DB.getNotebooks: '+JSON.stringify(results));
-                                if (results.length == 0) {
-                                    App.getUser().newNotebook(notebook, self.processNotebookNotes);
-                                } else {
-                                    results[0].set(notebook, self.processNotebookNotes);
-                                }
-                            });
-                        });
-                    }
-                } else if (syncChunks[i].notes && syncChunks[i].notes.length > 0) {
-                    self.processNotesChunk();
-                } else {
-                    self.finishSync();
-                }
-            }
-        }
-    };
-    this.processNotesChunk = function(notebook) {
-        console.log('[FxOS-Notes] this.processNotesChunk (notebook): '+JSON.stringify(notebook));
-        for(var i in syncChunks) {
-            for (var j in syncChunks[i].notes) {
-                if (!notebook) {
-                    self.getNote(syncChunks[i].notes[j].guid, function(note){
-                        console.log('[FxOS-Notes] self.getNote: '+JSON.stringify(note));
-                        DB.getNotes({guid: note.guid}, function(results){
-                            console.log('[FxOS-Notes] DB.getNotes: '+JSON.stringify(results));
-                            if (results.length > 0) {
-                                results[0].set(note, function(newNote){
-                                    if (results[0].isTrashed() && newNote.isActive()) {
-                                        newNote.restore();
-                                    } else if (!results[0].isTrashed() && !newNote.isActive()) {
-                                        newNote.trash();
-                                    }
-                                });
-                            } else {
-                                DB.getNotebooks({guid: note.notebookGuid}, function(notebooks){
-                                    console.log('[FxOS-Notes] DB.getNotebooks: '+JSON.stringify(notebooks));
-                                    if (notebooks.length > 0) {
-                                        notebooks[0].newNote(note, function(newNote){
-                                            if (!newNote.isActive()) {
-                                                newNote.trash();
-                                            }
-                                        });
-                                    }
-                                })
-                            }
-                            self.finishSync();
-                        });
-                    });
-                } else {
-                    notebookGuid = notebook.getGuid();
-                    if (syncChunks[i].notes[j].notebookGuid == notebookGuid) {
-                        self.getNote(syncChunks[i].notes[j].guid, function(note){
-                            console.log('[FxOS-Notes] self.getNote: '+JSON.stringify(note));
-                            DB.getNotes({guid: note.guid}, function(results){
-                                console.log('[FxOS-Notes] DB.getNotes: '+JSON.stringify(results));
-                                if (results.length > 0) {
-                                    results[0].set(note, function(newNote){
-                                        if (results[0].isTrashed() && newNote.isActive()) {
-                                            newNote.restore();
-                                        } else if (!results[0].isTrashed() && !newNote.isActive()) {
-                                            newNote.trash();
-                                        }
-                                    });
-                                } else {
-                                    notebook.newNote(note, function(newNote){
-                                        if (!newNote.isActive()) {
-                                            newNote.trash();
-                                        }
-                                    });
-                                }
-                                self.finishSync();
-                            });
-                        });
+                        syncList.notebooks.push(syncChunks[i].notebooks[j]);
                     }
                 }
-            }
-        }
-    };
-    this.processNotebookNotes = function(notebook) {
-        syncElements = syncElements-1;
-        self.processNotesChunk(notebook);
-    };
-    this.finishSync = function() {
-        App.stopSync();
-        syncElements = syncElements-1;
-        if (syncElements <= 0) {
-            for(var i in syncChunks) {
+                if (syncChunks[i].notes && syncChunks[i].notes.length > 0) {
+                    for (var j in syncChunks[i].notes) {
+                        syncList.notes.push(syncChunks[i].notes[j]);
+                    }
+                }
                 if (syncChunks[i].expungedNotebooks && syncChunks[i].expungedNotebooks.length > 0) {
                     for (var j in syncChunks[i].expungedNotebooks) {
-                        DB.getNotebooks(syncChunks[i].expungedNotebooks[j], function(notebook){
-                            if (notebook.length > 0) {
-                                notebook[0].remove();
-                            }
-                        });
+                        syncList.expungedNotebooks.push(syncChunks[i].expungedNotebooks[j]);
                     }
                 }
                 if (syncChunks[i].expungedNotes && syncChunks[i].expungedNotes.length > 0) {
                     for (var j in syncChunks[i].expungedNotes) {
-                        DB.getNotes(syncChunks[i].expungedNotes[j], function(note){
-                            if (note.length > 0) {
-                                note[0].remove();
-                            }
-                        });
+                        syncList.expungedNotes.push(syncChunks[i].expungedNotes[j]);
                     }
                 }
+
+                last_update_count = syncChunks[i].updateCount;
+                last_sync_time = syncChunks[i].currentTime;
             }
-            App.updateUserData({
-                last_update_count : last_update_count,
-                last_sync_time : last_sync_time
-            });
-            self.sendChanges();
+            self.processSyncChunkList();
         }
+    };
+    this.processSyncChunkList = function() {
+        var chunk = null;
+        console.log('[FxOS-Notes] this.processSyncList');
+        console.log('[FxOS-Notes] this.processSyncList syncList.notebooks.length: '+syncList.notebooks.length);
+        console.log('[FxOS-Notes] this.processSyncList syncList.notes.length: '+syncList.notes.length);
+        if (syncList.notebooks.length > 0) {
+            chunk = syncList.notebooks.pop();
+            console.log('[FxOS-Notes] this.processSyncList notebook chunk: '+JSON.stringify(chunk));
+            self.processNotebookChunk(chunk);
+        } else if (syncList.notes.length > 0) {
+            chunk = syncList.notes.pop();
+            self.processNoteChunk(chunk);
+        } else if (syncList.expungedNotebooks.length > 0) {
+            chunk = syncList.expungedNotebooks.pop();
+            self.processExpungedNotebookChunk(chunk);
+        } else if (syncList.expungedNotes.length > 0) {
+            chunk = syncList.expungedNotes.pop();
+            self.processExpungedNoteChunk(chunk);
+        } else {
+            self.finishSync();
+        }
+    };
+    this.processNotebookChunk = function(chunk) {
+        console.log('[FxOS-Notes] this.processNotebookChunk (chunk): '+JSON.stringify(chunk));
+        self.getNotebook(chunk.guid, function(notebook){
+            DB.getNotebooks({guid: notebook.guid}, function(results){
+                console.log('[FxOS-Notes] DB.getNotebooks: '+JSON.stringify(results));
+                if (results.length == 0) {
+                    App.getUser().newNotebook(notebook, self.processSyncChunkList);
+                } else {
+                    results[0].set(notebook, self.processSyncChunkList);
+                }
+            });
+        });
+    };
+    this.processNoteChunk = function(chunk) {
+        console.log('[FxOS-Notes] this.processNoteChunk (chunk): '+JSON.stringify(chunk));
+        self.getNote(chunk.guid, function(note){
+            console.log('[FxOS-Notes] self.getNote: '+JSON.stringify(note));
+            DB.getNotes({guid: note.guid}, function(results){
+                console.log('[FxOS-Notes] DB.getNotes: '+JSON.stringify(results));
+                if (results.length > 0) {
+                    results[0].set(note, function(newNote){
+                        if (results[0].isTrashed() && newNote.isActive()) {
+                            newNote.restore();
+                        } else if (!results[0].isTrashed() && !newNote.isActive()) {
+                            newNote.trash();
+                        }
+                        self.processSyncChunkList();
+                    });
+                } else {
+                    DB.getNotebooks({guid: note.notebookGuid}, function(notebooks){
+                        console.log('[FxOS-Notes] DB.getNotebooks: '+JSON.stringify(notebooks));
+                        if (notebooks.length > 0) {
+                            notebooks[0].newNote(note, function(newNote){
+                                if (!newNote.isActive()) {
+                                    newNote.trash();
+                                }
+                                self.processSyncChunkList();
+                            });
+                        }
+                    });
+                }
+            });
+        });
+    };
+    this.processExpungedNotebookChunk = function(chunk) {
+        console.log('[FxOS-Notes] this.processExpungedNotebookChunk (chunk): '+JSON.stringify(chunk));
+        DB.getNotebooks({guid: chunk}, function(notebook){
+            if (notebook.length > 0) {
+                notebook[0].remove();
+            }
+            self.processSyncChunkList();
+        });
+    };
+    this.processExpungedNoteChunk = function(chunk) {
+        console.log('[FxOS-Notes] this.processExpungedNoteChunk (chunk): '+JSON.stringify(chunk));
+        DB.getNotes({guid: chunk}, function(note){
+            if (note.length > 0) {
+                note[0].remove();
+            }
+            self.processSyncChunkList();
+        });
+    };
+    this.finishSync = function() {
+        App.stopSync();
+        App.updateUserData({
+            last_update_count : last_update_count,
+            last_sync_time : last_sync_time
+        }, self.sendChanges);
     };
 
     this.sendChanges = function() {
@@ -411,12 +412,10 @@ var Evernote = new function() {
                         self.updateNotebook(notebook, function() {
                             queue.remove(self.processQueueList);
                         });
-                    } else if (!notebook.isTrashed()) {
+                    } else {
                         self.newNotebook(notebook, function() {
                             queue.remove(self.processQueueList);
                         });
-                    } else {
-                        self.processQueueList();
                     }
                 }
             });
@@ -464,6 +463,8 @@ var Evernote = new function() {
 
     this.newNotebook = function(notebook, cbSuccess, cbError) {
         console.log('[FxOS-Notes] this.newNotebook');
+        var notebookData = notebook.export();
+        notebookData.name = notebookData.name.replace(/(^[\s]+|[\s]+$)/g, '');
         noteStore.createNotebook(oauth_token, new Notebook(notebook.export()), function(remoteNotebook) {
             notebook.set(remoteNotebook, cbSuccess);
             if (App.getUser().getLastUpdateCount() < remoteNotebook.updateSequenceNum) {
@@ -485,6 +486,7 @@ var Evernote = new function() {
     this.updateNotebook = function(notebook, cbSuccess, cbError) {
         console.log('[FxOS-Notes] this.updateNotebook');
         var notebookData = notebook.export();
+        notebookData.name = notebookData.name.replace(/(^[\s]+|[\s]+$)/g, '');
         notebookData.restrictions = new NotebookRestrictions(notebookData.restrictions);
         noteStore.updateNotebook(oauth_token, new Notebook(notebookData), function(remoteNotebook) {
             notebook.set(remoteNotebook, cbSuccess);
@@ -501,7 +503,7 @@ var Evernote = new function() {
     };
 
     this.newNote = function(note, cbSuccess, cbError) {
-        console.log('[FxOS-Notes] this.newNote');
+        console.log('[FxOS-Notes] this.newNote: '+JSON.stringify(note));
         DB.getNotebooks({"id": note.getNotebookId()}, function(notebook) {
             if (notebook.length > 0) {
                 notebook = notebook[0];
@@ -520,6 +522,7 @@ var Evernote = new function() {
                         })
                     });
                 }
+                noteData.title = noteData.title.replace(/(^[\s]+|[\s]+$)/g, '');
                 noteStore.createNote(oauth_token, new Note(noteData), function(remoteNote) {
                     console.log('[FxOS-Notes] this.newNote (noteStore.createNote): '+JSON.stringify(remoteNote));
                     self.getNote(remoteNote.guid, function(remoteNote) {
@@ -532,7 +535,9 @@ var Evernote = new function() {
                         }
                         cbSuccess(udatedNote);
                     }, cbError || cbSuccess);
-                }, cbError || cbSuccess);
+                }, /*cbError || cbSuccess*/function(error){
+                    console.log("ERROR: "+JSON.stringify(error));
+                });
             } else {
                 cbSuccess();
             }
@@ -540,11 +545,22 @@ var Evernote = new function() {
     };
     this.updateNote = function(note, cbSuccess, cbError) {
         console.log('[FxOS-Notes] this.updateNote');
-        noteStore.updateNote(oauth_token, new Note({
-            guid : note.getGuid(),
-            title : note.getName(),
-            content : note.getContent()
-        }), function(remoteNote) {
+        var noteData = note.export();
+        for(var k in noteData.resources) {
+            noteData.resources[k] = new Resource({
+                noteGuid : noteData.resources[k].noteGuid,
+                mime : noteData.resources[k].mime,
+                data : new Data({
+                    body : noteData.resources[k].data.body,
+                    size : noteData.resources[k].data.size
+                }),
+                attributes : new ResourceAttributes({
+                    fileName : noteData.resources[k].attributes.fileName
+                })
+            });
+        }
+        noteData.title = noteData.title.replace(/(^[\s]+|[\s]+$)/g, '');
+        noteStore.updateNote(oauth_token, new Note(noteData), function(remoteNote) {
             self.getNote(remoteNote.guid, function(remoteNote) {
                 udatedNote = note.set(remoteNote);
                 if (App.getUser().getLastUpdateCount() < remoteNote.updateSequenceNum) {
