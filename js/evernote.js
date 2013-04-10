@@ -277,6 +277,8 @@ var Evernote = new function() {
         console.log('[FxOS-Notes] this.processSyncList');
         console.log('[FxOS-Notes] this.processSyncList syncList.notebooks.length: '+syncList.notebooks.length);
         console.log('[FxOS-Notes] this.processSyncList syncList.notes.length: '+syncList.notes.length);
+        console.log('[FxOS-Notes] this.processSyncList syncList.expungedNotebooks.length: '+syncList.expungedNotebooks.length);
+        console.log('[FxOS-Notes] this.processSyncList syncList.expungedNotes.length: '+syncList.expungedNotes.length);
         if (syncList.notebooks.length > 0) {
             chunk = syncList.notebooks.pop();
             console.log('[FxOS-Notes] this.processSyncList notebook chunk: '+JSON.stringify(chunk));
@@ -552,22 +554,11 @@ var Evernote = new function() {
     };
     this.updateNote = function(note, cbSuccess, cbError) {
         console.log('[FxOS-Notes] this.updateNote');
-        var noteData = note.export();
-        for(var k in noteData.resources) {
-            noteData.resources[k] = new Resource({
-                noteGuid : noteData.resources[k].noteGuid,
-                mime : noteData.resources[k].mime,
-                data : new Data({
-                    body : noteData.resources[k].data.body,
-                    size : noteData.resources[k].data.size
-                }),
-                attributes : new ResourceAttributes({
-                    fileName : noteData.resources[k].attributes.fileName
-                })
-            });
-        }
-        noteData.title = noteData.title.replace(/(^[\s]+|[\s]+$)/g, '');
-        noteStore.updateNote(oauth_token, new Note(noteData), function(remoteNote) {
+        noteStore.updateNote(oauth_token, new Note({
+            guid : note.getGuid(),
+            title : note.getName(),
+            content : note.getContent()
+        }), function(remoteNote) {
             self.getNote(remoteNote.guid, function(remoteNote) {
                 udatedNote = note.set(remoteNote);
                 if (App.getUser().getLastUpdateCount() < remoteNote.updateSequenceNum) {
@@ -604,8 +595,8 @@ var Evernote = new function() {
                 value = "",
                 bytes = [];
 
-            if (!noteResources[r].data.bodyHash) {
-                hashMap[md5(noteResources[r].data.body)] = window.btoa(noteResources[r].data.body);
+            if (typeof noteResources[r].data.bodyHash == "string") {
+                hashMap[noteResources[r].data.bodyHash] = window.btoa(noteResources[r].data.body);
             } else {
                 for (var i in noteResources[r].data.bodyHash) {
                     key += String("0123456789abcdef".substr((noteResources[r].data.bodyHash[i] >> 4) & 0x0F,1)) + "0123456789abcdef".substr(noteResources[r].data.bodyHash[i] & 0x0F,1);
