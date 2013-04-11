@@ -329,7 +329,6 @@ var Models = new function() {
                 mime : options.mime,
                 data : new Data({
                     body : options.body,
-                    bodyHash: options.bodyHash,
                     size : options.size
                 }),
                 attributes : new ResourceAttributes({
