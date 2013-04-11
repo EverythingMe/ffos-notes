@@ -914,7 +914,7 @@ var App = new function() {
                 case "type":
                     break;
                 case "photo":
-                    $("note-content").innerHTML += " <img type=\""+output.mime+"\" src=\"data:"+output.mime+";base64,"+window.btoa(output.body)+"\" hash=\""+output.bodyHash+"\" />";
+                    $("note-content").innerHTML += " <img type=\""+output.mime+"\" src=\"data:"+output.mime+";base64,"+window.btoa(output.body)+"\" hash=\""+md5(output.body)+"\" />";
                     currentNote.newResource(output, function onSuccess(resource) {
                         // self.addResource(resource);
                         // el.classList.add(CLASS_WHEN_HAS_IMAGES);
@@ -1353,7 +1353,6 @@ var App = new function() {
                             "name": "Photo-" + new Date().getTime() + "." + act.result.type.replace("image/", ""),
                             "mime": act.result.type,
                             "body": reader.result,
-                            "bodyHash": md5(reader.result),
                             "size": act.result.blob.size
                         });
                     };

@@ -519,11 +519,18 @@ var Evernote = new function() {
                 note = note.set({notebookGuid : notebook.getGuid()});
                 var noteData = note.export();
                 for(var k in noteData.resources) {
+                    var bodyHashMd5 = md5(noteData.resources[k].data.body, false, true);
+                    var buf = new ArrayBuffer(bodyHashMd5.length*2); // 2 bytes for each char
+                    var bufView = new Uint16Array(buf);
+                    for (var i=0, strLen=bodyHashMd5.length; i<strLen; i++) {
+                            bufView[i] = bodyHashMd5.charCodeAt(i);
+                    }
                     noteData.resources[k] = new Resource({
                         noteGuid : noteData.resources[k].noteGuid,
                         mime : noteData.resources[k].mime,
                         data : new Data({
                             body : noteData.resources[k].data.body,
+                            bodyHash : buf,
                             size : noteData.resources[k].data.size
                         }),
                         attributes : new ResourceAttributes({
@@ -595,8 +602,8 @@ var Evernote = new function() {
                 value = "",
                 bytes = [];
 
-            if (typeof noteResources[r].data.bodyHash == "string") {
-                hashMap[noteResources[r].data.bodyHash] = window.btoa(noteResources[r].data.body);
+            if (!noteResources[r].data.bodyHash) {
+                hashMap[md5(noteResources[r].data.body, false, true)] = window.btoa(noteResources[r].data.body);
             } else {
                 for (var i in noteResources[r].data.bodyHash) {
                     key += String("0123456789abcdef".substr((noteResources[r].data.bodyHash[i] >> 4) & 0x0F,1)) + "0123456789abcdef".substr(noteResources[r].data.bodyHash[i] & 0x0F,1);
