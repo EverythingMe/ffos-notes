@@ -316,7 +316,6 @@ var Models = new function() {
         
         this.getResources = function(cbSuccess, cbError) {
             return self.data_resources;
-            // DB.getNoteResources({"noteId": self.getId()}, cbSuccess, cbError);
         };
         
         this.newResource = function(options, cbSuccess, cbError) {
@@ -324,8 +323,8 @@ var Models = new function() {
                 noteGuid : self.getGuid(),
                 mime : options.mime,
                 data : new Data({
-                    body : options.body,
-                    size : options.size
+                    body : ArrayBufferHelper.encode(options.body),
+                    size : options.body.length
                 }),
                 attributes : new ResourceAttributes({
                     fileName : options.name
