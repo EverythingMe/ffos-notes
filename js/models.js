@@ -318,7 +318,7 @@ var Models = new function() {
         };
         
         
-        this.getResources = function(cbSuccess, cbError) {
+        this.getResources = function() {
             return self.data_resources;
         };
         
