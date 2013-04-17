@@ -387,7 +387,9 @@ var Models = new function() {
         this.data_id = "";
         this.data_rel = "";
         this.data_rel_id = "";
+        this.data_rel_guid = "";
         this.data_rel_content = "";
+        this.data_expunge = false;
         
         function init(options) {
             updateObject(self, options);
@@ -421,7 +423,9 @@ var Models = new function() {
         this.getId = function() { return self.data_id; };
         this.getRel = function() { return self.data_rel; };
         this.getRelId = function() { return self.data_rel_id; };
+        this.getRelGuid = function() { return self.data_rel_guid; };
         this.getRelContent = function() { return self.data_rel_content; };
+        this.getExpunge = function() { return self.data_expunge; };
         
         this.setId = function(id) { self.data_id = id; };
 

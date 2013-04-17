@@ -276,6 +276,7 @@ var App = new function() {
         new Models.Queue({
             rel : type,
             rel_id : obj.data_id || obj.id,
+            rel_guid : obj.data_guid || obj.guid,
             rel_content : obj
         }).set(onAddQueue);
     };

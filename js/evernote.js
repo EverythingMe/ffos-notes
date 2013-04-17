@@ -14,8 +14,9 @@ var Evernote = new function() {
         AUTHORIZATION_URL = EVERNOTE_SERVER+"/OAuth.action",
 
         TEXTS = {
-            "NOTEBOOK_NAME_CONFLICT": "Your Evernote already has a notebook with the name '{{NOTEBOOK_NAME}}'. Do you want to keep the local notebook?",
-            "NOT_REACHED_EVERNOTE": "Could not reach Evernote server. Make sure you are connected to the internet."
+            "NOT_REACHED_EVERNOTE": "Could not reach Evernote server. Make sure you are connected to the internet.",
+            "NOTEBOOK_DELETE_CONFLICT": "Local notebook has been deleted. Would you like to restore it from the server?",
+            "GENERIC_CONFLICT": "The {{object}} {{name}} has a different version on Evernote from {{date}}. Would you like to keep your local changes?"
         },
 
         NAME_CONFLICT_POSTFIX = " - 1",
@@ -274,7 +275,6 @@ var Evernote = new function() {
         console.log('[FxOS-Notes] this.processSyncList syncList.expungedNotes.length: '+syncList.expungedNotes.length);
         if (syncList.notebooks.length > 0) {
             chunk = syncList.notebooks.pop();
-            console.log('[FxOS-Notes] this.processSyncList notebook chunk: '+JSON.stringify(chunk));
             self.processNotebookChunk(chunk);
         } else if (syncList.notes.length > 0) {
             chunk = syncList.notes.pop();
@@ -292,13 +292,55 @@ var Evernote = new function() {
     this.processNotebookChunk = function(chunk) {
         console.log('[FxOS-Notes] this.processNotebookChunk (chunk): '+JSON.stringify(chunk));
         self.getNotebook(chunk.guid, function(notebook){
-            DB.getNotebooks({guid: notebook.guid}, function(results){
-                console.log('[FxOS-Notes] DB.getNotebooks: '+JSON.stringify(results));
-                if (results.length == 0) {
-                    App.getUser().newNotebook(notebook, self.processSyncChunkList);
-                } else {
-                    results[0].set(notebook, self.processSyncChunkList);
-                }
+            console.log('[FxOS-Notes] self.getNotebook: '+JSON.stringify(notebook));
+            DB.getNotebooks({guid: notebook.guid}, function(resultsGuid){
+                console.log('[FxOS-Notes] DB.getNotebooks by guid: '+JSON.stringify(resultsGuid));
+                DB.getNotebooks({name: notebook.name}, function(resultsName){
+                    console.log('[FxOS-Notes] DB.getNotebooks by name: '+JSON.stringify(resultsName));
+                    DB.getQueues({rel: "Notebook", rel_guid: notebook.guid}, function(resultsQueue){
+                        console.log('[FxOS-Notes] DB.getQueues by notebook.guid: '+JSON.stringify(resultsQueue));
+                        if (resultsQueue.length == 0) {
+                            if (resultsGuid.length == 0) {
+                                if (resultsName.length == 0) {
+                                    App.getUser().newNotebook(notebook, self.processSyncChunkList);
+                                } else {
+                                    if (!resultsName[0].getGuid() || resultsName[0].getGuid() == notebook.guid) {
+                                        resultsName[0].set(notebook, self.processSyncChunkList);
+                                    } else {
+                                        App.getUser().newNotebook(notebook, self.processSyncChunkList);
+                                    }
+                                }
+                            } else {
+                                resultsGuid[0].set(notebook, self.processSyncChunkList);
+                            }
+                        } else {
+                            if (resultsQueue[0].getExpunge()) {
+                                if (confirm(TEXTS.NOTEBOOK_DELETE_CONFLICT)) {
+                                    App.getUser().newNotebook(notebook, function(){
+                                        resultsQueue[0].remove(self.processSyncChunkList);
+                                    });
+                                } else {
+                                    self.processSyncChunkList();
+                                }
+                            } else {
+                                if (resultsGuid[0].getName() != notebook.name) {
+                                    var txt = TEXTS.GENERIC_CONFLICT.replace("{{date}}", new Date(notebook.serviceUpdated));
+                                        txt = txt.replace("{{object}}", "Notebook");
+                                        txt = txt.replace("{{name}}", '"'+resultsGuid[0].getName()+'"');
+                                    if (!confirm(txt)) {
+                                        resultsGuid[0].set(notebook, function(){
+                                            resultsQueue[0].remove(self.processSyncChunkList);
+                                        });
+                                    } else {
+                                        self.processSyncChunkList();
+                                    }
+                                } else {
+                                    resultsGuid[0].set(notebook, self.processSyncChunkList);
+                                }
+                            }
+                        }
+                    });
+                });
             });
         });
     };
@@ -306,30 +348,55 @@ var Evernote = new function() {
         console.log('[FxOS-Notes] this.processNoteChunk (chunk): '+JSON.stringify(chunk));
         self.getNote(chunk.guid, function(note){
             console.log('[FxOS-Notes] self.getNote: '+JSON.stringify(note));
-            DB.getNotes({guid: note.guid}, function(results){
-                console.log('[FxOS-Notes] DB.getNotes: '+JSON.stringify(results));
-                if (results.length > 0) {
-                    results[0].set(note, function(newNote){
-                        if (results[0].isTrashed() && newNote.isActive()) {
-                            newNote.restore();
-                        } else if (!results[0].isTrashed() && !newNote.isActive()) {
-                            newNote.trash();
-                        }
-                        self.processSyncChunkList();
-                    });
-                } else {
-                    DB.getNotebooks({guid: note.notebookGuid}, function(notebooks){
-                        console.log('[FxOS-Notes] DB.getNotebooks: '+JSON.stringify(notebooks));
-                        if (notebooks.length > 0) {
-                            notebooks[0].newNote(note, function(newNote){
-                                if (!newNote.isActive()) {
-                                    newNote.trash();
+            DB.getNotes({guid: note.guid}, function(resultsNote){
+                console.log('[FxOS-Notes] DB.getNotes: '+JSON.stringify(resultsNote));
+                DB.getQueues({rel: "Note", rel_guid: note.guid}, function(resultsQueue){
+                    console.log('[FxOS-Notes] DB.getQueues by note.guid: '+JSON.stringify(resultsQueue));
+                    if (resultsQueue.length > 0) {
+                        var txt = TEXTS.GENERIC_CONFLICT.replace("{{date}}", new Date(note.updated));
+                            txt = txt.replace("{{object}}", "Note");
+                            txt = txt.replace("{{name}}", '"'+resultsNote[0].getTitle()+'"');
+                        if (!confirm(txt)) {
+                            resultsNote[0].set(note, function(newNote){
+                                if (resultsNote[0].isTrashed() && newNote.isActive()) {
+                                    newNote.restore(self.processSyncChunkList);
+                                } else if (!resultsNote[0].isTrashed() && !newNote.isActive()) {
+                                    newNote.trash(self.processSyncChunkList);
+                                } else {
+                                    self.processSyncChunkList();
                                 }
-                                self.processSyncChunkList();
+                            });
+                        } else {
+                            self.processSyncChunkList();
+                        }
+                    } else {
+                        if (resultsNote.length > 0) {
+                            resultsNote[0].set(note, function(newNote){
+                                if (resultsNote[0].isTrashed() && newNote.isActive()) {
+                                    newNote.restore(self.processSyncChunkList);
+                                } else if (!resultsNote[0].isTrashed() && !newNote.isActive()) {
+                                    newNote.trash(self.processSyncChunkList);
+                                } else {
+                                    self.processSyncChunkList();
+                                }
+                            });
+                        } else {
+                            DB.getNotebooks({guid: note.notebookGuid}, function(notebooks){
+                                console.log('[FxOS-Notes] DB.getNotebooks: '+JSON.stringify(notebooks));
+                                if (notebooks.length > 0) {
+                                    notebooks[0].newNote(note, function(newNote){
+                                        if (!newNote.isActive()) {
+                                            newNote.trash();
+                                        }
+                                        self.processSyncChunkList();
+                                    });
+                                } else {
+                                    self.processSyncChunkList();
+                                }
                             });
                         }
-                    });
-                }
+                    }
+                });
             });
         });
     };
