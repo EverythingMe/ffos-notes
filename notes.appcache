@@ -1,21 +1,7 @@
 CACHE MANIFEST
-# ver 1.30
+# ver 2
 
 index.html
-images/icon.png
-images/sprite.png
-images/back.png
-images/bg_overlay_orange.png
-images/bg_overlay_pressed_1.png
-images/bg_overlay_pressed_2.png
-images/div_line_lg_orange.png
-images/div_line_sm_orange.png
-images/header_bg_orange.png
-images/iconaction_cancel_30x30.png
-images/iconaction_menu_30x30.png
-images/iconaction_new_30x30.png
-images/toolbar_bg.png
-images/evernote-login.png
 js/lib/evernote/evernote-sdk-js/thrift/lib/thrift.js
 js/lib/evernote/evernote-sdk-js/thrift/lib/thrift-binary.js
 js/lib/evernote/evernote-sdk-js/generated/Errors_types.js
@@ -30,6 +16,8 @@ js/lib/oauth/sha1.js
 js/lib/enml-js/lib/xml-parser.js
 js/lib/enml-js/lib/xml-writer.js
 js/lib/enml-js/enml.js
+js/lib/md5/md5.min.js
+js/lib/sparkmd5/spark-md5.min.js
 js/dialog.js
 js/db.js
 js/models.js
@@ -38,11 +26,44 @@ js/Searcher.js
 js/Cards.js
 js/evernote.js
 js/common.js
-style/images/ui/gradient.png
-style/images/ui/pattern.png
-style/common.css
 style/dialog.css
 shared/style/headers.css
+shared/style/buttons.css
+shared/style/progress_activity.css
+style/common.css
+style/images/ui/pattern.png
+style/images/ui/gradient.png
+style/images/ui/pattern.png
+style/images/ui/cancel.png
+images/sprite.png
+images/iconaction_new_30x30.png
+images/sprite.png
+images/evernote-login
+images/header_bg_green.png
+images/header_negative_green.png
+images/separator_green.png
+images/sprite.png
+images/div_line_lg_gray.png
+shared/style/buttons.css
+shared/style/drawer.css
+shared/style/headers.css
+shared/style/lists.css
+shared/style/progress_activity.css
+shared/style/drawer/images/icons/menu.png
+shared/style/drawer/images/icons/menu@2x.png
+shared/style/drawer/images/ui/header.png
+shared/style/drawer/images/ui/negative.png
+shared/style/drawer/images/ui/pattern.png
+shared/style/drawer/images/ui/pattern_subheader.png
+shared/style/drawer/images/ui/separator.png
+shared/style/drawer/images/ui/separator_large.png
+shared/style/drawer/images/ui/shadow.png
+shared/style/drawer/images/ui/shadow@2x.png
+shared/style/drawer/images/ui/shadow_header.png
+shared/style/drawer/images/ui/shadow_header@2x.png
+shared/style/drawer/images/ui/header/header.png
+shared/style/drawer/images/ui/header/shadow.png
+shared/style/drawer/images/ui/header/shadow@2x.png
 shared/style/headers/images/icons/add.png
 shared/style/headers/images/icons/back-rtl.png
 shared/style/headers/images/icons/back.png
@@ -73,6 +94,9 @@ shared/style/headers/images/ui/organic/separator.png
 shared/style/headers/images/ui/organic/subheader.png
 shared/style/headers/images/ui/overlay/header.png
 shared/style/headers/images/ui/overlay/separator.png
+shared/style/progress_activity/images/ui/activity.png
+shared/style/progress_activity/images/ui/default.png
+shared/style/progress_activity/images/ui/default@2x.png
 
 NETWORK:
 *
