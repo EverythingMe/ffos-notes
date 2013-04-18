@@ -9,4 +9,4 @@
 	url = https://github.com/blueimp/JavaScript-MD5.git
 [submodule "js/lib/sparkmd5"]
 	path = js/lib/sparkmd5
-	url = git@github.com:satazor/SparkMD5.git
+	url = https://github.com/satazor/SparkMD5.git
