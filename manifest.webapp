@@ -2,9 +2,11 @@
     "name": "Notes",
     "description": "Notes app",
     "launch_path": "/index.html",
-    "type": "certified",
+    "type": "privileged",
     "permissions": {
-        "systemXHR": {}
+        "systemXHR": {
+            "description": "Access Evernote API"
+        }
     },
     "developer": {
         "name": "DoAT",
