@@ -13,11 +13,7 @@ var Evernote = new function() {
         ACCESS_TOKEN_URL = EVERNOTE_SERVER+"/oauth",
         AUTHORIZATION_URL = EVERNOTE_SERVER+"/OAuth.action",
 
-        TEXTS = {
-            "NOT_REACHED_EVERNOTE": "Could not reach Evernote server. Make sure you are connected to the internet.",
-            "NOTEBOOK_DELETE_CONFLICT": "Local notebook has been deleted. Would you like to restore it from the server?",
-            "GENERIC_CONFLICT": "The {{object}} {{name}} has a different version on Evernote from {{date}}. Would you like to keep your local changes?"
-        },
+        TEXTS = null,
 
         NAME_CONFLICT_POSTFIX = " - 1",
 
@@ -50,6 +46,8 @@ var Evernote = new function() {
         noteStore;
 
     this.init = function(user) {
+        self.setupTexts();
+
         console.log('[FxOS-Notes] Evernote.init()');
         console.log('[FxOS-Notes] isValidEvernoteUser: '+user.isValidEvernoteUser());
         if (user.isValidEvernoteUser()) {
@@ -80,6 +78,12 @@ var Evernote = new function() {
             $("button-evernote-login").style.display = "block";
             $("button-evernote-login").addEventListener("click", Evernote.login);
         }
+
+        document.addEventListener('localechange', function(){
+            navigator.mozL10n.ready(function(){
+                self.setupTexts();
+            });
+        }, false);
     };
 
     this.processXHR = function(url, method, callback) {
@@ -694,6 +698,14 @@ var Evernote = new function() {
     };
 
     this.onError = function() {};
+
+    this.setupTexts = function() {
+        TEXTS = {
+            "NOT_REACHED_EVERNOTE": navigator.mozL10n.get("not-reached-evernote"),
+            "NOTEBOOK_DELETE_CONFLICT": navigator.mozL10n.get("notebook-delete-conflict"),
+            "GENERIC_CONFLICT": navigator.mozL10n.get("generic-conflict")
+        };
+    };
 
     function initNoteStore() {
         if (!noteStore) {

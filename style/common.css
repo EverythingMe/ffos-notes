@@ -667,21 +667,6 @@ body.loading .card:not(.active) {
     display: none;
 }
 
-#button-evernote-login {
-    width: 254px;
-    height: 24px;
-    background: url("../images/evernote-login.png") no-repeat scroll 0 0 transparent;
-    padding: 0;
-    border: 0 none;
-    margin: 0;
-    position: absolute;
-    bottom: 5px;
-    left: 8px;
-}
-.loggedin #button-evernote-login {
-    display: none;
-}
-
 .loggedin section[role="region"] > header:first-child {
     background-image: url(../images/header_bg_green.png);
 }
@@ -709,33 +694,74 @@ body.loading .card:not(.active) {
     bottom: 0;
     left: 0;
     right: 0;
-    height: 2rem;
-    padding: 1rem 1.6rem;
+    height: 4rem;
+    padding: 0;
     background: rgba(0,0,0,.3);
 }
-.drawer footer button {
+.drawer footer #button-evernote-login {
+    background-color: #6BB130;
+    background-image: linear-gradient(to top, rgba(0, 0, 0, 0.21), rgba(255, 255, 255, 0.21));
+    border: medium none;
+    border-radius: 1px 1px 1px 1px;
+    box-shadow: 0 -1px rgba(0, 0, 0, 0.4) inset;
+    display: block;
+    height: 2.5rem;
+    line-height: 2.5rem;
+    margin: 0.8rem auto 0;
+    padding: 0;
+    text-overflow: clip;
+    white-space: normal;
+    width: 25rem;
+}
+.drawer footer #button-evernote-login span {
+    
+    color: #FFFFFF;
+    font-size: 1.4rem;
+    font-weight: 600;
+    text-shadow: 0 -1px rgba(0, 0, 0, 0.3);
+}
+.loggedin .drawer footer #button-evernote-login {
+    display: none;
+}
+.drawer footer #button-evernote-login i {
+    background: url("../images/evernote-logo.png") no-repeat scroll left top transparent;
+    display: inline-block;
+    width: 1.7rem;
+    vertical-align: middle;
+    height: 2.1rem;
+}
+.drawer footer #button-evernote-login i#evernote-text {
+    background-position: right top;
+    width: 7.2rem;
+}
+.drawer footer #button-settings {
     background: url("../images/sprite.png") no-repeat -20.2rem -24.3rem;
     border: 0;
     border-radius: 0;
     float: right;
     height: 2.3rem;
-    margin: 0;
+    margin: 1rem 1.6rem 1rem 0;
     overflow: hidden;
     padding: 0;
     text-indent: -9000em;
     width: 2.3rem;
 }
-.drawer footer span {
+.drawer footer span.username {
     float: left;
     font-weight: 500;
     font-size: 1.4rem;
     line-height: 2rem;
+    padding: 1rem 0 1rem 1.6rem;
 }
 .drawer footer progress {
     float: left;
+    margin: 1rem 0 1rem 1.6rem;
     position: relative;
     top: -0.4rem;
     margin-right: 1.6rem;
+}
+body:not(.loggedin) .drawer footer span.username, body:not(.loggedin) .drawer footer #button-settings {
+    display: none;
 }
 body:not(.syncing) progress[role="sync"] {
     display: none;

@@ -11,6 +11,9 @@
         
         <link href="style/dialog.css" rel="stylesheet" type="text/css" />
 
+        <link rel="resource" type="application/l10n" href="locales/locales.ini">
+        <script type="text/javascript" src="shared/js/l10n.js"></script>
+
         <script src="js/lib/evernote/evernote-sdk-js/thrift/lib/thrift.js"></script>
         <script src="js/lib/evernote/evernote-sdk-js/thrift/lib/thrift-binary.js"></script>
 
@@ -54,11 +57,11 @@
                 <h2 data-l10n-id="notebooks">Notebooks <b id="button-new-notebook"></b></h2>
                 <b class="card-next"></b>
                 <ul id="notebooks-list"></ul>
-                <button id="button-evernote-login"></button>
                 <footer>
                     <progress role="sync"></progress>
                     <span class="username"></span>
                     <button id="button-settings">Settings</button>
+                    <button id="button-evernote-login"><span data-l10n-id="connect-with">Connect with</span> <i id="evernote-elephant"></i> <i id="evernote-text"></i></button>
                 </footer>
             </div>
             <section class="card active" id="main" role="region">
@@ -136,36 +139,36 @@
             <section class="card skin-organic" id="settings" role="region" data-type="list">
                 <header>
                     <button id="button-settings-cancel"><span class="icon icon-close">close</span></button>
-                    <h1>Settings</h1>
+                    <h1 data-l10n-id="settings">Settings</h1>
                 </header>
                 <header>
-                    <h2>Connected to Evernote</h2>
+                    <h2 data-l10n-id="connected-to-evernote">Connected to Evernote</h2>
                 </header>
                 <ul>
-                    <li><p>Signed in as <span class="username"></span></p></li>
-                    <li><p>Account type <em class="account"></em></p></li>
+                    <li><p><span data-l10n-id="signed-in-as">Signed in as</span> <span class="username"></span></p></li>
+                    <li><p data-l10n-id="account-type">Account type <em class="account"></em></p></li>
                     <li>
                         <p class="buttons">
-                            <button id="button-premium">Go Premium</button>
-                            <button id="button-evernote-logout">Sign Out</button>
+                            <button data-l10n-id="go-premium" id="button-premium">Go Premium</button>
+                            <button data-l10n-id="sign-out" id="button-evernote-logout">Sign Out</button>
                         </p>
                     </li>
                 </ul>
                 <!--header>
-                    <h2>Evernote Email Address</h2>
+                    <h2 data-l10n-id="evernote-email-address">Evernote Email Address</h2>
                 </header>
                 <ul>
                     <li>
                         <p class="email">ranbena@everything.me</p>
-                        <p><button>Add to Contacts</button></p>
+                        <p><button data-l10n-id="add-to-contacts">Add to Contacts</button></p>
                     </li>
                 </ul-->
                 <header>
-                    <h2>Current Monthly Usage</h2>
+                    <h2 data-l10n-id="current-monthly-usage">Current Monthly Usage</h2>
                 </header>
                 <ul>
-                    <li><p>Upload left <em class="upload-left"></em></p></li>
-                    <li><p>Days left <em class="days-left"></em></p></li>
+                    <li><p data-l10n-id="upload-left">Upload left <em class="upload-left"></em></p></li>
+                    <li><p data-l10n-id="days-left">Days left <em class="days-left"></em></p></li>
                 </ul>
             </section>
         </div>

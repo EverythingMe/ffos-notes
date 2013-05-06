@@ -136,6 +136,12 @@ var App = new function() {
 
         Evernote.init();
         DB.init(initUser);
+
+        document.addEventListener('localechange', function(){
+            navigator.mozL10n.ready(function(){
+                self.setupTexts();
+            });
+        }, false);
     };
     
     function setupCache() {
@@ -186,7 +192,8 @@ var App = new function() {
             "CONFIRM_DELETE_NOTE": navigator.mozL10n.get("confirm-delete-note"),
             "ADD_IMAGE_TITLE": navigator.mozL10n.get("add-image-title"),
             "IMAGE_NOT_SUPPORTED": navigator.mozL10n.get("image-not-supported"),
-            "PHOTO_LABEL": navigator.mozL10n.get("image-label")
+            "PHOTO_LABEL": navigator.mozL10n.get("image-label"),
+            "NOTEBOOK_NAME_ALREADY_EXISTS": navigator.mozL10n.get("notebook-name-already-exists")
         };
 
         ORDERS = [
@@ -610,6 +617,7 @@ var App = new function() {
             var el = document.createElement("li");
             el.innerHTML = TEXTS.NOTEBOOK_ALL;
             el.className = "all";
+            el.setAttribute("data-l10n-id", "NOTEBOOK_ALL");
             el.addEventListener("click", clickAll);
             
             elList.appendChild(el);
@@ -620,6 +628,7 @@ var App = new function() {
             
             el.innerHTML = TEXTS.NOTEBOOK_TRASH + (numberOfTrashedNotes? " (" + numberOfTrashedNotes + ")" : "");
             el.className = "trash";
+            el.setAttribute("data-l10n-id", "NOTEBOOK_TRASH");
             el.addEventListener("click", clickTrash);
             
             elList.appendChild(el);
