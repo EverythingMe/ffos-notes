@@ -2,21 +2,16 @@
     "name": "Notes",
     "description": "Notes app",
     "launch_path": "/index.html",
-    "type": "certified",
+    "type": "privileged",
     "permissions": {
         "systemXHR": {
             "description": "Access Evernote API"
-        },
-        "settings": {
-            "access": "readonly",
-            "description": "Access device locale"
         }
     },
     "developer": {
         "name": "DoAT",
         "url": "http://everything.me/"
     },
-    "appcache_path": "/notes.appcache",
     "orientation": "portrait",
     "icons": {
         "128": "/images/icon.png"
