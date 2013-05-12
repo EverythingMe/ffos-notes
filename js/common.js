@@ -727,7 +727,10 @@ var App = new function() {
             
             elContent.innerHTML = noteContent;
             self.setTitle(noteName);
-            self.loadResources(note);
+            /**
+             * we currently only support inline-image resources, this is made for future versions of the app
+             */
+            // self.loadResources(note);
             
             if (note.isTrashed()) {
                 el.classList.add(CLASS_WHEN_TRASHED);
