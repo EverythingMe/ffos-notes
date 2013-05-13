@@ -1,12 +1,12 @@
 [submodule "js/lib/enml-js"]
 	path = js/lib/enml-js
 	url = https://github.com/EverythingMe/enml-js.git
-[submodule "js/lib/evernote"]
-	path = js/lib/evernote
-	url = https://github.com/EverythingMe/evernote-sdk-js.git
 [submodule "js/lib/md5"]
 	path = js/lib/md5
 	url = https://github.com/blueimp/JavaScript-MD5.git
 [submodule "js/lib/sparkmd5"]
 	path = js/lib/sparkmd5
 	url = https://github.com/satazor/SparkMD5.git
+[submodule "js/lib/evn"]
+	path = js/lib/evn
+	url = https://github.com/EverythingMe/evernote-sdk-js.git
