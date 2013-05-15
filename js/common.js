@@ -1230,7 +1230,7 @@ var App = new function() {
                            '</div>' +
                            '<div class="title">' + getNotePreview(content) + '</div>'
             var resources = note.getResources();
-            if (resources.length > 0) {
+            if (resources && resources.length > 0) {
                 var resource = resources[0],
                     elResource = document.createElement('div'),
                     src = "data:";

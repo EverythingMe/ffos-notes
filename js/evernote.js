@@ -840,7 +840,8 @@ var ENMLofHTML = function(){
         }
 
         if (child.nodeType == Node.TEXT_NODE) {
-            self.writer.write(child.nodeValue);
+            var text = child.nodeValue.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+            self.writer.write(text);
         }
     },
 
