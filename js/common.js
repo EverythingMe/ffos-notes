@@ -16,27 +16,7 @@ var App = new function() {
             "username": "default",
             "name": "default"
         },
-        TEXTS = {
-            "NEW_NOTEBOOK": "Create Notebook",
-            "NOTEBOOK_ALL": "All Notes",
-            "NOTEBOOK_TRASH": "Trash",
-            "NOTEBOOK_ACTION_TITLE": "Edit Notebook",
-            "NOTEBOOK_ACTION_RENAME": "Rename",
-            "NOTEBOOK_ACTION_DELETE": "Delete",
-            "PROMPT_RENAME_NOTEBOOK": "Rename Notebook:",
-            "PROMPT_DELETE_NOTEBOOK": "Tap OK to delete this notebook.\n\nNOTE: All its notes will be moved to the Trash.",
-            "NOTE_RESTORED": "Restored to {{notebook}}",
-            "NEW_NOTE": "New Note",
-            "EMPTY_NOTEBOOK": "no notes recorded<br />start writing now",
-            "EMPTY_TRASH": "your trash is empty!",
-            "FIRST_NOTEBOOK_NAME": "My Notebook",
-            "EMPTY_NOTEBOOK_NAME": "Notes",
-            "NOTE_CANCEL_CHANGES": "You have made changes to the note, do you wish to save it?",
-            "CONFIRM_TRASH_NOTE": "Tap OK to move this note to the Trash",
-            "CONFIRM_DELETE_NOTE": "Are you sure you want to permanently delete this note?",
-            "ADD_IMAGE_TITLE": "Attach a photo to your note:",
-            "IMAGE_NOT_SUPPORTED": "This feature is not supported on your device"
-        },
+        TEXTS = null,
         ORDERS = [
             {
                 "property": "date_updated",
@@ -82,6 +62,7 @@ var App = new function() {
         DEBUG && Console.init(LOGGER_NAMESPACE);
         
         setupCache();
+        self.setupTexts();
         
         cards = new Cards({
             "onMove": onCardMove
@@ -158,6 +139,12 @@ var App = new function() {
         });
         
         DB.init(initUser);
+
+        document.addEventListener('localechange', function(){
+            navigator.mozL10n.ready(function(){
+                self.setupTexts();
+            });
+        }, false);
     };
     
     function setupCache() {
@@ -180,6 +167,30 @@ var App = new function() {
             }
         });
     }
+
+    this.setupTexts = function() {
+        TEXTS = {
+            "NEW_NOTEBOOK": navigator.mozL10n.get("new-notebook"),
+            "NOTEBOOK_ALL": navigator.mozL10n.get("notebook-all"),
+            "NOTEBOOK_TRASH": navigator.mozL10n.get("notebook-trash"),
+            "NOTEBOOK_ACTION_TITLE": navigator.mozL10n.get("notebook-action-title"),
+            "NOTEBOOK_ACTION_RENAME": navigator.mozL10n.get("notebook-action-rename"),
+            "NOTEBOOK_ACTION_DELETE": navigator.mozL10n.get("notebook-action-delete"),
+            "PROMPT_RENAME_NOTEBOOK": navigator.mozL10n.get("prompt-rename-notebook"),
+            "PROMPT_DELETE_NOTEBOOK": navigator.mozL10n.get("prompt-delete-notebook"),
+            "NOTE_RESTORED": navigator.mozL10n.get("note-restored"),
+            "NEW_NOTE": navigator.mozL10n.get("new-note"),
+            "EMPTY_NOTEBOOK": navigator.mozL10n.get("empty-notebook"),
+            "EMPTY_TRASH": navigator.mozL10n.get("empty-trash"),
+            "FIRST_NOTEBOOK_NAME": navigator.mozL10n.get("first-notebook-name"),
+            "EMPTY_NOTEBOOK_NAME": navigator.mozL10n.get("empty-notebook-name"),
+            "NOTE_CANCEL_CHANGES": navigator.mozL10n.get("note-cancel-changes"),
+            "CONFIRM_TRASH_NOTE": navigator.mozL10n.get("confirm-trash-note"),
+            "CONFIRM_DELETE_NOTE": navigator.mozL10n.get("confirm-delete-note"),
+            "ADD_IMAGE_TITLE": navigator.mozL10n.get("add-image-title"),
+            "IMAGE_NOT_SUPPORTED": navigator.mozL10n.get("image-not-supported")
+        };
+    };
     
     this.getUserNotes = function() {
         user.getNotebooks(function(notebooks) {
@@ -1452,3 +1463,7 @@ function formatDate(date) {
 
 function $(s) { return document.getElementById(s); }
 function html(el, s) { el.innerHTML = (s || "").replace(/</g, '&lt;'); }
+
+window.onload = function onLoad() {
+    navigator.mozL10n.ready(App.init);
+}
