@@ -1,6 +1,7 @@
 {
     "name": "Notes",
     "description": "Notes app",
+    "version": "1.0",
     "launch_path": "/ffos-notes/index.html",
     "developer": {
         "name": "DoAT",
