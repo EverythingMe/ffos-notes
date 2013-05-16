@@ -1,15 +1,8 @@
 CACHE MANIFEST
-# ver 1.4
+# ver 2.1
 
 index.html
-images/icon.png
-images/back.png
-images/div_line_sm_orange.png
-images/div_line_lg_orange.png
-images/iconaction_menu_30x30.png
-images/iconaction_new_30x30.png
-images/iconaction_save_30x30.png
-images/iconaction_cancel_30x30.png
+images/iconaction_new.png
 images/attachment.png
 images/search_big.png
 images/sortby.png
@@ -20,26 +13,48 @@ images/type.png
 images/photo.png
 images/info.png
 images/share.png
-images/delete.png
 images/restore.png
 images/expunge.png
 images/close.png
 images/delete.png
+images/header_bg_green.png
+images/header_negative_green.png
+images/separator_green.png
+images/evernote-logo.png
+images/settings.png
+images/div_line_lg_gray.png
+style/dialog.css
+style/common.css
+style/images/ui/pattern.png
+style/images/ui/gradient.png
+shared/style/headers.css
+shared/style/buttons.css
+shared/style_unstable/progress_activity.css
 js/dialog.js
 js/db.js
 js/models.js
 js/Console.js
 js/Searcher.js
 js/Cards.js
+js/evernote.js
 js/common.js
-style/dialog.css
-style/common.css
-style/images/ui/pattern.png
-style/images/ui/gradient.png
-style/images/ui/pattern.png
-style/images/ui/cancel.png
+js/lib/evn/evernote-sdk-js/thrift/lib/thrift.js
+js/lib/evn/evernote-sdk-js/thrift/lib/thrift-binary.js
+js/lib/evn/evernote-sdk-js/generated/Errors_types.js
+js/lib/evn/evernote-sdk-js/generated/Limits_types.js
+js/lib/evn/evernote-sdk-js/generated/Types_types.js
+js/lib/evn/evernote-sdk-js/generated/NoteStore_types.js
+js/lib/evn/evernote-sdk-js/generated/UserStore_types.js
+js/lib/evn/evernote-sdk-js/generated/NoteStore.js
+js/lib/evn/evernote-sdk-js/generated/UserStore.js
+js/lib/oauth/oauth.js
+js/lib/oauth/sha1.js
+js/lib/enml-js/lib/xml-parser.js
+js/lib/enml-js/lib/xml-writer.js
+js/lib/enml-js/enml.js
+js/lib/md5/md5.min.js
+js/lib/sparkmd5/spark-md5.min.js
 shared/js/l10n.js
-shared/style/responsive.css
 
 NETWORK:
 *
