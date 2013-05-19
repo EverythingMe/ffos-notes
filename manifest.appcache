@@ -29,6 +29,7 @@ style/images/ui/pattern.png
 style/images/ui/gradient.png
 shared/style/headers.css
 shared/style/buttons.css
+shared/style/responsive.css
 shared/style_unstable/progress_activity.css
 js/dialog.js
 js/db.js

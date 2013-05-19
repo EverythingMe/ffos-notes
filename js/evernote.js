@@ -141,6 +141,9 @@ var Evernote = new function() {
 
                 self.getAuthorization();
             } else {
+                if (!TEXTS) {
+                    self.setupTexts();
+                }
                 alert(TEXTS.NOT_REACHED_EVERNOTE);
             }
         });
@@ -326,6 +329,9 @@ var Evernote = new function() {
                             }
                         } else {
                             if (resultsQueue[0].getExpunge()) {
+                                if (!TEXTS) {
+                                    self.setupTexts();
+                                }
                                 if (confirm(TEXTS.NOTEBOOK_DELETE_CONFLICT)) {
                                     App.getUser().newNotebook(notebook, function(){
                                         resultsQueue[0].remove(self.processSyncChunkList);
@@ -335,6 +341,9 @@ var Evernote = new function() {
                                 }
                             } else {
                                 if (resultsGuid[0].getName() != notebook.name) {
+                                    if (!TEXTS) {
+                                        self.setupTexts();
+                                    }
                                     var txt = TEXTS.GENERIC_CONFLICT.replace("{{date}}", new Date(notebook.serviceUpdated));
                                         txt = txt.replace("{{object}}", "Notebook");
                                         txt = txt.replace("{{name}}", '"'+resultsGuid[0].getName()+'"');
@@ -364,6 +373,9 @@ var Evernote = new function() {
                 DB.getQueues({rel: "Note", rel_guid: note.guid}, function(resultsQueue){
                     console.log('[FxOS-Notes] DB.getQueues by note.guid: '+JSON.stringify(resultsQueue));
                     if (resultsQueue.length > 0) {
+                        if (!TEXTS) {
+                            self.setupTexts();
+                        }
                         var txt = TEXTS.GENERIC_CONFLICT.replace("{{date}}", new Date(note.updated));
                             txt = txt.replace("{{object}}", "Note");
                             txt = txt.replace("{{name}}", '"'+resultsNote[0].getTitle()+'"');
