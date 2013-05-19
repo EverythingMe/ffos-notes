@@ -529,14 +529,14 @@ var Evernote = new function() {
                     if (note.getGuid()) {
                         self.updateNote(note, function(newNote) {
                             if (note.isTrashed()) {
-                                self.deleteNote(newNote.guid);
+                                self.deleteNote(newNote.getGuid());
                             }
                             queue.remove(self.processQueueList);
                         });
                     } else {
                         self.newNote(note, function(newNote) {
                             if (note.isTrashed()) {
-                                self.deleteNote(newNote.guid);
+                                self.deleteNote(newNote.getGuid());
                             }
                             queue.remove(self.processQueueList);
                         });
@@ -635,9 +635,7 @@ var Evernote = new function() {
                         }
                         cbSuccess(udatedNote);
                     }, cbError || cbSuccess);
-                }, /*cbError || cbSuccess*/function(error){
-                    console.log("ERROR: "+JSON.stringify(error));
-                });
+                }, cbError || cbSuccess);
             } else {
                 cbSuccess();
             }
