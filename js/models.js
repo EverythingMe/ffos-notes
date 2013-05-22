@@ -299,6 +299,9 @@ var Models = new function() {
         };
         
         this.newResource = function(options, cbSuccess, cbError) {
+            if (!self.data_resources) {
+                self.data_resources = [];
+            }
             self.data_resources.push(new Resource({
                 noteGuid : self.getGuid(),
                 mime : options.mime,

@@ -653,13 +653,32 @@ var Evernote = new function() {
         }, cbError || cbSuccess);
     };
     this.updateNote = function(note, cbSuccess, cbError) {
-        console.log('[FxOS-Notes] this.updateNote: '+JSON.stringify(note, null, 4));
-        console.log('[FxOS-Notes] this.updateNote oauth_token: ' + JSON.stringify(oauth_token, null, 4));
-        noteStore.updateNote(oauth_token, new Note({
-            guid : note.getGuid(),
-            title : note.getName(),
-            content : note.getContent()
-        }), function(remoteNote) {
+        console.log('[FxOS-Notes] this.updateNote: '+JSON.stringify(note));
+        console.log('[FxOS-Notes] this.updateNote oauth_token: ' + JSON.stringify(oauth_token));
+        var noteData = note.export();
+        for(var k in noteData.resources) {
+            var bodyArrayBuffer = ArrayBufferHelper.decode(noteData.resources[k].data.body);
+            var rawMD5str = md5(bodyArrayBuffer, false, true);
+            var bodyHashArrayBuffer = new ArrayBuffer(rawMD5str.length*2); // 2 bytes for each char
+            var arrayBufferView = new Uint16Array(bodyHashArrayBuffer);
+            for (var i=0, strLen=rawMD5str.length; i<strLen; i++) {
+                arrayBufferView[i] = rawMD5str.charCodeAt(i);
+            }
+            noteData.resources[k] = new Resource({
+                noteGuid : noteData.resources[k].noteGuid,
+                mime : noteData.resources[k].mime,
+                data : new Data({
+                    body : bodyArrayBuffer,
+                    bodyHash : bodyHashArrayBuffer,
+                    size : noteData.resources[k].data.size
+                }),
+                attributes : new ResourceAttributes({
+                    fileName : noteData.resources[k].attributes.fileName
+                })
+            });
+        }
+        noteData.title = noteData.title.replace(/(^[\s]+|[\s]+$)/g, '');
+        noteStore.updateNote(oauth_token, new Note(noteData), function(remoteNote) {
             self.getNote(remoteNote.guid, function(remoteNote) {
                 udatedNote = note.set(remoteNote);
                 if (App.getUser().getLastUpdateCount() < remoteNote.updateSequenceNum) {
