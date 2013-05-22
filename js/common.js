@@ -1734,7 +1734,7 @@ function prettyDate(time) {
   var day_diff = Math.floor(diff / 86400);
   
   if (isNaN(day_diff)) {
-    return '(incorrect date)';
+    return '('+navigator.mozL10n.get("incorrect-date")+')';
   }
   
   return day_diff == 0 && (
