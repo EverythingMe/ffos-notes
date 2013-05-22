@@ -143,29 +143,9 @@ var Models = new function() {
             
             return self;
         };
-        
-        this.trash = function(cbSuccess, cbError) {
-            if (self.data_trashed) {
-                return;
-            }
-            
-            DB.updateMultiple("notes", {"notebook_id": self.getId()}, {"trashed": true, "active": false, "notebook_id": null}, function(){
-                self.remove(cbSuccess, cbError);
-            }, cbError);
-        };
 
         this.remove = function(cbSuccess, cbError) {
             DB.removeNotebook(self, cbSuccess, cbError);
-        };
-        
-        this.restore = function(cbSuccess, cbError) {
-            if (!self.data_trashed) {
-                return;
-            }
-            
-            self.set({
-                "trashed": false
-            }, cbSuccess, cbError);
         };
         
         this.updateNotesCount = function(cbSuccess, cbError, options) {

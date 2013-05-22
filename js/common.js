@@ -452,7 +452,26 @@ var App = new function() {
     
     function onNotebookDelete(notebookAffected) {
         if (confirm(TEXTS.PROMPT_DELETE_NOTEBOOK)) {
-            notebookAffected.trash(function onSuccess(notebook) {
+            DB.getNotebooks({}, function(notebooks) {
+                for (var i in notebooks) {
+                    if (notebooks[i].getId() != notebookAffected.getId()) {
+                        notebookAffected.getNotes(true, function(notes){
+                            for (var k in notes) {
+                                notes[k].set({
+                                    "trashed": true,
+                                    "active": false,
+                                    "notebook_id": notebooks[i].getId(),
+                                    "notebookGuid": notebooks[i].getGuid()
+                                }, function (noteAffected){
+                                    self.addQueue('Note', noteAffected);
+                                });
+                            }
+                        });
+                        break;
+                    }
+                }
+            });
+            notebookAffected.remove(function onSuccess(notebook) {
                 NotebooksList.refresh();
                 self.addQueue('Notebook', {
                     id : notebookAffected.getId(),
