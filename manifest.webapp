@@ -10,7 +10,7 @@
         }
     },
     "developer": {
-        "name": "DoAT",
+        "name": "Everything.me",
         "url": "http://everything.me/"
     },
     "orientation": "portrait",
@@ -18,22 +18,22 @@
         "128": "/images/icon.png"
     },
     "locales": {
-        "en-US": {
-            "name": "Notes",
-            "description": "Notes is the official Firefox OS app. Notes is designed to help save all those ideas, reminders and moments of inspiration — keeping track of it all right there on your everyday device. With everything totally searchable you'll be able to stay fully organised with minimal effort."
-        },
-        "es": {
-            "name": "Notas",
-            "description": "Notas es la aplicación oficial de Firefox OS. Notas está diseñada para ayudar a conservar todas esas ideas, recordatorios y momentos de inspiración, y mantener un registro de todo en tu dispositivo cotidiano. Con todo completamente localizable, podrás estar plenamente organizado con un mínimo esfuerzo."
-        },
-        "pt-BR": {
-            "name": "Notas",
-            "description": "Notes is the official Firefox OS app. Notes is designed to help save all those ideas, reminders and moments of inspiration — keeping track of it all right there on your everyday device. With everything totally searchable you'll be able to stay fully organised with minimal effort."
-        },
-        "pl": {
-            "name": "Notatki",
-            "description": "Notatki to oficjalna aplikacja dla systemu Firefox OS. Korzystanie z niej jest darmowe. Powstała po to, żeby ułatwić zapisywanie pomysłów, inspiracji czy spraw do załatwienia wprost na Twoim telefonie. Mając dostęp do swoich notatek w łatwy sposób zorganizujesz swój czas."
-        }
+      "en-US": {
+        "name": "Notes",
+        "description": "Notes is the official Firefox OS app. Notes is designed to help save all those ideas, reminders and moments of inspiration — keeping track of it all right there on your everyday device. With everything totally searchable you'll be able to stay fully organised with minimal effort."
+      },
+      "es": {
+        "name": "Notas",
+        "description": "Notas es la aplicación oficial de Firefox OS. Notas está diseñada para ayudar a conservar todas esas ideas, recordatorios y momentos de inspiración, y mantener un registro de todo en tu dispositivo cotidiano. Con todo completamente localizable, podrás estar plenamente organizado con un mínimo esfuerzo."
+      },
+      "pl": {
+        "name": "Notatki",
+        "description": "Notatki to oficjalna aplikacja dla systemu Firefox OS. Korzystanie z niej jest darmowe. Powstała po to, żeby ułatwić zapisywanie pomysłów, inspiracji czy spraw do załatwienia wprost na Twoim telefonie. Mając dostęp do swoich notatek w łatwy sposób zorganizujesz swój czas."
+      },
+      "pt-BR": {
+        "name": "Notas",
+        "description": "Notas é o aplicativo oficial do Firefox OS. Notas é projetado para ajudar a manter todas essas idéias, lembretes e momentos de inspiração, e manter o controle de tudo em seu aparelho todos os dias. Com totalmente pesquisável, pode ser totalmente organizado com o mínimo esforço."
+      }
     },
     "default_locale": "en-US"
 }
