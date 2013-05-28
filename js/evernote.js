@@ -611,26 +611,28 @@ var Evernote = new function() {
                 notebook = notebook[0];
                 note = note.set({notebookGuid : notebook.getGuid()});
                 var noteData = note.export();
-                for(var k in noteData.resources) {
-                    var bodyArrayBuffer = ArrayBufferHelper.decode(noteData.resources[k].data.body);
-                    var rawMD5str = md5(bodyArrayBuffer, false, true);
-                    var bodyHashArrayBuffer = new ArrayBuffer(rawMD5str.length*2); // 2 bytes for each char
-                    var arrayBufferView = new Uint16Array(bodyHashArrayBuffer);
-                    for (var i=0, strLen=rawMD5str.length; i<strLen; i++) {
-                        arrayBufferView[i] = rawMD5str.charCodeAt(i);
+                if (noteData.resources) {
+                    for(var k in noteData.resources) {
+                        var bodyArrayBuffer = ArrayBufferHelper.decode(noteData.resources[k].data.body);
+                        var rawMD5str = md5(bodyArrayBuffer, false, true);
+                        var bodyHashArrayBuffer = new ArrayBuffer(rawMD5str.length*2); // 2 bytes for each char
+                        var arrayBufferView = new Uint16Array(bodyHashArrayBuffer);
+                        for (var i=0, strLen=rawMD5str.length; i<strLen; i++) {
+                            arrayBufferView[i] = rawMD5str.charCodeAt(i);
+                        }
+                        noteData.resources[k] = new Resource({
+                            noteGuid : noteData.resources[k].noteGuid,
+                            mime : noteData.resources[k].mime,
+                            data : new Data({
+                                body : bodyArrayBuffer,
+                                bodyHash : bodyHashArrayBuffer,
+                                size : noteData.resources[k].data.size
+                            }),
+                            attributes : new ResourceAttributes({
+                                fileName : noteData.resources[k].attributes.fileName
+                            })
+                        });
                     }
-                    noteData.resources[k] = new Resource({
-                        noteGuid : noteData.resources[k].noteGuid,
-                        mime : noteData.resources[k].mime,
-                        data : new Data({
-                            body : bodyArrayBuffer,
-                            bodyHash : bodyHashArrayBuffer,
-                            size : noteData.resources[k].data.size
-                        }),
-                        attributes : new ResourceAttributes({
-                            fileName : noteData.resources[k].attributes.fileName
-                        })
-                    });
                 }
                 noteData.title = noteData.title.replace(/(^[\s]+|[\s]+$)/g, '');
                 console.log('[FxOS-Notes] this.newNote oauth_token: ' + JSON.stringify(oauth_token));
@@ -656,26 +658,28 @@ var Evernote = new function() {
         console.log('[FxOS-Notes] this.updateNote: '+JSON.stringify(note));
         console.log('[FxOS-Notes] this.updateNote oauth_token: ' + JSON.stringify(oauth_token));
         var noteData = note.export();
-        for(var k in noteData.resources) {
-            var bodyArrayBuffer = ArrayBufferHelper.decode(noteData.resources[k].data.body);
-            var rawMD5str = md5(bodyArrayBuffer, false, true);
-            var bodyHashArrayBuffer = new ArrayBuffer(rawMD5str.length*2); // 2 bytes for each char
-            var arrayBufferView = new Uint16Array(bodyHashArrayBuffer);
-            for (var i=0, strLen=rawMD5str.length; i<strLen; i++) {
-                arrayBufferView[i] = rawMD5str.charCodeAt(i);
+        if (noteData.resources) {
+            for(var k in noteData.resources) {
+                var bodyArrayBuffer = ArrayBufferHelper.decode(noteData.resources[k].data.body);
+                var rawMD5str = md5(bodyArrayBuffer, false, true);
+                var bodyHashArrayBuffer = new ArrayBuffer(rawMD5str.length*2); // 2 bytes for each char
+                var arrayBufferView = new Uint16Array(bodyHashArrayBuffer);
+                for (var i=0, strLen=rawMD5str.length; i<strLen; i++) {
+                    arrayBufferView[i] = rawMD5str.charCodeAt(i);
+                }
+                noteData.resources[k] = new Resource({
+                    noteGuid : noteData.resources[k].noteGuid,
+                    mime : noteData.resources[k].mime,
+                    data : new Data({
+                        body : bodyArrayBuffer,
+                        bodyHash : bodyHashArrayBuffer,
+                        size : noteData.resources[k].data.size
+                    }),
+                    attributes : new ResourceAttributes({
+                        fileName : noteData.resources[k].attributes.fileName
+                    })
+                });
             }
-            noteData.resources[k] = new Resource({
-                noteGuid : noteData.resources[k].noteGuid,
-                mime : noteData.resources[k].mime,
-                data : new Data({
-                    body : bodyArrayBuffer,
-                    bodyHash : bodyHashArrayBuffer,
-                    size : noteData.resources[k].data.size
-                }),
-                attributes : new ResourceAttributes({
-                    fileName : noteData.resources[k].attributes.fileName
-                })
-            });
         }
         noteData.title = noteData.title.replace(/(^[\s]+|[\s]+$)/g, '');
         noteStore.updateNote(oauth_token, new Note(noteData), function(remoteNote) {
@@ -907,7 +911,7 @@ var ENMLofHTML = function(){
     this.parseAttributes = function(attributes) {
         for (var i=0; i < attributes.length; i++) {
             if (self.IGNORE_ATTRS.indexOf(attributes[i].nodeName) == -1) {
-                self.writer.write(' ' + attributes[i].nodeName + '="' + attributes[i].nodeValue + '"');
+                self.writer.write(' ' + attributes[i].nodeName + '="' + attributes[i].value + '"');
             }
         }
     },

@@ -223,7 +223,6 @@ var Models = new function() {
         
         this.set = function(options, cbSuccess, cbError) {
             if (options.content) {
-                console.log('indexOf: '+options.content.indexOf('<!DOCTYPE en-note SYSTEM "http://xml.evernote.com/pub/enml2.dtd">'));
                 if (options.content.indexOf('<!DOCTYPE en-note SYSTEM "http://xml.evernote.com/pub/enml2.dtd">') == -1) {
                     options.content = Evernote.html2enml(options.content);
                 }

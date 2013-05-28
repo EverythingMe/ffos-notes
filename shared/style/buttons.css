@@ -135,7 +135,7 @@ li .button:after {
   left: 0;
   right: 0;
   height: 0.2rem;
-  /*background: url( buttons/images/ui/shadow.png) repeat-x left bottom / auto 100%;*/
+  background: url( buttons/images/ui/shadow.png) repeat-x left bottom / auto 100%;
 }
 
 /* Press */
@@ -221,7 +221,11 @@ li .button[aria-disabled="true"].icon-dialog:before {
 
 ul.compact,
 ol.compact {
+<<<<<<< HEAD
   padding: 0 1.5rem 1.5rem 1.5rem;
+=======
+  margin: 0 1.5rem 1.5rem 1.5rem;
+>>>>>>> fix various bugs
 }
 
 ul.compact li,

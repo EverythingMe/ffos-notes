@@ -549,7 +549,7 @@ var App = new function() {
                 NoteInfoView.selectNotebook(newNotebookId);
                 NotebookView.show(notebook);
             });
-            self.addQueue('Note', noteAffected);
+            self.addQueue('Note', note);
         }, function onError() {});
     }
     
@@ -572,7 +572,9 @@ var App = new function() {
         var self = this,
             el = null, elList = null,
             onClick = null, onRefresh = null, onRename = null, onDelete = null,
+            tapIgnored, timeTouchStart, 
             
+            DISTANCE_TO_IGNORE_AS_MOVE = 3,
             TIMEOUT_BEFORE_EDITING_NOTEBOOK = 400;
             
         this.init = function(options) {
@@ -615,15 +617,33 @@ var App = new function() {
                 numberOfApps = notebook.getNumberOfNotes();
                 
             el.innerHTML = notebook.getName() + (numberOfApps? " (" + numberOfApps + ")" : "");
-            el.addEventListener("touchstart", function(){
+
+            el.addEventListener("touchstart", function(e){
+                tapIgnored = false;
+                touchStartPos = getEventPoint(e);
+
                 this.timeoutHold = window.setTimeout(function(){
                     el.edited = true;
+                    tapIgnored = false;
                     onEditNotebook(notebook);
                 }, TIMEOUT_BEFORE_EDITING_NOTEBOOK);
             });
-            el.addEventListener("touchend", function(){
+            el.addEventListener("touchmove", function(e){
+                if (!touchStartPos) { return; }
+                
+                var point = getEventPoint(e),
+                    distance = [point[0] - touchStartPos[0], point[1] - touchStartPos[1]];
+                    
+                if (Math.abs(distance[0]) > DISTANCE_TO_IGNORE_AS_MOVE ||
+                    Math.abs(distance[1]) > DISTANCE_TO_IGNORE_AS_MOVE) 
+                {
+                    window.clearTimeout(this.timeoutHold);
+                    tapIgnored = true;
+                }
+            });
+            el.addEventListener("touchend", function(e){
                 window.clearTimeout(this.timeoutHold);
-                if (!this.edited) {
+                if (!this.edited && !tapIgnored) {
                     clickNotebook(notebook);
                 }
                 this.edited = false;
@@ -741,7 +761,7 @@ var App = new function() {
                 noteContent = note.getContent(true);
             }
             
-            noteContentBeforeEdit = noteContent.replace('/>','>');
+            noteContentBeforeEdit = noteContent.replace(/\/>/g,">");
             noteNameBeforeEdit = noteName;
             
             elContent.innerHTML = noteContent;
@@ -1124,6 +1144,8 @@ var App = new function() {
             if (!currentNotebook || currentNotebook.getId() != notebook.getId()) {
                 currentSort = "";
                 currentIsDesc = false;
+                startNotesLoading();
+                self.clearNoteList();
             }
             
             currentNotebook = notebook;
@@ -1160,10 +1182,10 @@ var App = new function() {
                 });
             }
         };
-        
-        this.printNotes = function(notes, trashed) {
-            console.log('trashed: '+trashed);
-            $notesList.innerHTML = '';
+
+        this.printNotes = function(notes) {
+            startNotesLoading();
+            self.clearNoteList();
             
             notes = sortNotes(notes, currentSort, currentIsDesc);
             
@@ -1177,6 +1199,7 @@ var App = new function() {
                 elEmptyNotes.innerHTML = currentNotebook || !trashed ? TEXTS.EMPTY_NOTEBOOK : TEXTS.EMPTY_TRASH;
             }
             
+            finishNotesLoading();
             return $notesList;
         };
         
@@ -1231,6 +1254,18 @@ var App = new function() {
         this.hideSearchTitle = function() {
             elTitle.style.display = "block";
             elSearchTitle.style.display = "none";
+        };
+
+        this.clearNoteList = function() {
+            $notesList.innerHTML = '';
+        };
+
+        function startNotesLoading() {
+            document.body.classList.add('loading');
+        };
+
+        function finishNotesLoading() {
+            document.body.classList.remove('loading');
         };
         
         function getNoteElement(note) {
@@ -1753,6 +1788,13 @@ function prettyDate(time) {
 
 function formatDate(date) {
     return date.getDate() + "/" + date.getMonth() + "/" + date.getFullYear();
+}
+
+function getEventPoint(e) {
+    var touch = e.touches && e.touches[0] ? e.touches[0] : e,
+        point = touch && [touch.pageX || touch.clientX, touch.pageY || touch.clientY];
+    
+    return point;
 }
 
 function $(s) { return document.getElementById(s); }
