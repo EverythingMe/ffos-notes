@@ -948,7 +948,8 @@ var App = new function() {
                     break;
                 case "photo":
                     currentNote.newResource(output, function(){
-                        $("note-content").innerHTML += " <img type=\""+output.mime+"\" src=\"data:"+output.mime+";base64,"+ArrayBufferHelper.encode(output.body)+"\" hash=\""+SparkMD5.ArrayBuffer.hash(output.body)+"\" />";
+                        elContent.innerHTML += " <img type=\""+output.mime+"\" src=\"data:"+output.mime+";base64,"+ArrayBufferHelper.encode(output.body)+"\" hash=\""+SparkMD5.ArrayBuffer.hash(output.body)+"\" />";
+                        elContent.focus();
                     });                    
                     break;
                 case "info":
