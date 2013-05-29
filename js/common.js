@@ -1446,14 +1446,14 @@ function prettyDate(time) {
   }
   
   return day_diff == 0 && (
-    diff < 60 && 'Just now' ||
-    diff < 120 && '1 minute ago' ||
-    diff < 3600 && Math.floor(diff / 60) + ' minutes ago' ||
-    diff < 7200 && '1 hour ago' ||
-    diff < 86400 && Math.floor(diff / 3600) + ' hours ago') ||
-    day_diff == 1 && 'Yesterday' ||
-    day_diff < 7 && day_diff + ' days ago' ||
-    day_diff < 9 && 'A week ago' ||
+    diff < 60 && navigator.mozL10n.get("just-now") ||
+    diff < 120 && navigator.mozL10n.get("1-minute-ago") ||
+    diff < 3600 && navigator.mozL10n.get("minutes-ago", { "t": Math.floor(diff / 60) }) ||
+    diff < 7200 && navigator.mozL10n.get("1-hour-ago") ||
+    diff < 86400 && navigator.mozL10n.get("hours-ago", { "t": Math.floor(diff / 3600) })) ||
+    day_diff == 1 && navigator.mozL10n.get("yesterday") ||
+    day_diff < 7 && navigator.mozL10n.get("days-ago", { "t": day_diff }) ||
+    day_diff < 9 && navigator.mozL10n.get("a-week-ago") ||
     formatDate(new Date(time));
 }
 
