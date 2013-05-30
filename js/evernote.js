@@ -12,6 +12,7 @@ var Evernote = new function() {
         REQUEST_TOKEN_URL = EVERNOTE_SERVER+"/oauth",
         ACCESS_TOKEN_URL = EVERNOTE_SERVER+"/oauth",
         AUTHORIZATION_URL = EVERNOTE_SERVER+"/OAuth.action",
+        EVERNOTE_PREMIUM_URL = EVERNOTE_SERVER+"/Checkout.action",
 
         TEXTS = null,
 
@@ -153,6 +154,10 @@ var Evernote = new function() {
         DB.destroy(function(){
             window.location.href = "?signedout";
         });
+    };
+
+    this.premium = function() {
+        window.open(EVERNOTE_PREMIUM_URL);
     };
 
     this.getAuthorization = function() {

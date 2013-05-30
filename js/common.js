@@ -106,7 +106,7 @@ var App = new function() {
                 Evernote.logout();
             },
             "onPremium": function() {
-                alert('not implemented');
+                Evernote.premium();
             },
             "onEnter": function() {
                 cards.goTo(cards.CARDS.SETTINGS);
