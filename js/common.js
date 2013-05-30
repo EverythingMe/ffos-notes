@@ -825,7 +825,7 @@ var App = new function() {
         
         this.save = function() {
             var content = elContent.innerHTML,
-                name = elEditTitle.value || elTitle.innerHTML;
+                name = (elEditTitle.value || elTitle.innerHTML).replace(/&amp;/g, "&");
 
             currentNote.set({
                 "title": name,

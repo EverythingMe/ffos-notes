@@ -573,7 +573,7 @@ var Evernote = new function() {
                 });
             }
         }, function(error){
-            console.log('[FxOS-Notes] this.newNotebook error: '+ JSON.stringify(error));
+            console.log('[FxOS-Notes] noteStore.newNotebook error: '+ JSON.stringify(error));
             if (error.parameter == "Notebook.name") {
                 notebook.set({
                     name: notebook.getName() + NAME_CONFLICT_POSTFIX
@@ -596,12 +596,26 @@ var Evernote = new function() {
                     last_update_count : remoteNotebook.updateSequenceNum
                 });
             }
-        }, cbError || cbSuccess);
+        }, function(error) {
+            console.log('[FxOS-Notes] noteStore.updateNotebook error: ' + JSON.stringify(error));
+            if (cbError) {
+                cbError();
+            } else {
+                cbSuccess();
+            }
+        });
     };
     this.deleteNotebook = function(notebookGuid, cbSuccess, cbError) {
         console.log('[FxOS-Notes] this.deleteNotebook: ' + JSON.stringify(notebookGuid));
         console.log('[FxOS-Notes] this.deleteNotebook oauth_token: ' + JSON.stringify(oauth_token));
-        noteStore.expungeNotebook(oauth_token, notebookGuid, cbSuccess, cbError||cbSuccess);
+        noteStore.expungeNotebook(oauth_token, notebookGuid, cbSuccess, function(error) {
+            console.log('[FxOS-Notes] noteStore.expungeNotebook error: ' + JSON.stringify(error));
+            if (cbError) {
+                cbError();
+            } else {
+                cbSuccess();
+            }
+        });
     };
 
     this.newNote = function(note, cbSuccess, cbError) {
@@ -648,7 +662,14 @@ var Evernote = new function() {
                         }
                         cbSuccess(udatedNote);
                     }, cbError || cbSuccess);
-                }, cbError || cbSuccess);
+                }, function(error) {
+                    console.log('[FxOS-Notes] noteStore.newNote error: ' + JSON.stringify(error));
+                    if (cbError) {
+                        cbError();
+                    } else {
+                        cbSuccess();
+                    }
+                });
             } else {
                 cbSuccess();
             }
@@ -696,13 +717,20 @@ var Evernote = new function() {
                 }
                 cbSuccess(udatedNote);
             }, cbError || cbSuccess);
-        }, cbError || cbSuccess);
+        }, function(error) {
+            console.log('[FxOS-Notes] noteStore.updateNote error: ' + JSON.stringify(error));
+            if (cbError) {
+                cbError();
+            } else {
+                cbSuccess();
+            }
+        });
     };
     this.deleteNote = function(guid, cbSuccess, cbError) {
         console.log('[FxOS-Notes] this.deleteNote: ' + JSON.stringify(guid));
         console.log('[FxOS-Notes] this.deleteNote oauth_token: ' + JSON.stringify(oauth_token));
         noteStore.deleteNote(oauth_token, guid, cbSuccess, function(error) {
-            console.log('[FxOS-Notes] this.deleteNote error: ' + JSON.stringify(error));
+            console.log('[FxOS-Notes] noteStore.deleteNote error: ' + JSON.stringify(error));
             if (cbError) {
                 cbError();
             } else {
@@ -714,7 +742,7 @@ var Evernote = new function() {
         console.log('[FxOS-Notes] this.expungeNote: ' + JSON.stringify(guid));
         console.log('[FxOS-Notes] this.expungeNote oauth_token: ' + JSON.stringify(oauth_token));
         noteStore.expungeNote(oauth_token, guid, cbSuccess, function(error) {
-            console.log('[FxOS-Notes] this.expungeNote error: ' + JSON.stringify(error));
+            console.log('[FxOS-Notes] noteStore.expungeNote error: ' + JSON.stringify(error));
             if (cbError) {
                 cbError();
             } else {
@@ -756,7 +784,7 @@ var Evernote = new function() {
                 hashMap[key] = window.btoa(String.fromCharCode.apply(String, bytes));
             }
         }
-        return enml.HTMLOfENML(note.getContent(false),hashMap);
+        return enml.HTMLOfENML(note.getContent(false), hashMap);
     };
 
     this.html2enml = function(html) {
@@ -907,7 +935,7 @@ var ENMLofHTML = function(){
         }
 
         if (child.nodeType == Node.TEXT_NODE) {
-            var text = child.nodeValue.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+            var text = child.nodeValue.replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/&(?!amp;)/g, "&amp;");
             self.writer.write(text);
         }
     },
