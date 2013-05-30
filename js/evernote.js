@@ -681,8 +681,12 @@ var Evernote = new function() {
                 });
             }
         }
-        noteData.title = noteData.title.replace(/(^[\s]+|[\s]+$)/g, '');
-        noteStore.updateNote(oauth_token, new Note(noteData), function(remoteNote) {
+        noteStore.updateNote(oauth_token, new Note({
+            guid: noteData.guid,
+            title: noteData.title,
+            content: noteData.content,
+            resources: noteData.resources
+        }), function(remoteNote) {
             self.getNote(remoteNote.guid, function(remoteNote) {
                 udatedNote = note.set(remoteNote);
                 if (App.getUser().getLastUpdateCount() < remoteNote.updateSequenceNum) {
