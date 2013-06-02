@@ -571,6 +571,22 @@ section[role="region"] > header:first-child menu[type="toolbar"] {
     height: 1.8rem;
     margin: -0.85rem 0 0 -0.9rem;
 }
+#button-manual-sync {
+    width: 2.8rem;
+    left: 14.6rem;
+}
+body:not(.loggedin) #button-manual-sync {
+    display: none;
+}
+#button-manual-sync:before {
+    background: url('../images/sync.png') 0 0 no-repeat;
+    background-size: 2.8rem 2.2rem;
+    width: 2.8rem;
+    height: 2.2rem;
+}
+body.syncing #button-manual-sync:before {
+    animation: 0.9s steps(30, end) 0s normal none infinite rotate;
+}
 #search:before {
     background: transparent url('../images/search_small.png') 0 0 no-repeat;
     background-size: 1.6rem 1.6rem;
@@ -777,6 +793,10 @@ body:not(.syncing) progress[role="sync"] {
 }
 body:not(.loading) progress[role="loading"] {
     display: none;
+}
+progress[role="loading"] {
+    display: block;
+    margin: 50% auto 0;
 }
 
 *[data-type=list] li {
