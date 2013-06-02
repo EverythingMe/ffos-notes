@@ -12,7 +12,8 @@ var Evernote = new function() {
         REQUEST_TOKEN_URL = EVERNOTE_SERVER+"/oauth",
         ACCESS_TOKEN_URL = EVERNOTE_SERVER+"/oauth",
         AUTHORIZATION_URL = EVERNOTE_SERVER+"/OAuth.action",
-        EVERNOTE_PREMIUM_URL = EVERNOTE_SERVER+"/Checkout.action",
+        EVERNOTE_SET_TOKEN_URL = EVERNOTE_SERVER+"/SetAuthToken.action",
+        EVERNOTE_PREMIUM_ACTION = "/Checkout.action?origin=api-platform&offer="+OAUTH_CONSUMER_KEY,
 
         TEXTS = null,
 
@@ -157,7 +158,9 @@ var Evernote = new function() {
     };
 
     this.premium = function() {
-        window.open(EVERNOTE_PREMIUM_URL);
+        var premiumUrl = EVERNOTE_SET_TOKEN_URL + "?auth=" + encodeURIComponent(oauth_token) + "&targetUrl=" + encodeURIComponent(EVERNOTE_PREMIUM_ACTION);
+        console.log('[FxOS-Notes] this.premium url: ' + JSON.stringify(premiumUrl));
+        window.open(premiumUrl);
     };
 
     this.getAuthorization = function() {
