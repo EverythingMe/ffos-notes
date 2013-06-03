@@ -143,7 +143,26 @@ var App = new function() {
                 self.setupTexts();
             });
         }, false);
+
+        window.addEventListener('online', function() {
+            if (user.isValidEvernoteUser()) {
+                Evernote.getSyncState();
+            }
+            document.body.classList.remove('offline');
+            setConnection(true);
+        });
+        window.addEventListener('offline', function() {
+            document.body.classList.remove('online');
+            setConnection(false);
+        });
+        setConnection(navigator.onLine);
     };
+
+    function setConnection(isOnline) {
+        var status = isOnline ? 'online' : 'offline';
+        console.log('[FxOS-Notes] setConnection: '+JSON.stringify(status));
+        document.body.classList.add(status);
+    }
     
     function setupCache() {
         window.applicationCache.addEventListener('updateready', function onCacheUpdated() {
@@ -405,7 +424,7 @@ var App = new function() {
     };
 
     function onAddQueue(queue) {
-        if (user.isValidEvernoteUser()) {
+        if (user.isValidEvernoteUser() && navigator.onLine) {
             if (queue.getRel() == 'Notebook') {
                 Evernote.processNotebookQueue(queue);
             } else if (queue.getRel() == 'Note') {

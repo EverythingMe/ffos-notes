@@ -244,18 +244,26 @@ var Evernote = new function() {
         }, self.onError);
     };
 
-    this.getSyncChunk = function(usn, max, full, c) {
-        App.startSync();
-        console.log('[FxOS-Notes] this.getSyncChunk oauth_token: ' + JSON.stringify(oauth_token));
-        noteStore.getSyncChunk(oauth_token, usn, max, full, c, self.onError);
-    };
-
     this.startIncrementalSync = function() {
         self.getSyncChunk(last_update_count, syncMaxEntries, false, self.processSyncChunk);
     };
     this.startFullSync = function() {
         self.getSyncChunk(0, syncMaxEntries, true, self.processSyncChunk);
     };
+
+    this.getSyncChunk = function(usn, max, full, c) {
+        if (!navigator.onLine) {
+            if (!TEXTS) {
+                self.setupTexts();
+            }
+            alert(TEXTS.NOT_REACHED_EVERNOTE);
+            return;
+        }
+        App.startSync();
+        console.log('[FxOS-Notes] this.getSyncChunk oauth_token: ' + JSON.stringify(oauth_token));
+        noteStore.getSyncChunk(oauth_token, usn, max, full, c, self.onError);
+    };
+
     this.processSyncChunk = function(chunk) {
         syncChunks.push(chunk);
         if (chunk.chunkHighUSN < chunk.updateCount) {
