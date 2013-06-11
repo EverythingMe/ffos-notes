@@ -97,6 +97,12 @@ var Evernote = new function() {
             if (xhr.readyState === 4) {
                 console.log('[FxOS-Notes] processXHR xhr: '+JSON.stringify(xhr));
                 console.log('[FxOS-Notes] processXHR xhr.responseText: '+xhr.responseText);
+                // check to see if there was an error returned from Evernote server
+                if (xhr.responseText.match('<title>Apache Tomcat/6.0.32 - Error')) {
+                    alert(TEXTS.NOT_REACHED_EVERNOTE);
+                    App.stopSync();
+                    return;
+                }
                 if (typeof callback == 'function') {
                     callback(xhr);
                 }
@@ -643,25 +649,7 @@ var Evernote = new function() {
                 var noteData = note.export();
                 if (noteData.resources) {
                     for(var k in noteData.resources) {
-                        var bodyArrayBuffer = ArrayBufferHelper.decode(noteData.resources[k].data.body);
-                        var rawMD5str = md5(bodyArrayBuffer, false, true);
-                        var bodyHashArrayBuffer = new ArrayBuffer(rawMD5str.length*2); // 2 bytes for each char
-                        var arrayBufferView = new Uint16Array(bodyHashArrayBuffer);
-                        for (var i=0, strLen=rawMD5str.length; i<strLen; i++) {
-                            arrayBufferView[i] = rawMD5str.charCodeAt(i);
-                        }
-                        noteData.resources[k] = new Resource({
-                            noteGuid : noteData.resources[k].noteGuid,
-                            mime : noteData.resources[k].mime,
-                            data : new Data({
-                                body : bodyArrayBuffer,
-                                bodyHash : bodyHashArrayBuffer,
-                                size : noteData.resources[k].data.size
-                            }),
-                            attributes : new ResourceAttributes({
-                                fileName : noteData.resources[k].attributes.fileName
-                            })
-                        });
+                        noteData.resources[k] = self.buildResourceObject(noteData.resources[k]);
                     }
                 }
                 noteData.title = noteData.title.replace(/(^[\s]+|[\s]+$)/g, '');
@@ -697,25 +685,7 @@ var Evernote = new function() {
         var noteData = note.export();
         if (noteData.resources) {
             for(var k in noteData.resources) {
-                var bodyArrayBuffer = ArrayBufferHelper.decode(noteData.resources[k].data.body);
-                var rawMD5str = md5(bodyArrayBuffer, false, true);
-                var bodyHashArrayBuffer = new ArrayBuffer(rawMD5str.length*2); // 2 bytes for each char
-                var arrayBufferView = new Uint16Array(bodyHashArrayBuffer);
-                for (var i=0, strLen=rawMD5str.length; i<strLen; i++) {
-                    arrayBufferView[i] = rawMD5str.charCodeAt(i);
-                }
-                noteData.resources[k] = new Resource({
-                    noteGuid : noteData.resources[k].noteGuid,
-                    mime : noteData.resources[k].mime,
-                    data : new Data({
-                        body : bodyArrayBuffer,
-                        bodyHash : bodyHashArrayBuffer,
-                        size : noteData.resources[k].data.size
-                    }),
-                    attributes : new ResourceAttributes({
-                        fileName : noteData.resources[k].attributes.fileName
-                    })
-                });
+                noteData.resources[k] = self.buildResourceObject(noteData.resources[k]);
             }
         }
         noteStore.updateNote(oauth_token, new Note({
@@ -768,13 +738,37 @@ var Evernote = new function() {
     };
     this.getNote = function(guid, cbSuccess, cbError) {
         cbError = cbError || self.onError;
+        console.log('[FxOS-Notes] this.getNote guid: ' + JSON.stringify(guid));
         console.log('[FxOS-Notes] this.getNote oauth_token: ' + JSON.stringify(oauth_token));
         noteStore.getNote(oauth_token, guid, true, true, true, true, cbSuccess, cbError);
     };
     this.getNotebook = function(guid, cbSuccess, cbError) {
         cbError = cbError || self.onError;
+        console.log('[FxOS-Notes] this.getNotebook guid: ' + JSON.stringify(guid));
         console.log('[FxOS-Notes] this.getNotebook oauth_token: ' + JSON.stringify(oauth_token));
         noteStore.getNotebook(oauth_token, guid, cbSuccess, cbError);
+    };
+
+    this.buildResourceObject = function(resource) {
+        var bodyArrayBuffer = ArrayBufferHelper.decode(resource.data.body);
+        var rawMD5str = md5(bodyArrayBuffer, false, true);
+        var bodyHashArrayBuffer = new ArrayBuffer(rawMD5str.length*2); // 2 bytes for each char
+        var arrayBufferView = new Uint16Array(bodyHashArrayBuffer);
+        for (var i=0, strLen=rawMD5str.length; i<strLen; i++) {
+            arrayBufferView[i] = rawMD5str.charCodeAt(i);
+        }
+        return new Resource({
+            noteGuid : resource.noteGuid,
+            mime : resource.mime,
+            data : new Data({
+                body : bodyArrayBuffer,
+                bodyHash : bodyHashArrayBuffer,
+                size : resource.data.size
+            }),
+            attributes : new ResourceAttributes({
+                fileName : resource.attributes.fileName
+            })
+        });
     };
 
     this.enml2html = function(note) {

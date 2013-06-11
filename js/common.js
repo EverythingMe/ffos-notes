@@ -121,7 +121,7 @@ var App = new function() {
         $("button-new-notebook").addEventListener("click", self.promptNewNotebook);
         $("button-notebook-search").addEventListener("click", SearchHandler.open);
         $("button-evernote-login").addEventListener("click", Evernote.login);
-        $("button-manual-sync").addEventListener("click", Evernote.startIncrementalSync);
+        $("button-manual-sync").addEventListener("click", Evernote.getSyncState);
         
         elButtonNewNote.addEventListener("click", function() {
             self.newNote();

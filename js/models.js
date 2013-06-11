@@ -321,7 +321,7 @@ var Models = new function() {
         this.getContent = function(html) {
             if (html) {
                 if (html_content.length == 0) {
-                    html_content = Evernote.enml2html(self);
+                    html_content = Evernote.enml2html(self).replace(/\n/gi, "<br/>");
                 }
                 return html_content;
             }
