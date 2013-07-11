@@ -98,7 +98,7 @@ var Evernote = new function() {
                 console.log('[FxOS-Notes] processXHR xhr: '+JSON.stringify(xhr));
                 console.log('[FxOS-Notes] processXHR xhr.responseText: '+xhr.responseText);
                 // check to see if there was an error returned from Evernote server
-                if (xhr.responseText.match('<title>Apache Tomcat/6.0.32 - Error')) {
+                if (xhr.responseText.match('<title>.*(Error)')) {
                     alert(TEXTS.NOT_REACHED_EVERNOTE);
                     App.stopSync();
                     return;
