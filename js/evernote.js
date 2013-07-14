@@ -8,7 +8,7 @@ var Evernote = new function() {
         NOTESTORE_PORT = "443",
         NOTESTORE_PROTOCOL = "https",
         OAUTH_SIGNATURE_METHOD = "PLAINTEXT",
-        NOTES_APP_CALLBACK_URL = "http://redirector.cloudfoundry.com/",
+        NOTES_APP_CALLBACK_URL = "http://ffos-notes.local/redirect.html",
         REQUEST_TOKEN_URL = EVERNOTE_SERVER+"/oauth",
         ACCESS_TOKEN_URL = EVERNOTE_SERVER+"/oauth",
         AUTHORIZATION_URL = EVERNOTE_SERVER+"/OAuth.action",
@@ -170,6 +170,7 @@ var Evernote = new function() {
     };
 
     this.getAuthorization = function() {
+        console.log('[FxOS-Notes] getAuthorization url: '+AUTHORIZATION_URL+'?oauth_token='+tmp_oauth_token);
         authWindow = window.open(AUTHORIZATION_URL+'?oauth_token='+tmp_oauth_token);
         window.addEventListener('message', function onMessage(evt) {
             authWindow.close();

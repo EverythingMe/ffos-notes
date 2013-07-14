@@ -4,6 +4,10 @@
     "version": "2.0.3",
     "launch_path": "/index.html",
     "type": "privileged",
+    "redirects": [{
+      "from": "http://ffos-notes.local/redirect.html",
+      "to": "/redirect.html"
+    }],
     "permissions": {
         "systemXHR": {
             "description": "Access Evernote API"
