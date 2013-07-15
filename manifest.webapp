@@ -10,7 +10,11 @@
     }],
     "permissions": {
         "systemXHR": {
-            "description": "Access Evernote API"
+          "description": "Access Evernote API"
+        },
+        "storage": {
+          "description": "Get unlimited IndexedDB storage size",
+          "substitute": [ "indexedDB-unlimited" ]
         }
     },
     "developer": {
