@@ -6,6 +6,9 @@ body, div, p, ul, li, input, textarea, h1, h2, h3 {
     margin: 0;
     padding: 0;
 }
+body, input, textarea {
+    font-family: 'MozTT';
+}
 body {
     width: 100%;
     height: 100%;
