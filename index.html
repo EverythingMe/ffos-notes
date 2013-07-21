@@ -19,8 +19,10 @@
         <script src="js/Cards.js" type="text/javascript"></script>
         <script src="js/common.js" type="text/javascript"></script>
         
+        <link href="shared/style/headers.css" rel="stylesheet" type="text/css" />
+        <link href="shared/style/buttons.css" rel="stylesheet" type="text/css" />
         <link href="style/common.css" rel="Stylesheet" type="text/css" />
-        <link rel="stylesheet" type="text/css" href="shared/style/responsive.css">
+        <link href="shared/style/responsive.css" rel="stylesheet" type="text/css" />
     </head>
     <body>
         <div id="container" class="cards">
@@ -29,13 +31,15 @@
                 <b class="card-next"></b>
                 <ul id="notebooks-list"></ul>
             </div>
-            <div class="card active" id="main">
-                <div class="header">
-                    <b class="topleft card-prev" id="button-notebook-menu"><span></span></b>
+            <section class="card active" id="main" role="region">
+                <header>
+                    <button class="card-prev" id="button-notebook-menu"><span class="icon icon-menu">menu</span></button>
+                    <menu type="toolbar">
+                        <button id="button-notebook-add"><span class="icon icon-add">add</span></button>
+                    </menu>
                     <h1></h1>
                     <input type="text" value="" id="edit-notebook-name" name="edit-notebook-name" />
-                    <b class="topright" id="button-notebook-add"><span></span></b>
-                </div>
+                </header>
                 <div class="content">
                     <form method="get" action="" id="search" class="sprited" onsubmit="return false;">
                         <input type="text" id="searchNotes" name="searchNotes" />
@@ -49,14 +53,17 @@
                     <b id="button-notebook-search" class="sprited bottomleft">Search</b>
                     <b id="button-notebook-sortby" class="sprited bottomright">Sort By</b>
                 </div>
-            </div>
-            <div class="card" id="note">
-                <div class="header">
-                    <b class="topleft" id="button-note-cancel"><span></span></b>
+            </section>
+
+            <section class="card" id="note" role="region">
+                <header>
+                    <button id="button-note-cancel"><span class="icon icon-close">close</span></button>
+                    <menu type="toolbar">
+                        <button id="button-note-save" data-l10n-id="done">Done</button>
+                    </menu>
                     <h1></h1>
                     <input type="text" value="" id="edit-note-name" name="edit-note-name" />
-                    <b class="topright" id="button-note-save"><span></span></b>
-                </div>
+                </header>
                 <ul id="note-edit-actions">
                     <li class="sprited type">Type</li>
                     <li class="sprited photo">Attach Photo</li>
@@ -83,16 +90,17 @@
                         <b id="button-resource-delete" class="sprited bottomright">Delete</b>
                     </div>
                 </div>
-            </div>
-            <div class="card" id="note-info">
-                <div class="header">
-                    <b class="topleft card-prev"><span></span></b>
+            </section>
+
+            <section class="card" id="note-info" role="region">
+                <header>
+                    <button class="card-prev"><span class="icon icon-back">menu</span></button>
                     <h1 data-l10n-id="note-info">Note Info</h1>
-                </div>
+                </header>
                 <div class="content">
                     <ul class="fields"></ul>
                 </div>
-            </div>
+            </section>
         </div>
     </body>
 </html>

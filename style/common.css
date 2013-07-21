@@ -6,153 +6,48 @@ body, div, p, ul, li, input, textarea, h1, h2, h3 {
     margin: 0;
     padding: 0;
 }
-body, input, textarea {
-    font-family: 'MozTT';
-}
-input, textarea {
-    font-size: 1.5rem;
-}
 body {
     width: 100%;
     height: 100%;
     margin: 0 auto;
     background: #fff;
 }
+progress.pack-activity {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 1000;
+}
 
-
-.card > .header {
-
+section[role="region"] > header:first-child input[type="text"] {
     position: absolute;
     top: 0;
     left: 0;
-    right: 0;
-    z-index: 50;
-    height: 4.3rem;
-    line-height: 4.9rem;
+    font-size: 2.5rem;
+    font-weight: bold;
+    line-height: 4.8rem;
+    width: 100%;
+    height: 100%;
+    background: transparent;
+    border: none;
     color: #fff;
-    padding: 0 6rem 0.4rem 3rem;
-    background: linear-gradient(to bottom,  #cd6726 0%,#ba492e 100%);
-    border-bottom: 0.2rem solid #9a3124;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+    display: none;
+    padding: 0 8.6rem 0 2.9rem;
 }
-    .card .header h1 {
-        font: 2.5rem/4.8rem "MozTT", Sans-serif;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-    }
-    .card .header input {
-        position: absolute;
-        top: 0;
-        left: 0;
-        font-size: 2.2rem;
-        width: 100%;
-        height: 4.6rem;
-        background: transparent;
-        border: none;
-        color: #fff;
-        padding: 0 5.6rem 0 4rem;
-        -moz-box-sizing: border-box;
-        box-sizing: border-box;
-        display: none;
-    }
-    .edit-title .header h1 {
-        display: none;
-    }
-    .edit-title .header input {
-        display: block;
-        z-index: 50;
-    }
-    .card .header b {
-        position: absolute;
-        top: 0;
-        bottom: 0.4rem;
-        cursor: pointer;
-        font-size: 0;
-        text-indent: -10rem;
-        z-index: 100;
-    }
-        .card .header b span {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-        }
-    .card .header b.topleft {
-        left: 0;
-        width: 2rem;
-        height: 4.7rem;background: linear-gradient(to bottom,  #b55b22 0%,#9a3c27 100%);
-        border-bottom: 0.2rem solid #802a1e;
-    }
-        .card .header b.topleft span {
-            left: 0.2rem;
-            background: transparent url(../images/back.png) 50% 50% no-repeat;
-            background-size: 3rem 3rem;
-        }
-        .card .header b.topleft:before {
-            content: '';
-            position: absolute;
-            top: 0;
-            bottom: 0;
-            right: -0.1rem;
-            width: 0.2rem;
-            background: transparent url(../images/div_line_sm_orange.png) 0 0 no-repeat;
-            background-size: 0.2rem 4.9rem;
-        }
-    .card .header b.topright {
-        right: 0;
-        width: 5rem;
-    }
-        .card .header b.topright:before {
-            content: '';
-            position: absolute;
-            top: 0;
-            right: 0;
-            width: 5rem;
-            height: 5rem;
-        }
-        .card .header b.topright:after {
-            content: '';
-            position: absolute;
-            top: 0;
-            bottom: 0;
-            left: -0.1rem;
-            width: 0.2rem;
-            background: transparent url(../images/div_line_lg_orange.png) 0 0 no-repeat;
-            background-size: 0.2rem 4.9rem;
-        }
-        
-        
-.card .header b#button-notebook-menu span {
-    left: -1.6rem;
-    background: transparent url(../images/iconaction_menu_30x30.png) 50% 50% no-repeat;
-    background-size: 3rem 3rem;
+section[role="region"].edit-title > header:first-child h1 {
+    display: none;
 }
-.card .header b#button-notebook-add span {
-    background: transparent url(../images/iconaction_new_30x30.png) 50% 50% no-repeat;
-    background-size: 3rem 3rem;
+section[role="region"].edit-title > header:first-child input[type="text"] {
+    display: block;
+    z-index: 50;
 }
-#button-note-save span {
-    background: transparent url(../images/iconaction_save_30x30.png) 50% 50% no-repeat;
-    background-size: 3rem 3rem;
-    top: 50%;
-    left: 50%;
-    right: auto;
-    bottom: auto;
-    width: 2.7rem;
-    height: 2.2rem;
-    margin: -1.1rem 0 0 -1.3rem;
+section[role="region"] > header:first-child menu[type="toolbar"] {
+    position: relative;
+    z-index: 100;
 }
-#button-note-cancel span {
-    left: -0.5rem;
-    background: transparent url(../images/iconaction_cancel_30x30.png) 50% 50% no-repeat;
-    background-size: 3rem 3rem;
-}
-.readonly #button-note-cancel span {
-    background: transparent url(../images/back.png) 50% 50% no-repeat;
-    background-size: 3rem 3rem;
-}
-    
+
 .card .footer {
     position: absolute;
     bottom: 0;
@@ -160,7 +55,7 @@ body {
     right: 0;
     height: 4rem;
     line-height: 4rem;
-    z-index: 50;
+    z-index: 7;
     color: #fff;
     text-align: center;
     background: rgba(0, 0, 0, .8);
@@ -188,7 +83,7 @@ body {
         height: 4rem;
         opacity: 0;
     }
-    
+
 .card > .content {
     position: absolute;
     top: 4.9rem;
@@ -196,7 +91,7 @@ body {
     left: 0;
     right: 0;
     padding-bottom: 4rem;
-    z-index: 30;
+    z-index: 5;
     overflow-y: auto;
 }
 
@@ -219,18 +114,6 @@ body {
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
-            clear: left;
-        }
-        .notebook-notes li span {
-            display: block;
-            float: left;
-        }
-        .notebook-notes li .text {
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            max-width: 100%;
-            margin-right: 0.4rem;
         }
         .notebook-notes li .time {
             font-size: 1.3rem;
@@ -266,6 +149,7 @@ body {
         min-height: 25rem;
         padding: 2rem;
         line-height: 130%;
+        font-size: 1.6rem;
         -moz-box-sizing: border-box;
         box-sizing: border-box;
     }
@@ -291,7 +175,7 @@ body {
             position: relative;
             margin-top: 1.5rem;
         }
-        
+
         #note #note-resources .image {
             height: 6rem;
             padding-left: 9rem;
@@ -301,13 +185,13 @@ body {
         }
             #note #note-resources .image:before {
                 content: "";
-                background: transparent url(../images/attachment.png) 50% 50% no-repeat;
-                background-size: 1rem 2.2rem;
+                background: transparent url('../images/attachment.png') no-repeat;
+                background-size: 0.9rem 2.1rem;
                 position: absolute;
                 top: 0;
                 left: 7rem;
-                width: 1rem;
-                height: 2.2rem;
+                width: 0.9rem;
+                height: 2.1rem;
             }
             #note #note-resources .image span {
                 position: absolute;
@@ -319,7 +203,7 @@ body {
                 background-repeat: no-repeat;
                 background-size: cover;
             }
-        
+
     #note #button-note-save {
         opacity: 0;
         pointer-events: none;
@@ -330,7 +214,7 @@ body {
         opacity: 1;
         pointer-events: inherit;
     }
-    
+
 #note.card.readonly > .content {
     top: 4.9rem;
 }
@@ -346,7 +230,7 @@ body {
     #note.readonly > .footer {
         display: block;
     }
-    
+
 #note-edit-actions {
     position: absolute;
     top: 4.9rem;
@@ -384,8 +268,8 @@ body {
     #note-edit-actions li:last-child {
         border-right: none;
     }
-    
-    
+
+
 #image-fullscreen {
     position: absolute;
     top: 0;
@@ -424,7 +308,7 @@ body {
         text-overflow: ellipsis;
         white-space: nowrap;
     }
-    
+
 .empty {
     position: absolute;
     top: 0;
@@ -451,7 +335,7 @@ body {
 }
 
 #notebooks {
-    background: #3b3b3b;
+    background: #3b3b3b url(../shared/style/drawer/images/ui/pattern.png);
     color: #fff;
     box-shadow: -0.5rem 0 0.5rem 0 rgba(0, 0, 0, .3) inset;
 }
@@ -471,8 +355,8 @@ body {
             bottom: 0;
             width: 5rem;
             cursor: pointer;
-            background: transparent url(../images/iconaction_new_30x30.png) 50% 50% no-repeat;
-            background-size: 3rem 3rem;
+            background: transparent url(../images/iconaction_new.png) 50% 50% no-repeat;
+            background-size: 2.1rem 2rem;
         }
     #notebooks .card-next {
         position: absolute;
@@ -483,7 +367,12 @@ body {
         cursor: pointer;
     }
     #notebooks-list {
+         bottom: 4rem;
         list-style-type: none;
+        overflow-y: scroll;
+        position: absolute;
+        top: 4.8rem;
+        width: 100%;
     }
         #notebooks-list li {
             border-bottom: 0.1rem solid #616666;
@@ -491,6 +380,10 @@ body {
             font-size: 1.5rem;
             cursor: pointer;
         }
+        #notebooks-list li:last-child {
+            border-bottom: 0;
+        }
+
 
 
 #search {
@@ -556,7 +449,7 @@ body {
                     width: 0.1rem;
                     background: #fdfdfd;
                 }
-                
+
             #note-info .fields li .value {
                 position: relative;
             }
@@ -568,7 +461,7 @@ body {
             }
 
 
-.search-results #main .header,
+.search-results #main header,
 .search-results #main .footer,
 .search-results #main .empty {
     display: none;
@@ -617,18 +510,37 @@ body {
     pointer-events: none;
 }
 #button-notebook-search:before {
-    background: transparent url(../images/search_big.png) 0 0 no-repeat;
+    background: transparent url('../images/search_big.png') 0 0 no-repeat;
     background-size: 2.4rem 2.4rem;
 }
 #button-notebook-sortby:before {
-    background: transparent url(../images/sortby.png) 0 0 no-repeat;
+    background: transparent url('../images/sortby.png') 0 0 no-repeat;
     background-size: 1.8rem 1.8rem;
     width: 1.8rem;
     height: 1.8rem;
     margin: -0.85rem 0 0 -0.9rem;
 }
+#button-manual-sync {
+    width: 2.8rem;
+    left: 14.6rem;
+}
+body:not(.loggedin) #button-manual-sync {
+    display: none;
+}
+#button-manual-sync:before {
+    background: url('../images/sync.png') 0 0 no-repeat;
+    background-size: 2.8rem 2.2rem;
+    width: 2.8rem;
+    height: 2.2rem;
+}
+body.syncing #button-manual-sync:before {
+    animation: 0.9s steps(30, end) 0s normal none infinite rotate;
+}
+body.offline #button-manual-sync {
+    opacity: 0.4;
+}
 #search:before {
-    background: transparent url(../images/search_small.png) 0 0 no-repeat;
+    background: transparent url('../images/search_small.png') 0 0 no-repeat;
     background-size: 1.6rem 1.6rem;
     width: 1.6rem;
     height: 1.6rem;
@@ -637,49 +549,49 @@ body {
     right: 2.3rem;
 }
 .empty:before {
-    background: transparent url(../images/empty_list.png) 0 0 no-repeat;
+    background: transparent url('../images/empty_list.png') 0 0 no-repeat;
     background-size: 15.1rem 18.3rem;
     width: 16rem;
     height: 18.3rem;
     margin: -9.2rem 0 0 -8rem;
 }
 .notebook-fake .empty:before {
-    background: transparent url(../images/empty_trash.png) 0 0 no-repeat;
+    background: transparent url('../images/empty_trash.png') 0 0 no-repeat;
     background-size: 15.9rem 18.2rem;
     width: 16rem;
     height: 18.3rem;
 }
 
 #note-edit-actions .type:before {
-    background: transparent url(../images/type.png) 0 0 no-repeat;
+    background: transparent url('../images/type.png') 0 0 no-repeat;
     background-size: 2rem 2.1rem;
     width: 2rem;
     height: 2.1rem;
     margin: -0.8rem 0 0 -1rem;
 }
 #note-edit-actions .photo:before {
-    background: transparent url(../images/photo.png) 0 0 no-repeat;
+    background: transparent url('../images/photo.png') 0 0 no-repeat;
     background-size: 2.9rem 2.3rem;
     width: 2.9rem;
     height: 2.3rem;
     margin: -1rem 0 0 -1.3rem;
 }
 #note-edit-actions .info:before {
-    background: transparent url(../images/info.png) 0 0 no-repeat;
+    background: transparent url('../images/info.png') 0 0 no-repeat;
     background-size: 2.5rem 2.4rem;
     width: 2.5rem;
     height: 2.4rem;
     margin: -1rem 0 0 -1.1rem;
 }
 #note-edit-actions .share:before {
-    background: transparent url(../images/share.png) 0 0 no-repeat;
+    background: transparent url('../images/share.png') 0 0 no-repeat;
     background-size: 2.3rem 2.3rem;
     width: 2.3rem;
     height: 2.4rem;
     margin: -1rem 0 0 -1.2rem;
 }
 #note-edit-actions .delete:before {
-    background: transparent url(../images/delete.png) 0 0 no-repeat;
+    background: transparent url('../images/delete.png') 0 0 no-repeat;
     background-size: 2.4rem 2.5rem;
     width: 2.4rem;
     height: 2.6rem;
@@ -687,14 +599,14 @@ body {
 }
 
 #button-note-restore:before {
-    background: transparent url(../images/restore.png) 0 0 no-repeat;
+    background: transparent url('../images/restore.png') 0 0 no-repeat;
     background-size: 2.8rem 2.6rem;
     width: 2.8rem;
     height: 2.6rem;
     margin: -1.1rem 0 0 -1.4rem;
 }
 #button-note-delete:before {
-    background: transparent url(../images/expunge.png) 0 0 no-repeat;
+    background: transparent url('../images/expunge.png') 0 0 no-repeat;
     background-size: 2.4rem 2.5rem;
     width: 2.4rem;
     height: 2.6rem;
@@ -702,14 +614,14 @@ body {
 }
 
 #button-resource-close:before {
-    background: transparent url(../images/close.png) 0 0 no-repeat;
+    background: transparent url('../images/close.png') 0 0 no-repeat;
     background-size: 1.7rem 1.7rem;
     width: 1.7rem;
     height: 1.7rem;
     margin: -0.85rem 0 0 -0.9rem;
 }
 #button-resource-delete:before {
-    background: transparent url(../images/delete.png) 0 0 no-repeat;
+    background: transparent url('../images/delete.png') 0 0 no-repeat;
     background-size: 2.4rem 2.5rem;
     width: 2.4rem;
     height: 2.6rem;
