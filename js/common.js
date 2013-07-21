@@ -952,7 +952,7 @@ var App = new function() {
             
             el.classList.remove("notebook-real");
             el.classList.remove("notebook-fake");
-            el.classList.add(notebook? "notebook-real": "notebook-fake");
+            el.classList.add(notebook || !filters.trashed ? "notebook-real": "notebook-fake");
             
             notebook && self.setTitle(notebook.getName());
             
@@ -990,14 +990,15 @@ var App = new function() {
                 }
             } else {
                 user.getNotes(filters, function onSuccess(notes){
-                    self.printNotes(notes);
+                    self.printNotes(notes, filters.trashed);
                 }, function onError() {
                     
                 });
             }
         };
         
-        this.printNotes = function(notes) {
+        this.printNotes = function(notes, trashed) {
+            console.log('trashed: '+trashed);
             $notesList.innerHTML = '';
             
             notes = sortNotes(notes, currentSort, currentIsDesc);
@@ -1009,7 +1010,7 @@ var App = new function() {
                 el.classList.remove(EMPTY_CONTENT_CLASS);
             } else {
                 el.classList.add(EMPTY_CONTENT_CLASS);
-                elEmptyNotes.innerHTML = currentNotebook? TEXTS.EMPTY_NOTEBOOK : TEXTS.EMPTY_TRASH;
+                elEmptyNotes.innerHTML = currentNotebook || !trashed ? TEXTS.EMPTY_NOTEBOOK : TEXTS.EMPTY_TRASH;
             }
             
             return $notesList;
