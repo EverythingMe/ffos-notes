@@ -441,7 +441,7 @@ section[role="region"] > header:first-child menu[type="toolbar"] {
         #note-info .fields li {
             position: relative;
             height: 4.2rem;
-            line-height: 4.2rem;
+            /*line-height: 4.2rem;*/
             padding: 0 3rem 0 13.1rem;
             text-align: right;
             border-bottom: 0.1rem solid #e3e3e4;

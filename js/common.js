@@ -17,45 +17,8 @@ var App = new function() {
             "name": "default"
         },
         TEXTS = null,
-        ORDERS = [
-            {
-                "property": "date_updated",
-                "label": "Date updated",
-                "descending": true
-            },
-            {
-                "property": "date_created",
-                "label": "Date created",
-                "descending": true
-            },
-            {
-                "property": "title",
-                "label": "Title",
-                "descending": false
-            },
-            {
-                "property": "notebook_id",
-                "label": "Notebook",
-                "descending": false
-            }
-        ],
-        INFO_FIELDS = [
-            {
-                "key": "notebook_id",
-                "label": "Notebook",
-                "type": "options"
-            },
-            {
-                "key": "date_created",
-                "label": "Created on",
-                "type": "date"
-            },
-            {
-                "key": "date_updated",
-                "label": "Modified on",
-                "type": "date"
-            }
-        ],
+        ORDERS = null,
+        INFO_FIELDS = null,
         SEARCH_FIELDS = ["text", "title"];
     
     this.init = function() {
@@ -83,7 +46,8 @@ var App = new function() {
             "onCancel": onNoteCancel,
             "onRestore": onNoteRestore,
             "onDelete": onNoteDelete,
-            "onResourceClick": onResourceClick
+            "onResourceClick": onResourceClick,
+            "NoteActionsPhotoLabel": TEXTS.PHOTO_LABEL
         });
         // handler of the note-info card
         NoteInfoView.init({
@@ -188,8 +152,50 @@ var App = new function() {
             "CONFIRM_TRASH_NOTE": navigator.mozL10n.get("confirm-trash-note"),
             "CONFIRM_DELETE_NOTE": navigator.mozL10n.get("confirm-delete-note"),
             "ADD_IMAGE_TITLE": navigator.mozL10n.get("add-image-title"),
-            "IMAGE_NOT_SUPPORTED": navigator.mozL10n.get("image-not-supported")
+            "IMAGE_NOT_SUPPORTED": navigator.mozL10n.get("image-not-supported"),
+            "PHOTO_LABEL": navigator.mozL10n.get("image-label")
         };
+
+        ORDERS = [
+            {
+                "property": "date_updated",
+                "label": navigator.mozL10n.get("date-updated"),
+                "descending": true
+            },
+            {
+                "property": "date_created",
+                "label": navigator.mozL10n.get("date-created"),
+                "descending": true
+            },
+            {
+                "property": "title",
+                "label": navigator.mozL10n.get("title"),
+                "descending": false
+            },
+            {
+                "property": "notebook_id",
+                "label": navigator.mozL10n.get("notebook"),
+                "descending": false
+            }
+        ];
+        
+        INFO_FIELDS = [
+            {
+                "key": "notebook_id",
+                "label": navigator.mozL10n.get("notebook"),
+                "type": "options"
+            },
+            {
+                "key": "date_created",
+                "label": navigator.mozL10n.get("created-on"),
+                "type": "date"
+            },
+            {
+                "key": "date_updated",
+                "label": navigator.mozL10n.get("modified-on"),
+                "type": "date"
+            }
+        ];
     };
     
     this.getUserNotes = function() {
@@ -567,7 +573,8 @@ var App = new function() {
             NoteActions.init({
                 "el": elActions,
                 "onBeforeAction": onBeforeAction,
-                "onAfterAction": onAfterAction
+                "onAfterAction": onAfterAction,
+                "label": options.NoteActionsPhotoLabel
             });
         };
         
@@ -1145,7 +1152,7 @@ var App = new function() {
     var NoteActions = new function() {
         var self = this,
             el = null,
-            onBeforeAction = null, onAfterAction = null;
+            onBeforeAction = null, onAfterAction = null, photoLabel = null;
             
         this.init = function(options) {
             el = options.el;
@@ -1163,6 +1170,8 @@ var App = new function() {
             elInfo.addEventListener("click", actionInfo);
             elShare.addEventListener("click", actionShare);
             elDelete.addEventListener("click", actionDelete);
+
+            photoLabel = options.label;
         };
         
         function actionType() {
@@ -1192,7 +1201,7 @@ var App = new function() {
                     reader.readAsDataURL(act.result.blob);
                     reader.onload = function onBlobRead(e) {
                         onAfterAction && onAfterAction("photo", {
-                            "name": "Photo",
+                            "name": photoLabel,
                             "src": reader.result,
                             "size": 0
                         });
