@@ -113,12 +113,21 @@ section[role="region"] > header:first-child menu[type="toolbar"] {
         cursor: pointer;
     }
         .notebook-notes li .title {
+            clear: left;
             font-size: 1.8rem;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
         }
+        .notebook-notes li .text {
+            float: left;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 100%;
+        }
         .notebook-notes li .time {
+            float: left;
+            margin-left: 0.3rem;
             font-size: 1.3rem;
             color: #666;
         }
@@ -382,6 +391,8 @@ section[role="region"] > header:first-child menu[type="toolbar"] {
             padding: 1.3rem 2rem;
             font-size: 1.5rem;
             cursor: pointer;
+            text-overflow: ellipsis;
+            overflow: hidden;
         }
         #notebooks-list li:last-child {
             border-bottom: 0;
