@@ -21,15 +21,17 @@ progress.pack-activity {
     left: 0;
     z-index: 1000;
 }
-
+section[role="region"] > header:first-child > button, section[role="region"] > header:first-child > a {
+    width: 2.5rem;
+}
 section[role="region"] > header:first-child input[type="text"] {
     position: absolute;
     top: 0;
-    left: 0;
+    left: 2.9rem;
     font-size: 2.5rem;
     font-weight: bold;
     line-height: 4.8rem;
-    width: 100%;
+    width: calc(100% - 8.3rem);
     height: 100%;
     background: transparent;
     border: none;
@@ -37,7 +39,7 @@ section[role="region"] > header:first-child input[type="text"] {
     -moz-box-sizing: border-box;
     box-sizing: border-box;
     display: none;
-    padding: 0 8.6rem 0 2.9rem;
+    padding: 0;
 }
 section[role="region"].edit-title > header:first-child h1 {
     display: none;
@@ -400,6 +402,7 @@ section[role="region"] > header:first-child menu[type="toolbar"] {
 
 #notebooks.active + section[role="region"] > header:first-child > button, #notebooks.active + section[role="region"] > header:first-child > a {
     background-position: 4rem center;
+    width: 5rem;
 }
 #notebooks.active + section[role="region"] > header:first-child > button .icon, #notebooks.active + section[role="region"] > header:first-child > a .icon, #notebooks.active + section[role="region"] > header:first-child > button .icon:after, #notebooks.active + section[role="region"] > header:first-child > a .icon:after {
     width: 4rem;
