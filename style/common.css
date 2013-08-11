@@ -369,7 +369,7 @@ section[role="region"] > header:first-child menu[type="toolbar"] {
 }
 
 #notebooks {
-    background: #3b3b3b url(../shared/style/drawer/images/ui/pattern.png);
+    background: #3b3b3b url(../shared/style_unstable/drawer/images/ui/pattern.png);
     color: #fff;
     box-shadow: -0.5rem 0 0.5rem 0 rgba(0, 0, 0, .3) inset;
 }
