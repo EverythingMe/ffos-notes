@@ -11,6 +11,7 @@ var App = new function() {
         EMPTY_CONTENT_CLASS = "show-empty",
         CLASS_EDIT_TITLE = "edit-title",
         CLASS_SEARCH_RESULTS = "search-results",
+        CLASS_LOADING = "loading",
         DEFAULT_USER = {
             "id": "1",
             "username": "default",
@@ -109,6 +110,8 @@ var App = new function() {
                 self.setupTexts();
             });
         }, false);
+
+        document.body.classList.remove(CLASS_LOADING);
     };
     
     function setupCache() {

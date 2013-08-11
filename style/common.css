@@ -655,3 +655,7 @@ section[role="region"] > header:first-child menu[type="toolbar"] {
     height: 2.6rem;
     margin: -1.1rem 0 0 -1.2rem;
 }
+
+body.loading .card:not(.active) {
+    display: none;
+}
