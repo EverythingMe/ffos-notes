@@ -419,10 +419,6 @@ section[role="region"] > header:first-child menu[type="toolbar"] {
         #notebooks-list li:last-child {
             border-bottom: 0;
         }
-        #notebooks-list li:last-child {
-            border-bottom: 0;
-        }
-
 
 #notebooks.active + section[role="region"] > header:first-child > button, #notebooks.active + section[role="region"] > header:first-child > a {
     background-position: 4rem center;
@@ -679,18 +675,16 @@ body.offline #button-manual-sync {
     margin: -1.1rem 0 0 -1.2rem;
 }
 
-body.loading .card:not(.active) {
-    display: none;
-}
-
 .loggedin section[role="region"] > header:first-child {
     background-image: url(../images/header_bg_green.png);
 }
-.loggedin section[role="region"] > header:first-child > button .icon:after, section[role="region"] > header:first-child > a .icon:after {
-    background-image: url(../images/header_negative_green.png);
+.loggedin section[role="region"] > header:first-child > button .icon:after, .loggedin section[role="region"] > header:first-child > a .icon:after {
     background-color: #498722;
 }
-.loggedin section[role="region"] > header:first-child menu[type="toolbar"] a:last-child, section[role="region"] > header:first-child menu[type="toolbar"] button:last-child {
+.loggedin section[role="region"] > header:first-child menu[type="toolbar"] a:last-child,
+.loggedin section[role="region"] > header:first-child menu[type="toolbar"] button:last-child,
+.loggedin section[role="region"] > header:first-child > button,
+.loggedin section[role="region"] > header:first-child > a {
     background-image: url(../images/separator_green.png);
 }
 
@@ -839,6 +833,6 @@ progress[role="loading"] {
     content: "";
 }
 
-body:not(.loggedin) .drawer footer {
+body.loading .card:not(.active) {
     display: none;
 }

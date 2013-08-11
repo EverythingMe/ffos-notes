@@ -54,6 +54,9 @@ var Models = new function() {
         };
         
         this.getId = function() { return self.data_id; };
+        this.getUsername = function() { return self.data_username; };
+        this.getPrivilege = function() { return self.data_privilege; };
+        this.getEmail = function() { return self.data_email; };
         this.getDateCreated = function() { return self.data_date_created; };
         this.getOauthToken = function() { return self.data_oauth_token; };
         this.getNoteStoreUrl = function() { return self.data_note_store_url; };
@@ -61,6 +64,7 @@ var Models = new function() {
         this.getExpires = function() { return self.data_expires; };
         this.getLastUpdateCount = function() { return self.data_last_update_count; };
         this.getLastSyncTime = function() { return self.data_last_sync_time; };
+        this.getAccounting = function() { return self.data_accounting; };
 
         this.export = function() {
             return exportModel(self);

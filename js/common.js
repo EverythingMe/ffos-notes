@@ -127,16 +127,9 @@ var App = new function() {
             self.newNote();
         });
 
-        document.addEventListener('localechange', function(){
-            navigator.mozL10n.ready(function(){
-                self.setupTexts();
-            });
-        }, false);
+        DB.init(initUser);
 
         document.body.classList.remove(CLASS_LOADING);
-
-        Evernote.init();
-        DB.init(initUser);
 
         document.addEventListener('localechange', function(){
             navigator.mozL10n.ready(function(){
@@ -1479,7 +1472,7 @@ var App = new function() {
                     reader.readAsArrayBuffer(act.result.blob);
                     reader.onload = function onBlobRead(e) {
                         onAfterAction && onAfterAction("photo", {
-                            "name": "Photo-" + new Date().getTime() + "." + act.result.type.replace("image/", ""),
+                            "name": photoLabel + "-" + new Date().getTime() + "." + act.result.type.replace("image/", ""),
                             "mime": act.result.type,
                             "body": reader.result
                         });
