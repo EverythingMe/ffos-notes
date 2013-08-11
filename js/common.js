@@ -916,7 +916,7 @@ var App = new function() {
     
     var NotebookView = new function() {
         var self = this,
-            el = null, elTitle = null, elEditTitle = null, elEmptyNotes = null, $notesList = null,
+            el = null, elTitle = null, elEditTitle = null, elSearchTitle = null, elEmptyNotes = null, $notesList = null,
             currentNotebook = null, currentFilters = null, currentSort = "", currentIsDesc = false,
             onClickNote = null, notebookScrollOffset = 0,
             onChange = null;
@@ -929,6 +929,8 @@ var App = new function() {
             elTitle = el.querySelector("h1");
             elEditTitle = el.querySelector("input");
             elEmptyNotes = el.querySelector(".empty p");
+
+            elSearchTitle = el.querySelector("h2");
             
             elTitle.addEventListener("click", self.editTitle);
             elEditTitle.addEventListener("blur", self.saveEditTitle);
@@ -1060,6 +1062,16 @@ var App = new function() {
         
         this.scrollTop = function(scrollTop) {
             $notesList.parentNode.scrollTop = (typeof scrollTop == "number")? scrollTop : notebookScrollOffset;
+        };
+
+        this.showSearchTitle = function() {
+            elTitle.style.display = "none";
+            elSearchTitle.style.display = "block";
+        };
+
+        this.hideSearchTitle = function() {
+            elTitle.style.display = "block";
+            elSearchTitle.style.display = "none";
         };
         
         function getNoteElement(note) {
@@ -1293,6 +1305,7 @@ var App = new function() {
         };
         
         this.onSearch = function(items, keyword, fields) {
+            NotebookView.showSearchTitle();
             if (items.length > 0) {
                 var elList = NotebookView.printNotes(items);
                 
@@ -1301,6 +1314,7 @@ var App = new function() {
                 }, 0);
             } else {
                 if (!keyword) {
+                    NotebookView.hideSearchTitle();
                     showPreviousNotebook(true);
                 } else {
                     NotebookView.printNotes([]);
