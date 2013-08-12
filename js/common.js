@@ -669,7 +669,7 @@ var App = new function() {
             var el = document.createElement("li");
             el.innerHTML = TEXTS.NOTEBOOK_ALL;
             el.className = "all";
-            el.setAttribute("data-l10n-id", "NOTEBOOK_ALL");
+            el.dataset.l10nId = "notebook-all";
             el.addEventListener("click", clickAll);
             
             elList.appendChild(el);
@@ -680,7 +680,7 @@ var App = new function() {
             
             el.innerHTML = TEXTS.NOTEBOOK_TRASH + (numberOfTrashedNotes? " (" + numberOfTrashedNotes + ")" : "");
             el.className = "trash";
-            el.setAttribute("data-l10n-id", "NOTEBOOK_TRASH");
+            el.dataset.l10nId = "notebook-trash";
             el.addEventListener("click", clickTrash);
             
             elList.appendChild(el);
@@ -1210,6 +1210,7 @@ var App = new function() {
             } else {
                 el.classList.add(EMPTY_CONTENT_CLASS);
                 elEmptyNotes.innerHTML = currentNotebook || !trashed ? TEXTS.EMPTY_NOTEBOOK : TEXTS.EMPTY_TRASH;
+                elEmptyNotes.dataset.l10nId = currentNotebook || !trashed ? "empty-notebook" : "empty-trash";
             }
             
             finishNotesLoading();
