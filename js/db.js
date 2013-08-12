@@ -60,7 +60,7 @@ var DB = new function() {
     };
     
     this.remove = function(table, key, c, e) {
-        var store = db.transaction(table, IDBTransaction.READ_WRITE).objectStore(table),
+        var store = db.transaction(table, "readwrite").objectStore(table),
             req = store["delete"](key);
             
         req.onsuccess = function(e) {
@@ -72,7 +72,7 @@ var DB = new function() {
     };
     
     this.update = function(table, obj, c, e) {
-        var transaction = db.transaction(table, IDBTransaction.READ_WRITE);
+        var transaction = db.transaction(table, "readwrite");
         
         transaction.oncomplete = function(e) {
             c && c(obj);
@@ -115,7 +115,7 @@ var DB = new function() {
     };
     
     this.add = function(table, obj, c, e) {
-        var transaction = db.transaction(table, IDBTransaction.READ_WRITE);
+        var transaction = db.transaction(table, "readwrite");
         
         transaction.oncomplete = function(e) {
             c && c(obj);
