@@ -487,6 +487,7 @@ var App = new function() {
         function createNotebookEntry_All() {
             var el = document.createElement("li");
             el.innerHTML = TEXTS.NOTEBOOK_ALL;
+            el.dataset.l10nId = "notebook-all";
             el.className = "all";
             el.addEventListener("click", clickAll);
             
@@ -494,9 +495,14 @@ var App = new function() {
         }
         
         function createNotebookEntry_Trash(numberOfTrashedNotes) {
-            var el = document.createElement("li");
+            var el = document.createElement("li"),
+                span = document.createElement("span"),
+                text = document.createTextNode((numberOfTrashedNotes ? " (" + numberOfTrashedNotes + ")" : ""));
             
-            el.innerHTML = TEXTS.NOTEBOOK_TRASH + (numberOfTrashedNotes? " (" + numberOfTrashedNotes + ")" : "");
+            span.innerHTML = TEXTS.NOTEBOOK_TRASH;
+            span.dataset.l10nId = "notebook-trash";
+            el.appendChild(span);
+            el.appendChild(text);
             el.className = "trash";
             el.addEventListener("click", clickTrash);
             
@@ -1023,6 +1029,7 @@ var App = new function() {
             } else {
                 el.classList.add(EMPTY_CONTENT_CLASS);
                 elEmptyNotes.innerHTML = currentNotebook || !trashed ? TEXTS.EMPTY_NOTEBOOK : TEXTS.EMPTY_TRASH;
+                elEmptyNotes.dataset.l10nId = currentNotebook || !trashed ? "empty-notebook" : "empty-trash";
             }
             
             return $notesList;
