@@ -1,7 +1,7 @@
 {
     "name": "Notes",
     "description": "Notes app",
-    "version": "1.0.6",
+    "version": "1.0.7",
     "launch_path": "/index.html",
     "developer": {
         "name": "DoAT",
@@ -23,7 +23,7 @@
         },
         "pt-BR": {
             "name": "Notas",
-            "description": "Notes is the official Firefox OS app. Notes is designed to help save all those ideas, reminders and moments of inspiration — keeping track of it all right there on your everyday device. With everything totally searchable you'll be able to stay fully organised with minimal effort."
+            "description": "Notas é o aplicativo oficial do Firefox OS. Notas é projetado para ajudar a manter todas essas idéias, lembretes e momentos de inspiração, e manter o controle de tudo em seu aparelho todos os dias. Com totalmente pesquisável, pode ser totalmente organizado com o mínimo esforço."
         },
         "pl": {
             "name": "Notatki",
