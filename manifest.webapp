@@ -1,7 +1,7 @@
 {
     "name": "Notes",
     "description": "Notes app",
-    "version": "1.0.8",
+    "version": "1.0.9",
     "launch_path": "/index.html",
     "developer": {
         "name": "DoAT",
@@ -28,6 +28,18 @@
         "pl": {
             "name": "Notatki",
             "description": "Notatki to oficjalna aplikacja dla systemu Firefox OS. Korzystanie z niej jest darmowe. Powstała po to, żeby ułatwić zapisywanie pomysłów, inspiracji czy spraw do załatwienia wprost na Twoim telefonie. Mając dostęp do swoich notatek w łatwy sposób zorganizujesz swój czas."
+        },
+        "de": {
+            "name": "Notizen",
+            "description": "Notizen ist die offizielle App von Firefox OS. Notizen wurde entworfen,  um all diese Ideen , Erinnerungen und Momente der Inspiration zu speichern und sichert alles in Ihr Gerät jeden Tag. Weil alles vollständig durchsuchbar ist ,  organisiert man alles mit minimalem Aufwand."
+        },
+        "gr": {
+            "name": "Σημειώσεις",
+            "description": "Σημειώσεις είναι η επίσημη εφαρμογή του Firefox OS. Οι Σημειώσεις είναι μια εφαρμογή σχεδιασμένη για να σας βοηθήσει να αποθηκεύστε όλες εκείνες τις ιδέες, υπενθυμίσεις και στιγμές έμπνευσης, έχοντας την δυνατότητα να τα παρακολουθείτε στην καθημερινή σας συσκευή. Με τα πάντα πλήρως αναζητήσιμα θα μπορείτε να είστε πάντοτε πλήρως οργανωμένοι καταβάλλοντας την ελάχιστη προσπάθεια."
+        },
+        "hu": {
+            "name": "Jegyzetek",
+            "description": "A Jegyzetek egy hivatalos Firefox OS applikáció. A Jegyzetek segítségével lejegyezheted és elmentheted ötleteidet, emlékeztetőidet, a pillanat adta inspirációkat, amik mindíg elérhetőek lesznek a telefonodon. Automatikusan rendszerezi az elmentett dokumentumokat így minimális erőfeszítéssel rendben tarthatod jegyzeteidet és rájuk is kereshetsz telefonodon."
         }
     },
     "default_locale": "en-US"
