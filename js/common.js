@@ -1196,12 +1196,11 @@ var App = new function() {
             }
         };
 
-        this.printNotes = function(notes) {
+        this.printNotes = function(notes, trashed) {
             startNotesLoading();
             self.clearNoteList();
             
             notes = sortNotes(notes, currentSort, currentIsDesc);
-            
             if (notes && notes.length > 0) {
                 for (var i=0; i<notes.length; i++) {
                     $notesList.appendChild(getNoteElement(notes[i]));
