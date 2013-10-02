@@ -4,8 +4,7 @@ var App = new function() {
         $notebooksList = null, elButtonNewNote = null,
         createNoteOnTap = false,
         
-        DEBUG = window.location.href.indexOf('DEBUG=1') !== -1,
-        LOGGER_NAMESPACE = "DOAT-NOTES",
+        LOGGER_NAMESPACE = "[FxOS-Notes]",
         TIME_FOR_NEW_NOTE_DOUBLECLICK = 200,
         NUMBER_OF_SCROLL_RETRIES = 10,
         EMPTY_CONTENT_CLASS = "show-empty",
@@ -21,9 +20,11 @@ var App = new function() {
         ORDERS = null,
         INFO_FIELDS = null,
         SEARCH_FIELDS = ["text", "title"];
+
+    this.DEBUG = false;
     
     this.init = function() {
-        DEBUG && Console.init(LOGGER_NAMESPACE);
+        self.DEBUG && Console.init(LOGGER_NAMESPACE);
         
         setupCache();
         self.setupTexts();
@@ -153,7 +154,9 @@ var App = new function() {
 
     function setConnection(isOnline) {
         var status = isOnline ? 'online' : 'offline';
-        console.log('[FxOS-Notes] setConnection: '+JSON.stringify(status));
+        if (self.DEBUG) {
+            Console.log('setConnection: '+JSON.stringify(status));
+        }
         document.body.classList.add(status);
     }
     

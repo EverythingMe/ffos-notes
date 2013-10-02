@@ -50,7 +50,6 @@ var Evernote = new function() {
     this.init = function(user) {
         self.setupTexts();
 
-        console.log('[FxOS-Notes] Evernote.init()');
 
         oauth_token = user.getOauthToken();
         note_store_url = user.getNoteStoreUrl();
@@ -59,12 +58,15 @@ var Evernote = new function() {
         last_update_count = user.getLastUpdateCount();
         last_sync_time = user.getLastSyncTime();
 
-        console.log('[FxOS-Notes] oauth_token: '+oauth_token);
-        console.log('[FxOS-Notes] note_store_url: '+note_store_url);
-        console.log('[FxOS-Notes] shard_url: '+shard_url);
-        console.log('[FxOS-Notes] expires: '+expires);
-        console.log('[FxOS-Notes] last_update_count: '+last_update_count);
-        console.log('[FxOS-Notes] last_sync_time: '+last_sync_time);
+        if (App.DEBUG) {
+            Console.log('Evernote.init()');
+            Console.log('oauth_token: '+oauth_token);
+            Console.log('note_store_url: '+note_store_url);
+            Console.log('shard_url: '+shard_url);
+            Console.log('expires: '+expires);
+            Console.log('last_update_count: '+last_update_count);
+            Console.log('last_sync_time: '+last_sync_time);
+        }
 
         initNoteStore();
 
@@ -84,12 +86,16 @@ var Evernote = new function() {
     this.processXHR = function(url, method, callback) {
         var xhr = new XMLHttpRequest({mozSystem: true});
         xhr.open(method, url, true);
-        console.log('[FxOS-Notes] processXHR url: '+url);
+        if (App.DEBUG) {}
+            Console.log('processXHR url: '+url);
+        }
         xhr.onreadystatechange = function() {
 
             if (xhr.readyState === 4) {
-                console.log('[FxOS-Notes] processXHR xhr: '+JSON.stringify(xhr));
-                console.log('[FxOS-Notes] processXHR xhr.responseText: '+xhr.responseText);
+                if (App.DEBUG) {
+                    Console.log('processXHR xhr: '+JSON.stringify(xhr));
+                    Console.log('processXHR xhr.responseText: '+xhr.responseText);
+                }
                 // check to see if there was an error returned from Evernote server
                 if (xhr.responseText.match('<title>.*(Error)')) {
                     alert(TEXTS.NOT_REACHED_EVERNOTE);
@@ -158,12 +164,16 @@ var Evernote = new function() {
 
     this.premium = function() {
         var premiumUrl = EVERNOTE_SET_TOKEN_URL + "?auth=" + encodeURIComponent(oauth_token) + "&targetUrl=" + encodeURIComponent(EVERNOTE_PREMIUM_ACTION);
-        console.log('[FxOS-Notes] this.premium url: ' + JSON.stringify(premiumUrl));
+        if (App.DEBUG) {
+            Console.log('this.premium url: ' + JSON.stringify(premiumUrl));
+        }
         window.open(premiumUrl);
     };
 
     this.getAuthorization = function() {
-        console.log('[FxOS-Notes] getAuthorization url: '+AUTHORIZATION_URL+'?oauth_token='+tmp_oauth_token);
+        if (App.DEBUG) {
+            Console.log('getAuthorization url: '+AUTHORIZATION_URL+'?oauth_token='+tmp_oauth_token);
+        }
         authWindow = window.open(AUTHORIZATION_URL+'?oauth_token='+tmp_oauth_token);
         window.addEventListener('message', function onMessage(evt) {
             authWindow.close();
@@ -227,13 +237,17 @@ var Evernote = new function() {
     };
 
     this.getSyncState = function() {
-        console.log('[FxOS-Notes] this.getSyncState oauth_token: ' + JSON.stringify(oauth_token));
+        if (App.DEBUG) {
+            Console.log('this.getSyncState oauth_token: ' + JSON.stringify(oauth_token));
+        }
         noteStore.getSyncState(oauth_token, function(state) {
-            console.log('[FxOS-Notes] getSyncState: '+JSON.stringify(state));
-            console.log('[FxOS-Notes] state.fullSyncBefore: '+state.fullSyncBefore);
-            console.log('[FxOS-Notes] last_sync_time: '+last_sync_time);
-            console.log('[FxOS-Notes] state.updateCount: '+state.updateCount);
-            console.log('[FxOS-Notes] last_update_count: '+last_update_count);
+            if (App.DEBUG) {
+                Console.log('getSyncState: '+JSON.stringify(state));
+                Console.log('state.fullSyncBefore: '+state.fullSyncBefore);
+                Console.log('last_sync_time: '+last_sync_time);
+                Console.log('state.updateCount: '+state.updateCount);
+                Console.log('last_update_count: '+last_update_count);
+            }
             if (state.fullSyncBefore > last_sync_time) {
                 self.startFullSync();
             } else if(state.updateCount == last_update_count) {
@@ -260,7 +274,9 @@ var Evernote = new function() {
             return;
         }
         App.startSync();
-        console.log('[FxOS-Notes] this.getSyncChunk oauth_token: ' + JSON.stringify(oauth_token));
+        if (App.DEBUG) {
+            Console.log('this.getSyncChunk oauth_token: ' + JSON.stringify(oauth_token));
+        }
         noteStore.getSyncChunk(oauth_token, usn, max, full, c, self.onError);
     };
 
@@ -269,7 +285,9 @@ var Evernote = new function() {
         if (chunk.chunkHighUSN < chunk.updateCount) {
             self.getSyncChunk(chunk.chunkHighUSN, syncMaxEntries, true, self.processSyncChunk);
         } else {
-            console.log('[FxOS-Notes] processSyncChunk: '+JSON.stringify(syncChunks));
+            if (App.DEBUG) {
+                Console.log('processSyncChunk: '+JSON.stringify(syncChunks));
+            }
             for(var i in syncChunks) {
                 if (syncChunks[i].notebooks && syncChunks[i].notebooks.length > 0) {
                     for (var j in syncChunks[i].notebooks) {
@@ -300,11 +318,13 @@ var Evernote = new function() {
     };
     this.processSyncChunkList = function() {
         var chunk = null;
-        console.log('[FxOS-Notes] this.processSyncList');
-        console.log('[FxOS-Notes] this.processSyncList syncList.notebooks.length: '+syncList.notebooks.length);
-        console.log('[FxOS-Notes] this.processSyncList syncList.notes.length: '+syncList.notes.length);
-        console.log('[FxOS-Notes] this.processSyncList syncList.expungedNotebooks.length: '+syncList.expungedNotebooks.length);
-        console.log('[FxOS-Notes] this.processSyncList syncList.expungedNotes.length: '+syncList.expungedNotes.length);
+        if (App.DEBUG) {
+            Console.log('this.processSyncList');
+            Console.log('this.processSyncList syncList.notebooks.length: '+syncList.notebooks.length);
+            Console.log('this.processSyncList syncList.notes.length: '+syncList.notes.length);
+            Console.log('this.processSyncList syncList.expungedNotebooks.length: '+syncList.expungedNotebooks.length);
+            Console.log('this.processSyncList syncList.expungedNotes.length: '+syncList.expungedNotes.length);
+        }
         if (syncList.notebooks.length > 0) {
             chunk = syncList.notebooks.pop();
             self.processNotebookChunk(chunk);
@@ -322,15 +342,25 @@ var Evernote = new function() {
         }
     };
     this.processNotebookChunk = function(chunk) {
-        console.log('[FxOS-Notes] this.processNotebookChunk (chunk): '+JSON.stringify(chunk));
+        if (App.DEBUG) {
+            Console.log('this.processNotebookChunk (chunk): '+JSON.stringify(chunk));
+        }
         self.getNotebook(chunk.guid, function(notebook){
-            console.log('[FxOS-Notes] self.getNotebook: '+JSON.stringify(notebook));
+            if (App.DEBUG) {
+                Console.log('self.getNotebook: '+JSON.stringify(notebook));
+            }
             DB.getNotebooks({guid: notebook.guid}, function(resultsGuid){
-                console.log('[FxOS-Notes] DB.getNotebooks by guid: '+JSON.stringify(resultsGuid));
+                if (App.DEBUG) {
+                    Console.log('DB.getNotebooks by guid: '+JSON.stringify(resultsGuid));
+                }
                 DB.getNotebooks({name: notebook.name}, function(resultsName){
-                    console.log('[FxOS-Notes] DB.getNotebooks by name: '+JSON.stringify(resultsName));
+                    if (App.DEBUG) {
+                        Console.log('DB.getNotebooks by name: '+JSON.stringify(resultsName));
+                    }
                     DB.getQueues({rel: "Notebook", rel_guid: notebook.guid}, function(resultsQueue){
-                        console.log('[FxOS-Notes] DB.getQueues by notebook.guid: '+JSON.stringify(resultsQueue));
+                        if (App.DEBUG) {
+                            Console.log('DB.getQueues by notebook.guid: '+JSON.stringify(resultsQueue));
+                        }
                         if (resultsQueue.length == 0) {
                             if (resultsGuid.length == 0) {
                                 if (resultsName.length == 0) {
@@ -383,9 +413,21 @@ var Evernote = new function() {
         });
     };
     this.processNoteChunk = function(chunk) {
+        if (App.DEBUG) {
+            Console.log('this.processNoteChunk (chunk): '+JSON.stringify(chunk));
+        }
         self.getNote(chunk.guid, function(note){
+            if (App.DEBUG) {
+                Console.log('self.getNote: '+JSON.stringify(note));
+            }
             DB.getNotes({guid: note.guid}, function(resultsNote){
+                if (App.DEBUG) {
+                    Console.log('DB.getNotes: '+JSON.stringify(resultsNote));
+                }
                 DB.getQueues({rel: "Note", rel_guid: note.guid}, function(resultsQueue){
+                    if (App.DEBUG) {
+                        Console.log('DB.getQueues by note.guid: '+JSON.stringify(resultsQueue));
+                    }
                     if (resultsQueue.length > 0) {
                         if (!TEXTS) {
                             self.setupTexts();
@@ -419,6 +461,9 @@ var Evernote = new function() {
                             });
                         } else {
                             DB.getNotebooks({guid: note.notebookGuid}, function(notebooks){
+                                if (App.DEBUG) {
+                                    Console.log('DB.getNotebooks: '+JSON.stringify(notebooks));
+                                }
                                 if (notebooks.length > 0) {
                                     notebooks[0].newNote(note, function(newNote){
                                         if (!newNote.isActive()) {
@@ -437,7 +482,9 @@ var Evernote = new function() {
         });
     };
     this.processExpungedNotebookChunk = function(chunk) {
-        console.log('[FxOS-Notes] this.processExpungedNotebookChunk (chunk): '+JSON.stringify(chunk));
+        if (App.DEBUG) {
+            Console.log('this.processExpungedNotebookChunk (chunk): '+JSON.stringify(chunk));
+        }
         DB.getNotebooks({guid: chunk}, function(notebook){
             if (notebook.length > 0) {
                 notebook[0].remove();
@@ -446,7 +493,9 @@ var Evernote = new function() {
         });
     };
     this.processExpungedNoteChunk = function(chunk) {
-        console.log('[FxOS-Notes] this.processExpungedNoteChunk (chunk): '+JSON.stringify(chunk));
+        if (App.DEBUG) {
+            Console.log('this.processExpungedNoteChunk (chunk): '+JSON.stringify(chunk));
+        }
         DB.getNotes({guid: chunk}, function(note){
             if (note.length > 0) {
                 note[0].remove();
@@ -464,7 +513,9 @@ var Evernote = new function() {
 
     this.sendChanges = function() {
         App.getQueues(function(queues){
-            console.log('[FxOS-Notes] this.sendChanges: '+JSON.stringify(queues));
+            if (App.DEBUG) {
+                Console.log('this.sendChanges: '+JSON.stringify(queues));
+            }
             if (queues.length > 0) {
                 queueList = {
                     notebooks : [],
@@ -485,23 +536,31 @@ var Evernote = new function() {
     this.processQueueList = function() {
         App.startSync();
         var queue = null;
-        console.log('[FxOS-Notes] this.processQueueList');
-        console.log('[FxOS-Notes] this.processQueueList queueList.notebooks.length: '+queueList.notebooks.length);
-        console.log('[FxOS-Notes] this.processQueueList queueList.notes.length: '+queueList.notes.length);
+        if (App.DEBUG) {
+            Console.log('this.processQueueList');
+            Console.log('this.processQueueList queueList.notebooks.length: '+queueList.notebooks.length);
+            Console.log('this.processQueueList queueList.notes.length: '+queueList.notes.length);
+        }
         if (queueList.notebooks.length > 0) {
             queue = queueList.notebooks.pop();
-            console.log('[FxOS-Notes] this.processQueueList notebook queue: '+JSON.stringify(queue));
+            if (App.DEBUG) {
+                Console.log('this.processQueueList notebook queue: '+JSON.stringify(queue));
+            }
             self.processNotebookQueue(queue);
         } else if (queueList.notes.length > 0) {
             queue = queueList.notes.pop();
-            console.log('[FxOS-Notes] this.processQueueList note queue: '+JSON.stringify(queue));
+            if (App.DEBUG) {
+                Console.log('this.processQueueList note queue: '+JSON.stringify(queue));
+            }
             self.processNoteQueue(queue);
         } else {
             self.finishProcessQueueList();
         }
     };
     this.processNotebookQueue = function(queue) {
-        console.log('[FxOS-Notes] this.processNotebookQueue queue: '+JSON.stringify(queue));
+        if (App.DEBUG) {
+            Console.log('this.processNotebookQueue queue: '+JSON.stringify(queue));
+        }
         if (queue.getRelContent().expunge) {
             self.deleteNotebook(queue.getRelContent().guid, function(){
                 queue.remove(self.processQueueList);
@@ -511,9 +570,11 @@ var Evernote = new function() {
                 if (notebook.length > 0) {
                     notebook = notebook[0];
 
-                    console.log('[FxOS-Notes] this.processNotebookQueue notebook: '+JSON.stringify(notebook));
-                    console.log('[FxOS-Notes] this.processNotebookQueue notebook.getGuid(): '+notebook.getGuid());
-                    console.log('[FxOS-Notes] this.processNotebookQueue notebook.isTrashed(): '+notebook.isTrashed());
+                    if (App.DEBUG) {
+                        Console.log('this.processNotebookQueue notebook: '+JSON.stringify(notebook));
+                        Console.log('this.processNotebookQueue notebook.getGuid(): '+notebook.getGuid());
+                        Console.log('this.processNotebookQueue notebook.isTrashed(): '+notebook.isTrashed());
+                    }
                     if (notebook.getGuid()) {
                         self.updateNotebook(notebook, function() {
                             queue.remove(self.processQueueList);
@@ -528,7 +589,9 @@ var Evernote = new function() {
         }
     };
     this.processNoteQueue = function(queue) {
-        console.log('[FxOS-Notes] this.processNoteQueue queue: '+JSON.stringify(queue));
+        if (App.DEBUG) {
+            Console.log('this.processNoteQueue queue: '+JSON.stringify(queue));
+        }
         if (queue.getRelContent().expunge) {
             self.expungeNote(queue.getRelContent().guid, function(){
                 queue.remove(self.processQueueList);
@@ -538,9 +601,11 @@ var Evernote = new function() {
                 if (note.length > 0) {
                     note = note[0];
 
-                    console.log('[FxOS-Notes] this.processNoteQueue note: '+JSON.stringify(note));
-                    console.log('[FxOS-Notes] this.processNoteQueue note.getGuid(): '+note.getGuid());
-                    console.log('[FxOS-Notes] this.processNoteQueue note.isTrashed(): '+note.isTrashed());
+                    if (App.DEBUG) {
+                        Console.log('this.processNoteQueue note: '+JSON.stringify(note));
+                        Console.log('this.processNoteQueue note.getGuid(): '+note.getGuid());
+                        Console.log('this.processNoteQueue note.isTrashed(): '+note.isTrashed());
+                    }
                     if (note.getGuid()) {
                         if (note.isTrashed()) {
                             self.deleteNote(note.getGuid(), function(){
@@ -565,17 +630,23 @@ var Evernote = new function() {
     };
 
     this.finishProcessQueueList = function() {
-        console.log('[FxOS-Notes] this.finishProcessQueueList');
+        if (App.DEBUG) {
+            Console.log('this.finishProcessQueueList');
+        }
         App.stopSync();
         App.refershNotebooksList();
         App.refershNotebookView();
     };
 
     this.newNotebook = function(notebook, cbSuccess, cbError) {
-        console.log('[FxOS-Notes] this.newNotebook');
+        if (App.DEBUG) {
+            Console.log('this.newNotebook');
+        }
         var notebookData = notebook.export();
         notebookData.name = notebookData.name.replace(/(^[\s]+|[\s]+$)/g, '');
-        console.log('[FxOS-Notes] this.newNotebook oauth_token: ' + JSON.stringify(oauth_token));
+        if (App.DEBUG) {
+            Console.log('this.newNotebook oauth_token: ' + JSON.stringify(oauth_token));
+        }
         noteStore.createNotebook(oauth_token, new Notebook(notebook.export()), function(remoteNotebook) {
             notebook.set(remoteNotebook, cbSuccess);
             if (App.getUser().getLastUpdateCount() < remoteNotebook.updateSequenceNum) {
@@ -584,7 +655,9 @@ var Evernote = new function() {
                 });
             }
         }, function(error){
-            console.log('[FxOS-Notes] noteStore.newNotebook error: '+ JSON.stringify(error));
+            if (App.DEBUG) {
+                Console.log('noteStore.newNotebook error: '+ JSON.stringify(error));
+            }
             if (error.parameter == "Notebook.name") {
                 notebook.set({
                     name: notebook.getName() + NAME_CONFLICT_POSTFIX
@@ -595,11 +668,15 @@ var Evernote = new function() {
         });
     };
     this.updateNotebook = function(notebook, cbSuccess, cbError) {
-        console.log('[FxOS-Notes] this.updateNotebook');
+        if (App.DEBUG) {
+            Console.log('this.updateNotebook');
+        }
         var notebookData = notebook.export();
         notebookData.name = notebookData.name.replace(/(^[\s]+|[\s]+$)/g, '');
         notebookData.restrictions = new NotebookRestrictions(notebookData.restrictions);
-        console.log('[FxOS-Notes] this.updateNotebook oauth_token: ' + JSON.stringify(oauth_token));
+        if (App.DEBUG) {
+            Console.log('this.updateNotebook oauth_token: ' + JSON.stringify(oauth_token));
+        }
         noteStore.updateNotebook(oauth_token, new Notebook(notebookData), function(remoteNotebook) {
             notebook.set(remoteNotebook, cbSuccess);
             if (App.getUser().getLastUpdateCount() < remoteNotebook.updateSequenceNum) {
@@ -608,7 +685,9 @@ var Evernote = new function() {
                 });
             }
         }, function(error) {
-            console.log('[FxOS-Notes] noteStore.updateNotebook error: ' + JSON.stringify(error));
+            if (App.DEBUG) {
+                Console.log('noteStore.updateNotebook error: ' + JSON.stringify(error));
+            }
             if (cbError) {
                 cbError();
             } else {
@@ -617,10 +696,14 @@ var Evernote = new function() {
         });
     };
     this.deleteNotebook = function(notebookGuid, cbSuccess, cbError) {
-        console.log('[FxOS-Notes] this.deleteNotebook: ' + JSON.stringify(notebookGuid));
-        console.log('[FxOS-Notes] this.deleteNotebook oauth_token: ' + JSON.stringify(oauth_token));
+        if (App.DEBUG) {
+            Console.log('this.deleteNotebook: ' + JSON.stringify(notebookGuid));
+            Console.log('this.deleteNotebook oauth_token: ' + JSON.stringify(oauth_token));
+        }
         noteStore.expungeNotebook(oauth_token, notebookGuid, cbSuccess, function(error) {
-            console.log('[FxOS-Notes] noteStore.expungeNotebook error: ' + JSON.stringify(error));
+            if (App.DEBUG) {
+                Console.log('noteStore.expungeNotebook error: ' + JSON.stringify(error));
+            }
             if (cbError) {
                 cbError();
             } else {
@@ -630,7 +713,9 @@ var Evernote = new function() {
     };
 
     this.newNote = function(note, cbSuccess, cbError) {
-        console.log('[FxOS-Notes] this.newNote: '+JSON.stringify(note));
+        if (App.DEBUG) {
+            Console.log('this.newNote: '+JSON.stringify(note));
+        }
         DB.getNotebooks({"id": note.getNotebookId()}, function(notebook) {
             if (notebook.length > 0) {
                 notebook = notebook[0];
@@ -642,11 +727,17 @@ var Evernote = new function() {
                     }
                 }
                 noteData.title = noteData.title.replace(/(^[\s]+|[\s]+$)/g, '');
-                console.log('[FxOS-Notes] this.newNote oauth_token: ' + JSON.stringify(oauth_token));
+                if (App.DEBUG) {
+                    Console.log('this.newNote oauth_token: ' + JSON.stringify(oauth_token));
+                }
                 noteStore.createNote(oauth_token, new Note(noteData), function(remoteNote) {
-                    console.log('[FxOS-Notes] this.newNote (noteStore.createNote): '+JSON.stringify(remoteNote));
+                    if (App.DEBUG) {
+                        Console.log('this.newNote (noteStore.createNote): '+JSON.stringify(remoteNote));
+                    }
                     self.getNote(remoteNote.guid, function(remoteNote) {
-                        console.log('[FxOS-Notes] this.newNote (self.getNote): '+JSON.stringify(remoteNote));
+                        if (App.DEBUG) {
+                            Console.log('this.newNote (self.getNote): '+JSON.stringify(remoteNote));
+                        }
                         udatedNote = note.set(remoteNote);
                         if (App.getUser().getLastUpdateCount() < remoteNote.updateSequenceNum) {
                             App.updateUserData({
@@ -656,7 +747,9 @@ var Evernote = new function() {
                         cbSuccess(udatedNote);
                     }, cbError || cbSuccess);
                 }, function(error) {
-                    console.log('[FxOS-Notes] noteStore.newNote error: ' + JSON.stringify(error));
+                    if (App.DEBUG) {
+                        Console.log('noteStore.newNote error: ' + JSON.stringify(error));
+                    }
                     if (cbError) {
                         cbError();
                     } else {
@@ -669,8 +762,10 @@ var Evernote = new function() {
         }, cbError || cbSuccess);
     };
     this.updateNote = function(note, cbSuccess, cbError) {
-        console.log('[FxOS-Notes] this.updateNote: '+JSON.stringify(note));
-        console.log('[FxOS-Notes] this.updateNote oauth_token: ' + JSON.stringify(oauth_token));
+        if (App.DEBUG) {
+            Console.log('this.updateNote: '+JSON.stringify(note));
+            Console.log('this.updateNote oauth_token: ' + JSON.stringify(oauth_token));
+        }
         var noteData = note.export();
         if (noteData.resources) {
             for(var k in noteData.resources) {
@@ -693,7 +788,9 @@ var Evernote = new function() {
                 cbSuccess(udatedNote);
             }, cbError || cbSuccess);
         }, function(error) {
-            console.log('[FxOS-Notes] noteStore.updateNote error: ' + JSON.stringify(error));
+            if (App.DEBUG) {
+                Console.log('noteStore.updateNote error: ' + JSON.stringify(error));
+            }
             if (cbError) {
                 cbError();
             } else {
@@ -702,10 +799,14 @@ var Evernote = new function() {
         });
     };
     this.deleteNote = function(guid, cbSuccess, cbError) {
-        console.log('[FxOS-Notes] this.deleteNote: ' + JSON.stringify(guid));
-        console.log('[FxOS-Notes] this.deleteNote oauth_token: ' + JSON.stringify(oauth_token));
+        if (App.DEBUG) {
+            Console.log('this.deleteNote: ' + JSON.stringify(guid));
+            Console.log('this.deleteNote oauth_token: ' + JSON.stringify(oauth_token));
+        }
         noteStore.deleteNote(oauth_token, guid, cbSuccess, function(error) {
-            console.log('[FxOS-Notes] noteStore.deleteNote error: ' + JSON.stringify(error));
+            if (App.DEBUG) {
+                Console.log('noteStore.deleteNote error: ' + JSON.stringify(error));
+            }
             if (cbError) {
                 cbError();
             } else {
@@ -714,10 +815,14 @@ var Evernote = new function() {
         });
     };
     this.expungeNote = function(guid, cbSuccess, cbError) {
-        console.log('[FxOS-Notes] this.expungeNote: ' + JSON.stringify(guid));
-        console.log('[FxOS-Notes] this.expungeNote oauth_token: ' + JSON.stringify(oauth_token));
+        if (App.DEBUG) {
+            Console.log('this.expungeNote: ' + JSON.stringify(guid));
+            Console.log('this.expungeNote oauth_token: ' + JSON.stringify(oauth_token));
+        }
         noteStore.expungeNote(oauth_token, guid, cbSuccess, function(error) {
-            console.log('[FxOS-Notes] noteStore.expungeNote error: ' + JSON.stringify(error));
+            if (App.DEBUG) {
+                Console.log('noteStore.expungeNote error: ' + JSON.stringify(error));
+            }
             if (cbError) {
                 cbError();
             } else {
@@ -727,14 +832,18 @@ var Evernote = new function() {
     };
     this.getNote = function(guid, cbSuccess, cbError) {
         cbError = cbError || self.onError;
-        console.log('[FxOS-Notes] this.getNote guid: ' + JSON.stringify(guid));
-        console.log('[FxOS-Notes] this.getNote oauth_token: ' + JSON.stringify(oauth_token));
+        if (App.DEBUG) {
+            Console.log('this.getNote guid: ' + JSON.stringify(guid));
+            Console.log('this.getNote oauth_token: ' + JSON.stringify(oauth_token));
+        }
         noteStore.getNote(oauth_token, guid, true, true, true, true, cbSuccess, cbError);
     };
     this.getNotebook = function(guid, cbSuccess, cbError) {
         cbError = cbError || self.onError;
-        console.log('[FxOS-Notes] this.getNotebook guid: ' + JSON.stringify(guid));
-        console.log('[FxOS-Notes] this.getNotebook oauth_token: ' + JSON.stringify(oauth_token));
+        if (App.DEBUG) {
+            Console.log('this.getNotebook guid: ' + JSON.stringify(guid));
+            Console.log('this.getNotebook oauth_token: ' + JSON.stringify(oauth_token));
+        }
         noteStore.getNotebook(oauth_token, guid, cbSuccess, cbError);
     };
 
