@@ -82,7 +82,7 @@ var DB = new function() {
         };
         transaction.onfailure = self.onerror;
         
-        var request = transaction.objectStore(table).put(normalizeObj(serialize(obj)));
+        var request = transaction.objectStore(table).put(serialize(obj));
         request.onsuccess = function(e) {};
         request.onfailure = function(e) {};
         
@@ -126,7 +126,7 @@ var DB = new function() {
         transaction.onerror = self.onerror;
         
         var store = transaction.objectStore(table),
-            request = store.add(normalizeObj(serialize(obj)));
+            request = store.add(serialize(obj));
         request.onsuccess = function(e) {
         };
         request.onerror = function(e) {
@@ -135,16 +135,14 @@ var DB = new function() {
         Console.log("DB: add to -" + table + "-: ", obj);
     };
 
-    function normalizeObj(obj) {
-        return JSON.parse(JSON.stringify(obj));
-    }
-    
     // convert Object to storable data 
     function serialize(obj) {
         var data = {};
         
         for (var key in obj) {
-            if (key.indexOf('data_') !== -1) {
+            if (key.indexOf('data_') !== -1 &&
+                typeof obj[key] !== "function" &&
+                typeof obj[key] !== "undefined") {
                 data[key.replace('data_', "")] = obj[key];
             }
         }

@@ -383,13 +383,9 @@ var Evernote = new function() {
         });
     };
     this.processNoteChunk = function(chunk) {
-        console.log('[FxOS-Notes] this.processNoteChunk (chunk): '+JSON.stringify(chunk));
         self.getNote(chunk.guid, function(note){
-            console.log('[FxOS-Notes] self.getNote: '+JSON.stringify(note));
             DB.getNotes({guid: note.guid}, function(resultsNote){
-                console.log('[FxOS-Notes] DB.getNotes: '+JSON.stringify(resultsNote));
                 DB.getQueues({rel: "Note", rel_guid: note.guid}, function(resultsQueue){
-                    console.log('[FxOS-Notes] DB.getQueues by note.guid: '+JSON.stringify(resultsQueue));
                     if (resultsQueue.length > 0) {
                         if (!TEXTS) {
                             self.setupTexts();
@@ -423,7 +419,6 @@ var Evernote = new function() {
                             });
                         } else {
                             DB.getNotebooks({guid: note.notebookGuid}, function(notebooks){
-                                console.log('[FxOS-Notes] DB.getNotebooks: '+JSON.stringify(notebooks));
                                 if (notebooks.length > 0) {
                                     notebooks[0].newNote(note, function(newNote){
                                         if (!newNote.isActive()) {
