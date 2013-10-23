@@ -6,12 +6,12 @@ var DB = new function() {
         
         db = null,
         DB_NAME = "EVME_Notes",
-        DB_VERSION = 3,
+        DB_VERSION = 4,
         
         schema = {
             "notes": {
                 "objectName": "Note",
-                "indexes": ["notebook_id", "name"]
+                "indexes": ["notebook_id", "name", "guid", "notebookGuid"]
             },
             "noteResource": {
                 "objectName": "NoteResource",
@@ -19,7 +19,7 @@ var DB = new function() {
             },
             "notebooks": {
                 "objectName": "Notebook",
-                "indexes": ["user_id"]
+                "indexes": ["user_id", "guid"]
             },
             "users": {
                 "objectName": "User"
@@ -45,8 +45,6 @@ var DB = new function() {
             })(table, obj);
         }
     };
-    
-    this.get = function() { return db; };
     
     // update multiple objects (update @table set data=@data where filters=@filters)
     this.updateMultiple = function(table, filters, data, c, e) {
@@ -75,14 +73,15 @@ var DB = new function() {
     };
     
     this.update = function(table, obj, c, e) {
-        var transaction = db.transaction(table, "readwrite");
+        var data = serialize(obj),
+            transaction = db.transaction(table, "readwrite");
         
         transaction.oncomplete = function(e) {
             c && c(obj);
         };
         transaction.onfailure = self.onerror;
         
-        var request = transaction.objectStore(table).put(serialize(obj));
+        var request = transaction.objectStore(table).put(data);
         request.onsuccess = function(e) {};
         request.onfailure = function(e) {};
         
@@ -108,7 +107,7 @@ var DB = new function() {
                 
                 ok && ret.push(unserialize(obj, table));
                 
-                cursor["continue"]();
+                cursor.continue();
             } else {
                 Console.log("DB: get from -" + table + "-: ", filters, ret);
                 c && c(ret);
@@ -118,7 +117,8 @@ var DB = new function() {
     };
     
     this.add = function(table, obj, c, e) {
-        var transaction = db.transaction(table, "readwrite");
+        var data = serialize(obj),
+            transaction = db.transaction(table, "readwrite");
         
         transaction.oncomplete = function(e) {
             c && c(obj);
@@ -126,7 +126,7 @@ var DB = new function() {
         transaction.onerror = self.onerror;
         
         var store = transaction.objectStore(table),
-            request = store.add(serialize(obj));
+            request = store.add(data);
         request.onsuccess = function(e) {
         };
         request.onerror = function(e) {
@@ -137,8 +137,11 @@ var DB = new function() {
 
     // convert Object to storable data 
     function serialize(obj) {
+        if (typeof obj["export"] === "function") {
+            return obj.export();
+        }
         var data = {};
-        
+
         for (var key in obj) {
             if (key.indexOf('data_') !== -1 &&
                 typeof obj[key] !== "function" &&
@@ -146,7 +149,7 @@ var DB = new function() {
                 data[key.replace('data_', "")] = obj[key];
             }
         }
-        
+
         return data;
     }
     // given data and table, return an object
@@ -154,8 +157,6 @@ var DB = new function() {
         var objName = schema[table].objectName;
         return new window.Models[objName](data);
     }
-    
-    
     
     this.destroy = function(cbSuccess) {
         var req = indexedDB.deleteDatabase(DB_NAME);

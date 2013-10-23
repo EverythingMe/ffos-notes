@@ -86,7 +86,7 @@ var Evernote = new function() {
     this.processXHR = function(url, method, callback) {
         var xhr = new XMLHttpRequest({mozSystem: true});
         xhr.open(method, url, true);
-        if (App.DEBUG) {}
+        if (App.DEBUG) {
             Console.log('processXHR url: '+url);
         }
         xhr.onreadystatechange = function() {
@@ -561,8 +561,8 @@ var Evernote = new function() {
         if (App.DEBUG) {
             Console.log('this.processNotebookQueue queue: '+JSON.stringify(queue));
         }
-        if (queue.getRelContent().expunge) {
-            self.deleteNotebook(queue.getRelContent().guid, function(){
+        if (queue.getExpunge()) {
+            self.deleteNotebook(queue.getRelGuid(), function(){
                 queue.remove(self.processQueueList);
             });
         } else {
@@ -592,8 +592,8 @@ var Evernote = new function() {
         if (App.DEBUG) {
             Console.log('this.processNoteQueue queue: '+JSON.stringify(queue));
         }
-        if (queue.getRelContent().expunge) {
-            self.expungeNote(queue.getRelContent().guid, function(){
+        if (queue.getExpunge()) {
+            self.expungeNote(queue.getRelGuid(), function(){
                 queue.remove(self.processQueueList);
             })
         } else {
@@ -848,18 +848,13 @@ var Evernote = new function() {
     };
 
     this.buildResourceObject = function(resource) {
-        var bodyArrayBuffer = ArrayBufferHelper.decode(resource.data.body);
-        var rawMD5str = md5(bodyArrayBuffer, false, true);
-        var bodyHashArrayBuffer = new ArrayBuffer(rawMD5str.length*2); // 2 bytes for each char
-        var arrayBufferView = new Uint16Array(bodyHashArrayBuffer);
-        for (var i=0, strLen=rawMD5str.length; i<strLen; i++) {
-            arrayBufferView[i] = rawMD5str.charCodeAt(i);
-        }
+        var rawMD5str = md5(resource.data.body, false, true),
+            bodyHashArrayBuffer = new ArrayBuffer(rawMD5str.length*2); // 2 bytes for each char
         return new Resource({
             noteGuid : resource.noteGuid,
             mime : resource.mime,
             data : new Data({
-                body : bodyArrayBuffer,
+                body : resource.data.body,
                 bodyHash : bodyHashArrayBuffer,
                 size : resource.data.size
             }),
@@ -873,23 +868,15 @@ var Evernote = new function() {
         var hashMap = {};
         var noteResources = note.data_resources || [];
         for (var r in noteResources) {
-            var key = "",
-                value = "",
-                bytes = [];
-
-            if (!noteResources[r].data.bodyHash) {
-                hashMap[SparkMD5.ArrayBuffer.hash(ArrayBufferHelper.decode(noteResources[r].data.body))] = noteResources[r].data.body;
+            if (noteResources[r].data.body instanceof ArrayBuffer && typeof noteResources[r].data.bodyHash === "string") {
+                hashMap[noteResources[r].data.bodyHash] = window.URL.createObjectURL(ArrayBufferHelper.getBlob(noteResources[r].data.body, noteResources[r].mime));
             } else {
+                var key = "";
+
                 for (var i in noteResources[r].data.bodyHash) {
                     key += String("0123456789abcdef".substr((noteResources[r].data.bodyHash[i] >> 4) & 0x0F,1)) + "0123456789abcdef".substr(noteResources[r].data.bodyHash[i] & 0x0F,1);
                 }
-                for (var i in noteResources[r].data.body) {
-                    value += String("0123456789abcdef".substr((noteResources[r].data.body[i] >> 4) & 0x0F,1)) + "0123456789abcdef".substr(noteResources[r].data.body[i] & 0x0F,1);
-                }
-                for(var i=0; i< value.length-1; i+=2){
-                    bytes.push(parseInt(value.substr(i, 2), 16));
-                }
-                hashMap[key] = window.btoa(String.fromCharCode.apply(String, bytes));
+                hashMap[key] = window.URL.createObjectURL(ArrayBufferHelper.getBlob(noteResources[r].data.body, noteResources[r].mime));
             }
         }
         return enml.HTMLOfENML(note.getContent(false), hashMap);

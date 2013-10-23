@@ -1,20 +1,24 @@
 {
   "name": "Notes+",
   "description": "Notes app",
-  "version": "2.0.7",
+  "version": "2.1",
   "launch_path": "/index.html",
   "type": "privileged",
-  "redirects": [{
-    "from": "http://ffos-notes.local/redirect.html",
-    "to": "/redirect.html"
-  }],
+  "redirects": [
+    {
+      "from": "http://ffos-notes.local/redirect.html",
+      "to": "/redirect.html"
+    }
+  ],
   "permissions": {
     "systemXHR": {
       "description": "Access Evernote API"
     },
     "storage": {
       "description": "Get unlimited IndexedDB storage size",
-      "substitute": [ "indexedDB-unlimited" ]
+      "substitute": [
+        "indexedDB-unlimited"
+      ]
     }
   },
   "developer": {
@@ -46,7 +50,7 @@
       "name": "Notizen",
       "description": "Notizen ist die offizielle App von Firefox OS. Notizen wurde entworfen,  um all diese Ideen , Erinnerungen und Momente der Inspiration zu speichern und sichert alles in Ihr Gerät jeden Tag. Weil alles vollständig durchsuchbar ist ,  organisiert man alles mit minimalem Aufwand."
     },
-    "gr": {
+    "el": {
       "name": "Σημειώσεις",
       "description": "Σημειώσεις είναι η επίσημη εφαρμογή του Firefox OS. Οι Σημειώσεις είναι μια εφαρμογή σχεδιασμένη για να σας βοηθήσει να αποθηκεύστε όλες εκείνες τις ιδέες, υπενθυμίσεις και στιγμές έμπνευσης, έχοντας την δυνατότητα να τα παρακολουθείτε στην καθημερινή σας συσκευή. Με τα πάντα πλήρως αναζητήσιμα θα μπορείτε να είστε πάντοτε πλήρως οργανωμένοι καταβάλλοντας την ελάχιστη προσπάθεια."
     },

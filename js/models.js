@@ -309,8 +309,9 @@ var Models = new function() {
                 noteGuid : self.getGuid(),
                 mime : options.mime,
                 data : new Data({
-                    body : ArrayBufferHelper.encode(options.body),
-                    size : options.body.length
+                    body : options.buffer,
+                    bodyHash : options.hash,
+                    size : options.size
                 }),
                 attributes : new ResourceAttributes({
                     fileName : options.name
@@ -370,7 +371,6 @@ var Models = new function() {
         this.data_rel = "";
         this.data_rel_id = "";
         this.data_rel_guid = "";
-        this.data_rel_content = "";
         this.data_expunge = false;
         
         function init(options) {
@@ -406,7 +406,6 @@ var Models = new function() {
         this.getRel = function() { return self.data_rel; };
         this.getRelId = function() { return self.data_rel_id; };
         this.getRelGuid = function() { return self.data_rel_guid; };
-        this.getRelContent = function() { return self.data_rel_content; };
         this.getExpunge = function() { return self.data_expunge; };
         
         this.setId = function(id) { self.data_id = id; };
@@ -493,7 +492,9 @@ function updateObject(obj, options) {
 function exportModel(obj) {
     var expObj = {};
     for (var key in obj) {
-        expObj[key.replace('data_', '')] = obj[key];
+        if (typeof obj[key] !== "function" && typeof obj[key] !== "undefined") {
+            expObj[key.replace('data_', '')] = obj[key];
+        }
     }
     return expObj;
 }
