@@ -30,7 +30,8 @@ var App = new function() {
         self.setupTexts();
 
         cards = new Cards({
-            "onMove": onCardMove
+            "onMove": onCardMove,
+            "onTransitionEnd": onCardTransitionEnd
         });
 
         // handler of the notebook card (list of notes)
@@ -308,8 +309,6 @@ var App = new function() {
             self.addQueue('Note', note);
             self.showNote(note, notebook);
 
-            NoteView.focus();
-
             cb && cb(note);
         });
 
@@ -434,9 +433,16 @@ var App = new function() {
 
     function onCardMove(cardIndex) {
         Notification.hide();
-
         if (cards && (cardIndex === cards.CARDS.SETTINGS)) {
             Settings.update();
+        }
+    }
+
+    function onCardTransitionEnd(e) {
+        var activeCard = $$('.card.active');
+
+        if(document.body.classList.contains('card-'+activeCard.id) && activeCard.id == 'note') {
+            NoteView.focus();
         }
     }
 

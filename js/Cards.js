@@ -3,29 +3,31 @@ var Cards = function(_options) {
     var _this = this,
         elContainer = null, cardElements = [], drawerWidth = 0, cardWidth = 0, currentIndex = -1,
         hasDrawer = false, transitionDuration = 0, transitionEasing = "",
-        onMove = null;
+        onMove = null,
+        onTransitionEnd = null;
 
     var CLASS_WHEN_ACTIVE = "active",
         CLASS_DRAWER = "drawer",
         DEFAULT_TRANSITION_DURATION = 400,
         DEFAULT_TRANSITION_EASING = "ease";
-        
+
     this.CARDS = {};
-    
+
     this.init = function(options) {
         !options && (options = {});
-        
+
         onMove = options.onMove;
+        onTransitionEnd = options.onTransitionEnd;
         elContainer = options.container || document.querySelector(".cards");
-        
+
         elContainer.style.cssText += '; position: relative; overflow: hidden; min-height: 100%;';
-        
+
         cardWidth = drawerWidth = elContainer.offsetWidth;
         cardElements = elContainer.getElementsByClassName("card");
-        
+
         transitionDuration = options.transitionDuration || DEFAULT_TRANSITION_DURATION;
         transitionEasing = options.transitionEasing || DEFAULT_TRANSITION_EASING;
-        
+
         initCards();
     };
 
@@ -33,11 +35,11 @@ var Cards = function(_options) {
         if (typeof index == "string") {
             index = getIndexById(index);
         }
-        
+
         if (index < 0 || index >= cardElements.length) {
             return _this;
         }
-        
+
         for (var i=0, l=cardElements.length; i<l; i++) {
             var pos = 0,
                 zIndex = 10,
@@ -59,16 +61,17 @@ var Cards = function(_options) {
             }
 
             el.style.cssText += "; z-index: " + zIndex + ";" +
-                                 "-moz-transform: translate3d(" + pos + "px, 0, 0); " +
-                                 "-webkit-transform: translate3d(" + pos + "px, 0, 0); ";
+                                 "transform: translateX(" + pos + "px); ";
         }
-        
+
+        Console.log('GOTO', index, pos);
+
         cardElements[currentIndex].classList.remove(CLASS_WHEN_ACTIVE);
         document.body.classList.remove("card-" + cardElements[currentIndex].id);
         currentIndex = index;
         cardElements[currentIndex].classList.add(CLASS_WHEN_ACTIVE);
         document.body.classList.add("card-" + cardElements[currentIndex].id);
-        
+
         onMove && onMove(currentIndex);
 
         return _this;
@@ -117,20 +120,21 @@ var Cards = function(_options) {
             });
         }
     }
-    
+
     function enableAnimation() {
         for (var i=0, l=cardElements.length; i<l; i++) {
-            var duration = transitionDuration;
-            
-            if (cardElements[i].isDrawer) {
+            var duration = transitionDuration,
+                el = cardElements[i];
+
+            if (el.isDrawer) {
                 // duration should be proportionate so that there won't be the movement gap
             }
-            
-            cardElements[i].style.cssText += "; -moz-transition: all " + duration + "ms " + transitionEasing + ";" +
-                                             "; -webkit-transition: all " + duration + "ms " + transitionEasing + ";";
+
+            el.style.cssText += "; transition: all " + duration + "ms " + transitionEasing + ";";
+            el.addEventListener('transitionend', onTransitionEnd);
         }
     }
-    
+
     function getIndexById(cardId) {
         for (var i=0, l=cardElements.length; i<l; i++) {
             if (cardElements[i].id == cardId) {
