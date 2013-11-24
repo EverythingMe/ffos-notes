@@ -29,12 +29,14 @@ var Evernote = new function() {
         last_sync_time,
 
         syncChunks = [],
+        totalSyncChunks = 0,
         syncMaxEntries = 100,
 
         queueList = {
             notebooks : [],
             notes : []
         },
+        totalQueueChunks = 0,
 
         syncList = {
             notebooks : [],
@@ -98,6 +100,9 @@ var Evernote = new function() {
                 }
                 // check to see if there was an error returned from Evernote server
                 if (xhr.responseText.match('<title>.*(Error)')) {
+                    if (!TEXTS) {
+                        self.setupTexts();
+                    }
                     alert(TEXTS.NOT_REACHED_EVERNOTE);
                     App.stopSync();
                     return;
@@ -110,7 +115,7 @@ var Evernote = new function() {
 
         xhr.send();
     };
-    
+
     this.buildOauthURL = function(url, method, parameters) {
         var accessor = {
             token: null,
@@ -186,8 +191,8 @@ var Evernote = new function() {
 
     this.getAccessToken = function() {
         var postUrl = self.buildOauthURL(REQUEST_TOKEN_URL, 'POST', {
-            oauth_token : tmp_oauth_token, 
-            oauth_verifier : oauth_verifier, 
+            oauth_token : tmp_oauth_token,
+            oauth_verifier : oauth_verifier,
             oauth_signature_method : OAUTH_SIGNATURE_METHOD
         });
         self.processXHR(postUrl, 'POST', function(xhr){
@@ -201,7 +206,7 @@ var Evernote = new function() {
             note_store_url = decodeURIComponent(responseData['edam_noteStoreUrl']);
             shard_url = decodeURIComponent(responseData['edam_webApiUrlPrefix']);
             expires = responseData['edam_expires'];
-            
+
             self.finishAuthenticationProcess();
         });
     };
@@ -231,7 +236,7 @@ var Evernote = new function() {
             user.last_sync_time = last_sync_time;
 
             App.onLogin();
-            
+
             App.updateUserData(user, callback);
         }, self.onError);
     };
@@ -292,21 +297,25 @@ var Evernote = new function() {
                 if (syncChunks[i].notebooks && syncChunks[i].notebooks.length > 0) {
                     for (var j in syncChunks[i].notebooks) {
                         syncList.notebooks.push(syncChunks[i].notebooks[j]);
+                        totalSyncChunks++;
                     }
                 }
                 if (syncChunks[i].notes && syncChunks[i].notes.length > 0) {
                     for (var j in syncChunks[i].notes) {
                         syncList.notes.push(syncChunks[i].notes[j]);
+                        totalSyncChunks++;
                     }
                 }
                 if (syncChunks[i].expungedNotebooks && syncChunks[i].expungedNotebooks.length > 0) {
                     for (var j in syncChunks[i].expungedNotebooks) {
                         syncList.expungedNotebooks.push(syncChunks[i].expungedNotebooks[j]);
+                        totalSyncChunks++;
                     }
                 }
                 if (syncChunks[i].expungedNotes && syncChunks[i].expungedNotes.length > 0) {
                     for (var j in syncChunks[i].expungedNotes) {
                         syncList.expungedNotes.push(syncChunks[i].expungedNotes[j]);
+                        totalSyncChunks++;
                     }
                 }
 
@@ -318,6 +327,12 @@ var Evernote = new function() {
     };
     this.processSyncChunkList = function() {
         var chunk = null;
+        var remainingSyncChunks = syncList.notebooks.length
+                                + syncList.notes.length
+                                + syncList.expungedNotebooks.length
+                                + syncList.expungedNotes.length;
+        var percentage = ((totalSyncChunks - remainingSyncChunks) * 100) / totalSyncChunks;
+        self.updateProgressBar(percentage);
         if (App.DEBUG) {
             Console.log('this.processSyncList');
             Console.log('this.processSyncList syncList.notebooks.length: '+syncList.notebooks.length);
@@ -341,6 +356,9 @@ var Evernote = new function() {
             self.finishSync();
         }
     };
+    this.updateProgressBar = function(percentage) {
+        document.querySelector('progress').value = parseInt(Math.ceil(percentage));
+    }
     this.processNotebookChunk = function(chunk) {
         if (App.DEBUG) {
             Console.log('this.processNotebookChunk (chunk): '+JSON.stringify(chunk));
@@ -524,8 +542,10 @@ var Evernote = new function() {
                 for(var i in queues) {
                     if (queues[i].getRel() == 'Notebook') {
                         queueList.notebooks.push(queues[i]);
+                        totalQueueChunks++;
                     } else if (queues[i].getRel() == 'Note') {
                         queueList.notes.push(queues[i]);
+                        totalQueueChunks++;
                     }
                 }
             }
@@ -536,6 +556,10 @@ var Evernote = new function() {
     this.processQueueList = function() {
         App.startSync();
         var queue = null;
+        var remainingSyncChunks = queueList.notebooks.length
+                                + queueList.notes.length;
+        var percentage = ((totalQueueChunks - remainingSyncChunks) * 100) / totalQueueChunks;
+        self.updateProgressBar(percentage);
         if (App.DEBUG) {
             Console.log('this.processQueueList');
             Console.log('this.processQueueList queueList.notebooks.length: '+queueList.notebooks.length);
