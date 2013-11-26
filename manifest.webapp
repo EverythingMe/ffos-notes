@@ -57,6 +57,10 @@
     "hu": {
       "name": "Jegyzetek",
       "description": "A Jegyzetek egy hivatalos Firefox OS applikáció. A Jegyzetek segítségével lejegyezheted és elmentheted ötleteidet, emlékeztetőidet, a pillanat adta inspirációkat, amik mindíg elérhetőek lesznek a telefonodon. Automatikusan rendszerezi az elmentett dokumentumokat így minimális erőfeszítéssel rendben tarthatod jegyzeteidet és rájuk is kereshetsz telefonodon."
+    },
+    "it": {
+      "name": "Notes",
+      "description": "Notes è l'applicazione ufficiale di Firefox OS. Notes è stato progettato per aiutare a salvare tutte quelle idee, ricordi e momenti di ispirazione - tenere traccia di tutto proprio lì sul tuo dispositivo di tutti i giorni. Con tutto completamente ricercabile sarete in grado di rimanere completamente organizzati con lo minimo sforzo."
     }
   },
   "default_locale": "en-US"
