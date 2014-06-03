@@ -45,6 +45,10 @@
             "name": "Notes",
             "description": "Notes è l'applicazione ufficiale di Firefox OS. Notes è stato progettato per aiutare a salvare tutte quelle idee, ricordi e momenti di ispirazione - tenere traccia di tutto proprio lì sul tuo dispositivo di tutti i giorni. Con tutto completamente ricercabile sarete in grado di rimanere completamente organizzati con lo minimo sforzo."
         }
+        "fr": {
+            "name": "Notes",
+            "description": "Notes est l’application officielle de Firefox OS. Notes est conçue pour vous aider à retenir toutes vos idées, choses à se souvenir et moments d’inspiration. Vous les conservez en permanence à portée de main, sur votre appareil principal. La recherche simplifiée vous permet de rester organisé, sans effort."
+        },
     },
     "default_locale": "en-US"
 }
